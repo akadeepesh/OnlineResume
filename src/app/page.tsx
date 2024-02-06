@@ -64,7 +64,7 @@ const DeCoder: React.FC = () => {
                 </span>
                 <Button size={"sm"}>
                   <EnvelopeOpenIcon className="mr-2 h-4 w-4" />{" "}
-                  <a href="mailto:deepesh.kumar.ug21@nsut.ac.in">Email</a>
+                  <a href="deepesh.kumar.ug21@nsut.ac.in">Email</a>
                 </Button>
                 <div className="flex flex-row justify-between items-center gap-3 w-full">
                   <Button className="w-1/2" size={"sm"}>
