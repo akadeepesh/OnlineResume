@@ -110,275 +110,370 @@ const DeCoder: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-        <div className="">
+        <div className="Skills">
           <Card>
             <CardHeader>
               <CardTitle className="font-bold">Skills</CardTitle>
               <Separator className="bg-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-2 cursor-default">
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">Python</HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-row gap-10">
-                      <div className="flex flex-col gap-1 justify-center items-start">
-                        <a href="https://github.com/akadeepesh/PythonAutomation">
-                          PythonAutomation
-                        </a>
-                        <a href="https://github.com/akadeepesh/DjangoUserJWT">
-                          DjangoUserJWT
-                        </a>
-                        <a href="https://github.com/akadeepesh/ChatWithWebsites">
-                          ChatWithWebsites
-                        </a>
-                        <a href="https://github.com/akadeepesh/DataVisualizer">
-                          DataVisualizer
-                        </a>
-                        <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
-                          DjangoSessionAuthentication
-                        </a>
-                        <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
-                          CollegeAdmissionManagement
-                        </a>
-                        <a href="https://github.com/akadeepesh/FirstDjangoProject">
-                          FirstDjangoProject
-                        </a>
+              <div className="flex flex-row gap-10">
+                <div className="flex flex-col gap-2 cursor-default">
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Python
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-row gap-10">
+                        <div className="flex flex-col gap-1 justify-center items-start">
+                          <a href="https://github.com/akadeepesh/PythonAutomation">
+                            PythonAutomation
+                          </a>
+                          <a href="https://github.com/akadeepesh/DjangoUserJWT">
+                            DjangoUserJWT
+                          </a>
+                          <a href="https://github.com/akadeepesh/ChatWithWebsites">
+                            ChatWithWebsites
+                          </a>
+                          <a href="https://github.com/akadeepesh/DataVisualizer">
+                            DataVisualizer
+                          </a>
+                          <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
+                            DjangoSessionAuthentication
+                          </a>
+                          <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
+                            CollegeAdmissionManagement
+                          </a>
+                          <a href="https://github.com/akadeepesh/FirstDjangoProject">
+                            FirstDjangoProject
+                          </a>
+                        </div>
+                        <Separator
+                          orientation="vertical"
+                          className="bg-foreground"
+                        />
+                        <div className="flex flex-col gap-1 justify-center items-center">
+                          <a href="https://github.com/akadeepesh/UserAuth">
+                            UserAuth
+                          </a>
+                          <a href="https://github.com/akadeepesh/PixelToRem">
+                            PixelToRem
+                          </a>
+                          <a href="https://github.com/akadeepesh/BankManagement-Python">
+                            BankManagementPython
+                          </a>
+                          <a href="https://github.com/akadeepesh/DeleteCopiedFiles">
+                            DeleteCopiedFiles
+                          </a>
+                          <a href="https://github.com/akadeepesh/SpeakToGPT">
+                            SpeakToGPT
+                          </a>
+                          <a href="https://github.com/akadeepesh/GithubViewsCounter">
+                            GithubViewsCounter
+                          </a>
+                          <a href="https://github.com/akadeepesh/Tkinter-Programs">
+                            TkinterPrograms
+                          </a>
+                        </div>
+                        <Separator
+                          orientation="vertical"
+                          className="bg-foreground"
+                        />
+                        <div className="flex flex-col gap-1 justify-center items-end">
+                          <a href="https://github.com/akadeepesh/Tkinter-Games">
+                            TkinterGames
+                          </a>
+                          <a href="https://github.com/akadeepesh/Rewards_Auto">
+                            RewardsAuto
+                          </a>
+                          <a href="https://github.com/akadeepesh/News_For_Me">
+                            NewsForMe
+                          </a>
+                          <a href="https://github.com/akadeepesh/Sentence_Correction">
+                            SentenceCorrection
+                          </a>
+                          <a href="https://github.com/akadeepesh/Spotify_Add2playlist">
+                            SpotifyAdd2playlist
+                          </a>
+                          <a href="https://github.com/akadeepesh/Password_manager">
+                            Password_manager
+                          </a>
+                          <a href="https://github.com/akadeepesh/Django_basic">
+                            Django_basic
+                          </a>
+                        </div>
                       </div>
-                      <Separator
-                        orientation="vertical"
-                        className="bg-foreground"
-                      />
-                      <div className="flex flex-col gap-1 justify-center items-center">
-                        <a href="https://github.com/akadeepesh/UserAuth">
-                          UserAuth
-                        </a>
-                        <a href="https://github.com/akadeepesh/PixelToRem">
-                          PixelToRem
-                        </a>
-                        <a href="https://github.com/akadeepesh/BankManagement-Python">
-                          BankManagementPython
-                        </a>
-                        <a href="https://github.com/akadeepesh/DeleteCopiedFiles">
-                          DeleteCopiedFiles
-                        </a>
-                        <a href="https://github.com/akadeepesh/SpeakToGPT">
-                          SpeakToGPT
-                        </a>
-                        <a href="https://github.com/akadeepesh/GithubViewsCounter">
-                          GithubViewsCounter
-                        </a>
-                        <a href="https://github.com/akadeepesh/Tkinter-Programs">
-                          TkinterPrograms
-                        </a>
-                      </div>
-                      <Separator
-                        orientation="vertical"
-                        className="bg-foreground"
-                      />
-                      <div className="flex flex-col gap-1 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/Tkinter-Games">
-                          TkinterGames
-                        </a>
-                        <a href="https://github.com/akadeepesh/Rewards_Auto">
-                          RewardsAuto
-                        </a>
-                        <a href="https://github.com/akadeepesh/News_For_Me">
-                          NewsForMe
-                        </a>
-                        <a href="https://github.com/akadeepesh/Sentence_Correction">
-                          SentenceCorrection
-                        </a>
-                        <a href="https://github.com/akadeepesh/Spotify_Add2playlist">
-                          SpotifyAdd2playlist
-                        </a>
-                        <a href="https://github.com/akadeepesh/Password_manager">
-                          Password_manager
-                        </a>
-                        <a href="https://github.com/akadeepesh/Django_basic">
-                          Django_basic
-                        </a>
-                      </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">
-                    React.js
-                  </HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-col gap-3 justify-center items-end">
-                      <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
-                        MLAutomationFrontend
-                      </a>
-                      <a href="https://github.com/akadeepesh/VirtualAssistant">
-                        VirtualAssistant
-                      </a>
-                      <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
-                        ReCreatingFirstSite
-                      </a>
-                      <a href="https://github.com/akadeepesh/FirstViteTried">
-                        FirstViteTried
-                      </a>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">Django</HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-row gap-10">
-                      <div className="flex flex-col gap-1 justify-center items-start">
-                        <a href="https://github.com/akadeepesh/DjangoUserJWT">
-                          DjangoUserJWT
-                        </a>
-                        <a href="https://github.com/akadeepesh/Django_basic">
-                          Django_basic
-                        </a>
-                        <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
-                          FirstDjangoAssignment
-                        </a>
-                        <a href="https://github.com/akadeepesh/DjangoAuth">
-                          DjangoAuth
-                        </a>
-                        <a href="https://github.com/akadeepesh/VirtualMentor">
-                          VirtualMentor
-                        </a>
-                      </div>
-                      <Separator
-                        orientation="vertical"
-                        className="bg-foreground"
-                      />
-                      <div className="flex flex-col gap-1 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
-                          DjangoSessionAuthentication
-                        </a>
-                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
-                          VirtualMentorEY
-                        </a>
-                        <a href="https://github.com/akadeepesh/UserAuth">
-                          UserAuth
-                        </a>
-                        <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
-                          CollegeAdmissionManagement
-                        </a>
-                        <a href="https://github.com/akadeepesh/FirstDjangoProject">
-                          FirstDjangoProject
-                        </a>
-                      </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">
-                    Javascript
-                  </HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-row gap-10">
-                      <div className="flex flex-col gap-1 justify-center items-start">
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      React.js
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col gap-3 justify-center items-end">
                         <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
                           MLAutomationFrontend
                         </a>
-                        <a href="https://github.com/akadeepesh/DataVisualizationWeb">
-                          DataVisualizationWeb
-                        </a>
-                        <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
-                          FirstDjangoAssignment
-                        </a>
-                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
                         <a href="https://github.com/akadeepesh/VirtualAssistant">
                           VirtualAssistant
-                        </a>
-                      </div>
-                      <Separator
-                        orientation="vertical"
-                        className="bg-foreground"
-                      />
-                      <div className="flex flex-col gap-1 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
-                          VirtualAssistant1stTry
                         </a>
                         <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
                           ReCreatingFirstSite
                         </a>
-                        <a href="https://github.com/akadeepesh/DjangoAuth">
-                          DjangoAuth
-                        </a>
-                        <a href="https://github.com/akadeepesh/VirtualMentor">
-                          VirtualMentor
+                        <a href="https://github.com/akadeepesh/FirstViteTried">
+                          FirstViteTried
                         </a>
                       </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">
-                    Typescript
-                  </HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-col gap-1 justify-center items-end">
-                      <a href="https://github.com/akadeepesh/OnlineResume">
-                        OnlineResume
-                      </a>
-                      <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
-                        VirtualMentorEY
-                      </a>
-                      <a href="https://github.com/akadeepesh/FirstViteTried">
-                        FirstViteTried
-                      </a>
-                      <a href="https://github.com/akadeepesh/MySky">MySky</a>
-                      <a href="https://github.com/akadeepesh/data-creation">
-                        DataCreation
-                      </a>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <HoverCard>
-                  <HoverCardTrigger className="w-fit">
-                    HTML/CSS
-                  </HoverCardTrigger>
-                  <HoverCardContent className="flex flex-row">
-                    <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-row gap-10">
-                      <div className="flex flex-col gap-1 justify-center items-start">
-                        <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
-                          VirtualAssistant1stTry
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Django
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-row gap-10">
+                        <div className="flex flex-col gap-1 justify-center items-start">
+                          <a href="https://github.com/akadeepesh/DjangoUserJWT">
+                            DjangoUserJWT
+                          </a>
+                          <a href="https://github.com/akadeepesh/Django_basic">
+                            Django_basic
+                          </a>
+                          <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                            FirstDjangoAssignment
+                          </a>
+                          <a href="https://github.com/akadeepesh/DjangoAuth">
+                            DjangoAuth
+                          </a>
+                          <a href="https://github.com/akadeepesh/VirtualMentor">
+                            VirtualMentor
+                          </a>
+                        </div>
+                        <Separator
+                          orientation="vertical"
+                          className="bg-foreground"
+                        />
+                        <div className="flex flex-col gap-1 justify-center items-end">
+                          <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
+                            DjangoSessionAuthentication
+                          </a>
+                          <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                            VirtualMentorEY
+                          </a>
+                          <a href="https://github.com/akadeepesh/UserAuth">
+                            UserAuth
+                          </a>
+                          <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
+                            CollegeAdmissionManagement
+                          </a>
+                          <a href="https://github.com/akadeepesh/FirstDjangoProject">
+                            FirstDjangoProject
+                          </a>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Python GUI - Tkinter
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col gap-5 justify-center items-end">
+                        <a href="https://github.com/akadeepesh/Tkinter-Games">
+                          TkinterGames
                         </a>
-                        <a href="https://github.com/akadeepesh/happy-birthday">
-                          HappyBirthday
+                        <a href="https://github.com/akadeepesh/Tkinter-Programs">
+                          TkinterPrograms
                         </a>
-                        <a href="https://github.com/akadeepesh/KeepItSimple">
-                          KeepItSimple
-                        </a>
-                        <a href="https://github.com/akadeepesh/Django">
-                          Django
+                        <a href="https://github.com/akadeepesh/BankManagement-Python">
+                          BankManagementPython
                         </a>
                       </div>
-                      <Separator
-                        orientation="vertical"
-                        className="bg-foreground"
-                      />
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      HTML | CSS
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-row gap-10">
+                        <div className="flex flex-col gap-1 justify-center items-start">
+                          <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                            VirtualAssistant1stTry
+                          </a>
+                          <a href="https://github.com/akadeepesh/happy-birthday">
+                            HappyBirthday
+                          </a>
+                          <a href="https://github.com/akadeepesh/KeepItSimple">
+                            KeepItSimple
+                          </a>
+                          <a href="https://github.com/akadeepesh/Django">
+                            Django
+                          </a>
+                        </div>
+                        <Separator
+                          orientation="vertical"
+                          className="bg-foreground"
+                        />
+                        <div className="flex flex-col gap-1 justify-center items-end">
+                          <a href="https://github.com/akadeepesh/Page_404">
+                            Page404
+                          </a>
+                          <a href="https://github.com/akadeepesh/deepesh_html">
+                            DeepeshHtml
+                          </a>
+                          <a href="https://github.com/akadeepesh/Deepesh-Portfolio">
+                            DeepeshPortfolio
+                          </a>
+                          <a href="https://github.com/akadeepesh/chrome_personalization">
+                            ChromePersonalization
+                          </a>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Javascript
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-row gap-10">
+                        <div className="flex flex-col gap-1 justify-center items-start">
+                          <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
+                            MLAutomationFrontend
+                          </a>
+                          <a href="https://github.com/akadeepesh/DataVisualizationWeb">
+                            DataVisualizationWeb
+                          </a>
+                          <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                            FirstDjangoAssignment
+                          </a>
+                          <a href="https://github.com/akadeepesh/MySky">
+                            MySky
+                          </a>
+                          <a href="https://github.com/akadeepesh/VirtualAssistant">
+                            VirtualAssistant
+                          </a>
+                        </div>
+                        <Separator
+                          orientation="vertical"
+                          className="bg-foreground"
+                        />
+                        <div className="flex flex-col gap-1 justify-center items-end">
+                          <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                            VirtualAssistant1stTry
+                          </a>
+                          <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
+                            ReCreatingFirstSite
+                          </a>
+                          <a href="https://github.com/akadeepesh/DjangoAuth">
+                            DjangoAuth
+                          </a>
+                          <a href="https://github.com/akadeepesh/VirtualMentor">
+                            VirtualMentor
+                          </a>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+                <Separator orientation="vertical" className="bg-foreground" />
+                <div className="flex flex-col gap-2 cursor-default">
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Typescript
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col gap-1 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/Page_404">
-                          Page404
+                        <a href="https://github.com/akadeepesh/OnlineResume">
+                          OnlineResume
                         </a>
+                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                          VirtualMentorEY
+                        </a>
+                        <a href="https://github.com/akadeepesh/FirstViteTried">
+                          FirstViteTried
+                        </a>
+                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
+                        <a href="https://github.com/akadeepesh/data-creation">
+                          DataCreation
+                        </a>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      C | C++
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col justify-center items-end">
+                        <a href="https://github.com/akadeepesh/Cpp-DSA">
+                          CppDSA
+                        </a>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">MySQL</HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col justify-center items-end">
+                        <a href="https://github.com/akadeepesh/BankManagement-Python">
+                          BankManagementPython
+                        </a>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Next.js
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col gap-5 justify-center items-end">
+                        <a href="https://github.com/akadeepesh/OnlineResume">
+                          OnlineResume
+                        </a>
+                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
+                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                          VirtualMentorEY
+                        </a>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">php</HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col justify-center items-end">
                         <a href="https://github.com/akadeepesh/deepesh_html">
                           DeepeshHtml
                         </a>
-                        <a href="https://github.com/akadeepesh/Deepesh-Portfolio">
-                          DeepeshPortfolio
-                        </a>
-                        <a href="https://github.com/akadeepesh/chrome_personalization">
-                          ChromePersonalization
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      JQuery
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <Github className="flex justify-center items-center w-full h-full" />
+                      <div className="flex flex-col justify-center items-end">
+                        <a href="https://github.com/akadeepesh/KeepItSimple">
+                          KeepItSimple
                         </a>
                       </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
               </div>
             </CardContent>
           </Card>
