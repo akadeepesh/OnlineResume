@@ -64,14 +64,19 @@ const DeCoder: React.FC = () => {
                 </span>
                 <Button size={"sm"}>
                   <EnvelopeOpenIcon className="mr-2 h-4 w-4" />{" "}
-                  <a href="deepesh.kumar.ug21@nsut.ac.in">Email</a>
+                  <a href="mailto:deepesh.kumar.ug21@nsut.ac.in">Email</a>
                 </Button>
                 <div className="flex flex-row justify-between items-center gap-3 w-full">
                   <Button className="w-1/2" size={"sm"}>
-                    <a href="https://github.com/akadeepesh">GitHub</a>
+                    <a href="https://github.com/akadeepesh" target="__blank">
+                      GitHub
+                    </a>
                   </Button>
                   <Button className="w-1/2" size={"sm"}>
-                    <a href="https://www.linkedin.com/in/akadeepesh/">
+                    <a
+                      href="https://www.linkedin.com/in/akadeepesh/"
+                      target="__blank"
+                    >
                       LinkedIn
                     </a>
                   </Button>
@@ -127,25 +132,46 @@ const DeCoder: React.FC = () => {
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-row gap-10">
                         <div className="flex flex-col gap-1 justify-center items-start">
-                          <a href="https://github.com/akadeepesh/PythonAutomation">
+                          <a
+                            href="https://github.com/akadeepesh/PythonAutomation"
+                            target="__blank"
+                          >
                             PythonAutomation
                           </a>
-                          <a href="https://github.com/akadeepesh/DjangoUserJWT">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoUserJWT"
+                            target="__blank"
+                          >
                             DjangoUserJWT
                           </a>
-                          <a href="https://github.com/akadeepesh/ChatWithWebsites">
+                          <a
+                            href="https://github.com/akadeepesh/ChatWithWebsites"
+                            target="__blank"
+                          >
                             ChatWithWebsites
                           </a>
-                          <a href="https://github.com/akadeepesh/DataVisualizer">
+                          <a
+                            href="https://github.com/akadeepesh/DataVisualizer"
+                            target="__blank"
+                          >
                             DataVisualizer
                           </a>
-                          <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoSessionAuthentication"
+                            target="__blank"
+                          >
                             DjangoSessionAuthentication
                           </a>
-                          <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
+                          <a
+                            href="https://github.com/akadeepesh/CollegeAdmissionManagement"
+                            target="__blank"
+                          >
                             CollegeAdmissionManagement
                           </a>
-                          <a href="https://github.com/akadeepesh/FirstDjangoProject">
+                          <a
+                            href="https://github.com/akadeepesh/FirstDjangoProject"
+                            target="__blank"
+                          >
                             FirstDjangoProject
                           </a>
                         </div>
@@ -154,25 +180,46 @@ const DeCoder: React.FC = () => {
                           className="bg-foreground"
                         />
                         <div className="flex flex-col gap-1 justify-center items-center">
-                          <a href="https://github.com/akadeepesh/UserAuth">
+                          <a
+                            href="https://github.com/akadeepesh/UserAuth"
+                            target="__blank"
+                          >
                             UserAuth
                           </a>
-                          <a href="https://github.com/akadeepesh/PixelToRem">
+                          <a
+                            href="https://github.com/akadeepesh/PixelToRem"
+                            target="__blank"
+                          >
                             PixelToRem
                           </a>
-                          <a href="https://github.com/akadeepesh/BankManagement-Python">
+                          <a
+                            href="https://github.com/akadeepesh/BankManagement-Python"
+                            target="__blank"
+                          >
                             BankManagementPython
                           </a>
-                          <a href="https://github.com/akadeepesh/DeleteCopiedFiles">
+                          <a
+                            href="https://github.com/akadeepesh/DeleteCopiedFiles"
+                            target="__blank"
+                          >
                             DeleteCopiedFiles
                           </a>
-                          <a href="https://github.com/akadeepesh/SpeakToGPT">
+                          <a
+                            href="https://github.com/akadeepesh/SpeakToGPT"
+                            target="__blank"
+                          >
                             SpeakToGPT
                           </a>
-                          <a href="https://github.com/akadeepesh/GithubViewsCounter">
+                          <a
+                            href="https://github.com/akadeepesh/GithubViewsCounter"
+                            target="__blank"
+                          >
                             GithubViewsCounter
                           </a>
-                          <a href="https://github.com/akadeepesh/Tkinter-Programs">
+                          <a
+                            href="https://github.com/akadeepesh/Tkinter-Programs"
+                            target="__blank"
+                          >
                             TkinterPrograms
                           </a>
                         </div>
@@ -181,25 +228,46 @@ const DeCoder: React.FC = () => {
                           className="bg-foreground"
                         />
                         <div className="flex flex-col gap-1 justify-center items-end">
-                          <a href="https://github.com/akadeepesh/Tkinter-Games">
+                          <a
+                            href="https://github.com/akadeepesh/Tkinter-Games"
+                            target="__blank"
+                          >
                             TkinterGames
                           </a>
-                          <a href="https://github.com/akadeepesh/Rewards_Auto">
+                          <a
+                            href="https://github.com/akadeepesh/Rewards_Auto"
+                            target="__blank"
+                          >
                             RewardsAuto
                           </a>
-                          <a href="https://github.com/akadeepesh/News_For_Me">
+                          <a
+                            href="https://github.com/akadeepesh/News_For_Me"
+                            target="__blank"
+                          >
                             NewsForMe
                           </a>
-                          <a href="https://github.com/akadeepesh/Sentence_Correction">
+                          <a
+                            href="https://github.com/akadeepesh/Sentence_Correction"
+                            target="__blank"
+                          >
                             SentenceCorrection
                           </a>
-                          <a href="https://github.com/akadeepesh/Spotify_Add2playlist">
+                          <a
+                            href="https://github.com/akadeepesh/Spotify_Add2playlist"
+                            target="__blank"
+                          >
                             SpotifyAdd2playlist
                           </a>
-                          <a href="https://github.com/akadeepesh/Password_manager">
+                          <a
+                            href="https://github.com/akadeepesh/Password_manager"
+                            target="__blank"
+                          >
                             Password_manager
                           </a>
-                          <a href="https://github.com/akadeepesh/Django_basic">
+                          <a
+                            href="https://github.com/akadeepesh/Django_basic"
+                            target="__blank"
+                          >
                             Django_basic
                           </a>
                         </div>
@@ -213,16 +281,28 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col gap-3 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
+                        <a
+                          href="https://github.com/akadeepesh/ML_Automation_Frontend"
+                          target="__blank"
+                        >
                           MLAutomationFrontend
                         </a>
-                        <a href="https://github.com/akadeepesh/VirtualAssistant">
+                        <a
+                          href="https://github.com/akadeepesh/VirtualAssistant"
+                          target="__blank"
+                        >
                           VirtualAssistant
                         </a>
-                        <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
+                        <a
+                          href="https://github.com/akadeepesh/ReCreating-FirstSite"
+                          target="__blank"
+                        >
                           ReCreatingFirstSite
                         </a>
-                        <a href="https://github.com/akadeepesh/FirstViteTried">
+                        <a
+                          href="https://github.com/akadeepesh/FirstViteTried"
+                          target="__blank"
+                        >
                           FirstViteTried
                         </a>
                       </div>
@@ -236,19 +316,34 @@ const DeCoder: React.FC = () => {
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-row gap-10">
                         <div className="flex flex-col gap-1 justify-center items-start">
-                          <a href="https://github.com/akadeepesh/DjangoUserJWT">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoUserJWT"
+                            target="__blank"
+                          >
                             DjangoUserJWT
                           </a>
-                          <a href="https://github.com/akadeepesh/Django_basic">
+                          <a
+                            href="https://github.com/akadeepesh/Django_basic"
+                            target="__blank"
+                          >
                             Django_basic
                           </a>
-                          <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                          <a
+                            href="https://github.com/akadeepesh/FirstDjangoAssignment"
+                            target="__blank"
+                          >
                             FirstDjangoAssignment
                           </a>
-                          <a href="https://github.com/akadeepesh/DjangoAuth">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoAuth"
+                            target="__blank"
+                          >
                             DjangoAuth
                           </a>
-                          <a href="https://github.com/akadeepesh/VirtualMentor">
+                          <a
+                            href="https://github.com/akadeepesh/VirtualMentor"
+                            target="__blank"
+                          >
                             VirtualMentor
                           </a>
                         </div>
@@ -257,19 +352,34 @@ const DeCoder: React.FC = () => {
                           className="bg-foreground"
                         />
                         <div className="flex flex-col gap-1 justify-center items-end">
-                          <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoSessionAuthentication"
+                            target="__blank"
+                          >
                             DjangoSessionAuthentication
                           </a>
-                          <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                          <a
+                            href="https://github.com/akadeepesh/Virtual-Mentor-EY"
+                            target="__blank"
+                          >
                             VirtualMentorEY
                           </a>
-                          <a href="https://github.com/akadeepesh/UserAuth">
+                          <a
+                            href="https://github.com/akadeepesh/UserAuth"
+                            target="__blank"
+                          >
                             UserAuth
                           </a>
-                          <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
+                          <a
+                            href="https://github.com/akadeepesh/CollegeAdmissionManagement"
+                            target="__blank"
+                          >
                             CollegeAdmissionManagement
                           </a>
-                          <a href="https://github.com/akadeepesh/FirstDjangoProject">
+                          <a
+                            href="https://github.com/akadeepesh/FirstDjangoProject"
+                            target="__blank"
+                          >
                             FirstDjangoProject
                           </a>
                         </div>
@@ -283,13 +393,22 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col gap-5 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/Tkinter-Games">
+                        <a
+                          href="https://github.com/akadeepesh/Tkinter-Games"
+                          target="__blank"
+                        >
                           TkinterGames
                         </a>
-                        <a href="https://github.com/akadeepesh/Tkinter-Programs">
+                        <a
+                          href="https://github.com/akadeepesh/Tkinter-Programs"
+                          target="__blank"
+                        >
                           TkinterPrograms
                         </a>
-                        <a href="https://github.com/akadeepesh/BankManagement-Python">
+                        <a
+                          href="https://github.com/akadeepesh/BankManagement-Python"
+                          target="__blank"
+                        >
                           BankManagementPython
                         </a>
                       </div>
@@ -303,16 +422,28 @@ const DeCoder: React.FC = () => {
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-row gap-10">
                         <div className="flex flex-col gap-1 justify-center items-start">
-                          <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                          <a
+                            href="https://github.com/akadeepesh/VirtualAssistant-1stTry"
+                            target="__blank"
+                          >
                             VirtualAssistant1stTry
                           </a>
-                          <a href="https://github.com/akadeepesh/happy-birthday">
+                          <a
+                            href="https://github.com/akadeepesh/happy-birthday"
+                            target="__blank"
+                          >
                             HappyBirthday
                           </a>
-                          <a href="https://github.com/akadeepesh/KeepItSimple">
+                          <a
+                            href="https://github.com/akadeepesh/KeepItSimple"
+                            target="__blank"
+                          >
                             KeepItSimple
                           </a>
-                          <a href="https://github.com/akadeepesh/Django">
+                          <a
+                            href="https://github.com/akadeepesh/Django"
+                            target="__blank"
+                          >
                             Django
                           </a>
                         </div>
@@ -321,16 +452,28 @@ const DeCoder: React.FC = () => {
                           className="bg-foreground"
                         />
                         <div className="flex flex-col gap-1 justify-center items-end">
-                          <a href="https://github.com/akadeepesh/Page_404">
+                          <a
+                            href="https://github.com/akadeepesh/Page_404"
+                            target="__blank"
+                          >
                             Page404
                           </a>
-                          <a href="https://github.com/akadeepesh/deepesh_html">
+                          <a
+                            href="https://github.com/akadeepesh/deepesh_html"
+                            target="__blank"
+                          >
                             DeepeshHtml
                           </a>
-                          <a href="https://github.com/akadeepesh/Deepesh-Portfolio">
+                          <a
+                            href="https://github.com/akadeepesh/Deepesh-Portfolio"
+                            target="__blank"
+                          >
                             DeepeshPortfolio
                           </a>
-                          <a href="https://github.com/akadeepesh/chrome_personalization">
+                          <a
+                            href="https://github.com/akadeepesh/chrome_personalization"
+                            target="__blank"
+                          >
                             ChromePersonalization
                           </a>
                         </div>
@@ -345,19 +488,34 @@ const DeCoder: React.FC = () => {
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-row gap-10">
                         <div className="flex flex-col gap-1 justify-center items-start">
-                          <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
+                          <a
+                            href="https://github.com/akadeepesh/ML_Automation_Frontend"
+                            target="__blank"
+                          >
                             MLAutomationFrontend
                           </a>
-                          <a href="https://github.com/akadeepesh/DataVisualizationWeb">
+                          <a
+                            href="https://github.com/akadeepesh/DataVisualizationWeb"
+                            target="__blank"
+                          >
                             DataVisualizationWeb
                           </a>
-                          <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                          <a
+                            href="https://github.com/akadeepesh/FirstDjangoAssignment"
+                            target="__blank"
+                          >
                             FirstDjangoAssignment
                           </a>
-                          <a href="https://github.com/akadeepesh/MySky">
+                          <a
+                            href="https://github.com/akadeepesh/MySky"
+                            target="__blank"
+                          >
                             MySky
                           </a>
-                          <a href="https://github.com/akadeepesh/VirtualAssistant">
+                          <a
+                            href="https://github.com/akadeepesh/VirtualAssistant"
+                            target="__blank"
+                          >
                             VirtualAssistant
                           </a>
                         </div>
@@ -366,16 +524,28 @@ const DeCoder: React.FC = () => {
                           className="bg-foreground"
                         />
                         <div className="flex flex-col gap-1 justify-center items-end">
-                          <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                          <a
+                            href="https://github.com/akadeepesh/VirtualAssistant-1stTry"
+                            target="__blank"
+                          >
                             VirtualAssistant1stTry
                           </a>
-                          <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
+                          <a
+                            href="https://github.com/akadeepesh/ReCreating-FirstSite"
+                            target="__blank"
+                          >
                             ReCreatingFirstSite
                           </a>
-                          <a href="https://github.com/akadeepesh/DjangoAuth">
+                          <a
+                            href="https://github.com/akadeepesh/DjangoAuth"
+                            target="__blank"
+                          >
                             DjangoAuth
                           </a>
-                          <a href="https://github.com/akadeepesh/VirtualMentor">
+                          <a
+                            href="https://github.com/akadeepesh/VirtualMentor"
+                            target="__blank"
+                          >
                             VirtualMentor
                           </a>
                         </div>
@@ -395,14 +565,28 @@ const DeCoder: React.FC = () => {
                         <a href="https://github.com/akadeepesh/OnlineResume">
                           OnlineResume
                         </a>
-                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                        <a
+                          href="https://github.com/akadeepesh/Virtual-Mentor-EY"
+                          target="__blank"
+                        >
                           VirtualMentorEY
                         </a>
-                        <a href="https://github.com/akadeepesh/FirstViteTried">
+                        <a
+                          href="https://github.com/akadeepesh/FirstViteTried"
+                          target="__blank"
+                        >
                           FirstViteTried
                         </a>
-                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
-                        <a href="https://github.com/akadeepesh/data-creation">
+                        <a
+                          href="https://github.com/akadeepesh/MySky"
+                          target="__blank"
+                        >
+                          MySky
+                        </a>
+                        <a
+                          href="https://github.com/akadeepesh/data-creation"
+                          target="__blank"
+                        >
                           DataCreation
                         </a>
                       </div>
@@ -415,7 +599,10 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col justify-center items-end">
-                        <a href="https://github.com/akadeepesh/Cpp-DSA">
+                        <a
+                          href="https://github.com/akadeepesh/Cpp-DSA"
+                          target="__blank"
+                        >
                           CppDSA
                         </a>
                       </div>
@@ -426,7 +613,10 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col justify-center items-end">
-                        <a href="https://github.com/akadeepesh/BankManagement-Python">
+                        <a
+                          href="https://github.com/akadeepesh/BankManagement-Python"
+                          target="__blank"
+                        >
                           BankManagementPython
                         </a>
                       </div>
@@ -439,11 +629,22 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col gap-5 justify-center items-end">
-                        <a href="https://github.com/akadeepesh/OnlineResume">
+                        <a
+                          href="https://github.com/akadeepesh/OnlineResume"
+                          target="__blank"
+                        >
                           OnlineResume
                         </a>
-                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
-                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                        <a
+                          href="https://github.com/akadeepesh/MySky"
+                          target="__blank"
+                        >
+                          MySky
+                        </a>
+                        <a
+                          href="https://github.com/akadeepesh/Virtual-Mentor-EY"
+                          target="__blank"
+                        >
                           VirtualMentorEY
                         </a>
                       </div>
@@ -454,7 +655,10 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col justify-center items-end">
-                        <a href="https://github.com/akadeepesh/deepesh_html">
+                        <a
+                          href="https://github.com/akadeepesh/deepesh_html"
+                          target="__blank"
+                        >
                           DeepeshHtml
                         </a>
                       </div>
@@ -467,7 +671,10 @@ const DeCoder: React.FC = () => {
                     <HoverCardContent className="flex flex-row">
                       <Github className="flex justify-center items-center w-full h-full" />
                       <div className="flex flex-col justify-center items-end">
-                        <a href="https://github.com/akadeepesh/KeepItSimple">
+                        <a
+                          href="https://github.com/akadeepesh/KeepItSimple"
+                          target="__blank"
+                        >
                           KeepItSimple
                         </a>
                       </div>
