@@ -37,9 +37,9 @@ const Github: React.FC<{ className: string }> = ({ className }) => {
 
 const DeCoder: React.FC = () => {
   return (
-    <div className="flex my-20 max-w-screen-lg flex-row items-center mx-10 lg:mx-60 md:mx-40 sm:mx-20">
+    <div className="flex my-20 max-w-screen-lg flex-row justify-center gap-10 mx-10 lg:mx-60 md:mx-40 sm:mx-20">
       <ModeToggle className="fixed right-5 top-5" />
-      <div className="flex flex-col gap-10">
+      <div className="Sidebar flex flex-col gap-10">
         <div className="w-[391.23px]">
           <AspectRatio ratio={384 / 501}>
             <Image
@@ -52,7 +52,7 @@ const DeCoder: React.FC = () => {
           </AspectRatio>
         </div>
         <div className="Contact">
-          <Card>
+          <Card className="bg-primary-foreground">
             <CardHeader>
               <CardTitle className="font-bold">Contact</CardTitle>
               <CardDescription>New Delhi, India</CardDescription>
@@ -81,7 +81,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <div className="Education">
-          <Card>
+          <Card className="bg-primary-foreground">
             <CardHeader>
               <CardTitle className="font-bold">Education</CardTitle>
               <CardDescription>New Delhi, India</CardDescription>
@@ -111,7 +111,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <div className="Skills">
-          <Card>
+          <Card className="bg-primary-foreground">
             <CardHeader>
               <CardTitle className="font-bold">Skills</CardTitle>
               <Separator className="bg-foreground" />
@@ -479,7 +479,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <div className="Tools">
-          <Card>
+          <Card className="bg-primary-foreground">
             <CardHeader>
               <CardTitle className="font-bold">Tools</CardTitle>
               <CardDescription>
@@ -521,7 +521,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <div className="OS">
-          <Card>
+          <Card className="bg-primary-foreground">
             <CardHeader>
               <CardTitle className="font-bold">OS</CardTitle>
               <CardDescription>
@@ -537,6 +537,56 @@ const DeCoder: React.FC = () => {
                   Windows (11 | 10 | 8.1 | 7)
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      <div className="font-bold">
+        <Separator orientation="vertical" className="bg-foreground" />
+      </div>
+      <div className="flex flex-col gap-10">
+        <div className="About flex flex-col gap-5">
+          <div className="text-5xl">About</div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-extrabold">Deepesh Kumar</CardTitle>
+              <CardDescription>Full Stack Web Developer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Driven and versatile full-stack web developer with a strong
+                focus on crafting user-friendly, automated solutions. I am a
+                3rd-year student at Netaji Subhas University of Technology,
+                proficient in Python, C++, Django, Next.js, and more. During my
+                internship at BrainIntelCorp, I successfully developed an
+                emotion recognition model with 85% accuracy, significantly
+                improving their customer service operations. I am dedicated to
+                making technology accessible and strive to leverage my skills
+                and innovative thinking to contribute to your team's success.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <Separator orientation="horizontal" className="bg-foreground" />
+        <div className="Exp flex flex-col gap-5">
+          <div className="text-5xl">Experience</div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex flex-row justify-between">
+                <div className="font-extrabold">Python Developer</div>
+                <div className="text-base text-muted-foreground">
+                  Jun 2023 - Jul 2023
+                </div>
+              </CardTitle>
+              <CardDescription>BrainIntelCorp (Startup)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Incidunt nulla id vitae, eos dolorem quae recusandae nostrum cum
+                adipisci ducimus error voluptate veritatis quo quaerat minus
+                voluptatem illo consectetur. Est.
+              </p>
             </CardContent>
           </Card>
         </div>
