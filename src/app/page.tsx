@@ -967,6 +967,51 @@ const DeCoder: React.FC = () => {
             </Card>
           </div>
         </div>
+        <Separator orientation="horizontal" className="bg-foreground" />
+        <div className="flex flex-col gap-5">
+          <div className="text-4xl">Certifications and Awards</div>
+          <div className="flex flex-row justify-between">
+            <div className="flex flex-col">
+              <a
+                href="https://hackerrank.com/certificates/a63c9ae3221c?utm_medium=email&utm_source=mail_template_1393&utm_campaign=hrc_skills_certificate"
+                target="__blank"
+              >
+                <Button variant={"link"}>Python (Basic) Certificate</Button>
+              </a>
+              <a
+                href="https://www.hackerrank.com/certificates/771a2eef8697"
+                target="__blank"
+              >
+                <Button variant={"link"}>HackerRank - Problem Solving</Button>
+              </a>
+              <a
+                href="https://www.hackerrank.com/certificates/8e579853d4fc"
+                target="__blank"
+              >
+                <Button variant={"link"}>HackerRank - SQL Basics</Button>
+              </a>
+            </div>
+            <div className="flex flex-col items-end">
+              <a href="https://cert.devtown.in/verify/Z2tARCS" target="__blank">
+                <Button variant={"link"}>
+                  C++ Data Structures and Algorithms
+                </Button>
+              </a>
+              <a
+                href="https://learn.microsoft.com/en-us/users/deepeshkumar-5270/"
+                target="__blank"
+              >
+                <Button variant={"link"}>Microsoft Learn - Azure AI</Button>
+              </a>
+              <a
+                href="https://www.holopin.io/@akadeepesh#badges"
+                target="__blank"
+              >
+                <Button variant={"link"}>Holopin Badges - HacktoberFest</Button>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
