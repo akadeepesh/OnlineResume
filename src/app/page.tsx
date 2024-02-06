@@ -478,6 +478,48 @@ const DeCoder: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+        <div className="Tools">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-bold">Tools</CardTitle>
+              <CardDescription>
+                <Separator className="bg-foreground" />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-col gap-3">
+                  <Button className="cursor-default" variant="outline">
+                    Git
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    GitHub
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    Figma
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    Vs-Code
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button className="cursor-default" variant="outline">
+                    Jupyter
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    pycharm
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    Google Colab
+                  </Button>
+                  <Button className="cursor-default" variant="outline">
+                    Sublime Text
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
