@@ -205,33 +205,112 @@ const DeCoder: React.FC = () => {
                 </HoverCard>
                 <HoverCard>
                   <HoverCardTrigger className="w-fit">
-                    Javascript
+                    React.js
                   </HoverCardTrigger>
                   <HoverCardContent className="flex flex-row">
                     <Github className="flex justify-center items-center w-full h-full" />
-                    <div className="flex flex-col gap-1 justify-center items-end">
+                    <div className="flex flex-col gap-3 justify-center items-end">
                       <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
                         MLAutomationFrontend
                       </a>
-                      <a href="https://github.com/akadeepesh/DataVisualizationWeb">
-                        DataVisualizationWeb
-                      </a>
-                      <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
-                        FirstDjangoAssignment
-                      </a>
-                      <a href="https://github.com/akadeepesh/MySky">MySky</a>
                       <a href="https://github.com/akadeepesh/VirtualAssistant">
                         VirtualAssistant
                       </a>
                       <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
                         ReCreatingFirstSite
                       </a>
-                      <a href="https://github.com/akadeepesh/DjangoAuth">
-                        DjangoAuth
+                      <a href="https://github.com/akadeepesh/FirstViteTried">
+                        FirstViteTried
                       </a>
-                      <a href="https://github.com/akadeepesh/VirtualMentor">
-                        VirtualMentor
-                      </a>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+                <HoverCard>
+                  <HoverCardTrigger className="w-fit">Django</HoverCardTrigger>
+                  <HoverCardContent className="flex flex-row">
+                    <Github className="flex justify-center items-center w-full h-full" />
+                    <div className="flex flex-row gap-10">
+                      <div className="flex flex-col gap-1 justify-center items-start">
+                        <a href="https://github.com/akadeepesh/DjangoUserJWT">
+                          DjangoUserJWT
+                        </a>
+                        <a href="https://github.com/akadeepesh/Django_basic">
+                          Django_basic
+                        </a>
+                        <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                          FirstDjangoAssignment
+                        </a>
+                        <a href="https://github.com/akadeepesh/DjangoAuth">
+                          DjangoAuth
+                        </a>
+                        <a href="https://github.com/akadeepesh/VirtualMentor">
+                          VirtualMentor
+                        </a>
+                      </div>
+                      <Separator
+                        orientation="vertical"
+                        className="bg-foreground"
+                      />
+                      <div className="flex flex-col gap-1 justify-center items-end">
+                        <a href="https://github.com/akadeepesh/DjangoSessionAuthentication">
+                          DjangoSessionAuthentication
+                        </a>
+                        <a href="https://github.com/akadeepesh/Virtual-Mentor-EY">
+                          VirtualMentorEY
+                        </a>
+                        <a href="https://github.com/akadeepesh/UserAuth">
+                          UserAuth
+                        </a>
+                        <a href="https://github.com/akadeepesh/CollegeAdmissionManagement">
+                          CollegeAdmissionManagement
+                        </a>
+                        <a href="https://github.com/akadeepesh/FirstDjangoProject">
+                          FirstDjangoProject
+                        </a>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+                <HoverCard>
+                  <HoverCardTrigger className="w-fit">
+                    Javascript
+                  </HoverCardTrigger>
+                  <HoverCardContent className="flex flex-row">
+                    <Github className="flex justify-center items-center w-full h-full" />
+                    <div className="flex flex-row gap-10">
+                      <div className="flex flex-col gap-1 justify-center items-start">
+                        <a href="https://github.com/akadeepesh/ML_Automation_Frontend">
+                          MLAutomationFrontend
+                        </a>
+                        <a href="https://github.com/akadeepesh/DataVisualizationWeb">
+                          DataVisualizationWeb
+                        </a>
+                        <a href="https://github.com/akadeepesh/FirstDjangoAssignment">
+                          FirstDjangoAssignment
+                        </a>
+                        <a href="https://github.com/akadeepesh/MySky">MySky</a>
+                        <a href="https://github.com/akadeepesh/VirtualAssistant">
+                          VirtualAssistant
+                        </a>
+                      </div>
+                      <Separator
+                        orientation="vertical"
+                        className="bg-foreground"
+                      />
+                      <div className="flex flex-col gap-1 justify-center items-end">
+                        <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                          VirtualAssistant1stTry
+                        </a>
+                        <a href="https://github.com/akadeepesh/ReCreating-FirstSite">
+                          ReCreatingFirstSite
+                        </a>
+                        <a href="https://github.com/akadeepesh/DjangoAuth">
+                          DjangoAuth
+                        </a>
+                        <a href="https://github.com/akadeepesh/VirtualMentor">
+                          VirtualMentor
+                        </a>
+                      </div>
                     </div>
                   </HoverCardContent>
                 </HoverCard>
@@ -258,9 +337,49 @@ const DeCoder: React.FC = () => {
                     </div>
                   </HoverCardContent>
                 </HoverCard>
+                <HoverCard>
+                  <HoverCardTrigger className="w-fit">
+                    HTML/CSS
+                  </HoverCardTrigger>
+                  <HoverCardContent className="flex flex-row">
+                    <Github className="flex justify-center items-center w-full h-full" />
+                    <div className="flex flex-row gap-10">
+                      <div className="flex flex-col gap-1 justify-center items-start">
+                        <a href="https://github.com/akadeepesh/VirtualAssistant-1stTry">
+                          VirtualAssistant1stTry
+                        </a>
+                        <a href="https://github.com/akadeepesh/happy-birthday">
+                          HappyBirthday
+                        </a>
+                        <a href="https://github.com/akadeepesh/KeepItSimple">
+                          KeepItSimple
+                        </a>
+                        <a href="https://github.com/akadeepesh/Django">
+                          Django
+                        </a>
+                      </div>
+                      <Separator
+                        orientation="vertical"
+                        className="bg-foreground"
+                      />
+                      <div className="flex flex-col gap-1 justify-center items-end">
+                        <a href="https://github.com/akadeepesh/Page_404">
+                          Page404
+                        </a>
+                        <a href="https://github.com/akadeepesh/deepesh_html">
+                          DeepeshHtml
+                        </a>
+                        <a href="https://github.com/akadeepesh/Deepesh-Portfolio">
+                          DeepeshPortfolio
+                        </a>
+                        <a href="https://github.com/akadeepesh/chrome_personalization">
+                          ChromePersonalization
+                        </a>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               </div>
-
-              {/* <div className="">Javascript</div> */}
             </CardContent>
           </Card>
         </div>
