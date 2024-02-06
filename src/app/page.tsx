@@ -789,14 +789,183 @@ const DeCoder: React.FC = () => {
               <CardDescription>BrainIntelCorp (Startup)</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Incidunt nulla id vitae, eos dolorem quae recusandae nostrum cum
-                adipisci ducimus error voluptate veritatis quo quaerat minus
-                voluptatem illo consectetur. Est.
+              <p className="text-semibold text-lg mb-3">
+                Emotion Detection by Voice Recognition
               </p>
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-3">
+                  <p>•</p>
+                  <p>
+                    Developed a highly accurate Neural Network model for emotion
+                    detection through voice.
+                  </p>
+                </div>
+                <div className="flex flex-row gap-3">
+                  <p>•</p>
+                  <p>
+                    Trained the model utilizing open-source datasets, resulting
+                    in an impressive accuracy rate of85%.
+                  </p>
+                </div>
+                <div className="flex flex-row gap-3">
+                  <p>•</p>
+                  <p>
+                    Conducted extensive experiments with diverse deep learning
+                    and machine learning algorithms toenhance model accuracy.
+                  </p>
+                </div>
+                <div className="flex flex-row gap-3">
+                  <p>•</p>
+                  <p>
+                    Successfully implemented the project using Python and
+                    various essential modules such as OS,Librosa, sklearn,
+                    keras, Transformers, Xception, and numpy.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </div>
+        <Separator orientation="horizontal" className="bg-foreground" />
+        <div className="Project flex flex-col gap-5">
+          <div className="text-5xl">Projects</div>
+          <div className="flex flex-col gap-10">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-row justify-between">
+                  <div className="font-bold">NLP Helping tools</div>
+                  <div className="text-base text-muted-foreground">
+                    Dec 2023 - Present
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  Helps in Tokenization, Stemming/lemmatation, Stop Word Removal
+                  etc
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Full Stack Application (Django and React.js) with REST
+                      API.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Authentication and Authorization with Django custom user
+                      base models using JWT.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Material-Tailwind UI, Tailwind CSS and Mauve colors have
+                      been used for better UI.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Successfully implemented the project using Python and
+                      various essential modules such as OS,Librosa, sklearn,
+                      keras, Transformers, Xception, and numpy.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-row justify-between">
+                  <div className="font-bold">Poetry Showcase</div>
+                  <div className="text-base text-muted-foreground">
+                    14 NOV 2023
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  A simple UI app to showcase poetries written by me.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Full Stack Application created within 3 hours with Django
+                      Rest Framework and Next.js.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Complete integration of Next.js with Clerk Auth for
+                      Authentication and Authorization.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      For frontend design library I chose ShadcnUI, having
+                      minimal dark and light theme.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>Fully responsive single page simple app.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-row justify-between">
+                  <div className="font-bold">Personal Voice Assistant</div>
+                  <div className="text-base text-muted-foreground">
+                    Oct 2022 - Jan 2023
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  A personal web assistant for various use across the system.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col">
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Full Stack Application using Django Rest Framework &
+                      React.js connected through REST API.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Using Python Speech Recognizer and performing multiple
+                      operations accordingly.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      GPT4ALL an open source local LLM model is integrated in
+                      this WebApp.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-3">
+                    <p>•</p>
+                    <p>
+                      Some main features are - Sending messages to WhatsApp
+                      using name of user, Running/closing anyapplication, Asking
+                      queries to GPT, location on google maps etc.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
