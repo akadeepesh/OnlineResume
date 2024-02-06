@@ -562,7 +562,8 @@ const DeCoder: React.FC = () => {
                 emotion recognition model with 85% accuracy, significantly
                 improving their customer service operations. I am dedicated to
                 making technology accessible and strive to leverage my skills
-                and innovative thinking to contribute to your team's success.
+                and innovative thinking to contribute to your team&apos;s
+                success.
               </p>
             </CardContent>
           </Card>
