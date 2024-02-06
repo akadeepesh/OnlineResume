@@ -520,6 +520,26 @@ const DeCoder: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+        <div className="OS">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-bold">OS</CardTitle>
+              <CardDescription>
+                <Separator className="bg-foreground" />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-5">
+                <Button className="cursor-default" variant="destructive">
+                  Ubuntu | Linux
+                </Button>
+                <Button className="cursor-default" variant="destructive">
+                  Windows (11 | 10 | 8.1 | 7)
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
