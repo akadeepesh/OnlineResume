@@ -60,13 +60,24 @@ const DeCoder: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-3">
-                <span className="text-muted-foreground text-sm">
-                  +91 9876543210
-                </span>
+                <div className="flex flex-row justify-between">
+                  <span className="text-muted-foreground text-sm">
+                    +91 9876543210
+                  </span>
+                  <div className="flex felx-row justify-center items-center text-muted-foreground text-sm">
+                    <EnvelopeOpenIcon className="mr-2 h-4 w-4" />
+                    <a href="mailto:deepesh.kumar.ug21@nsut.ac.in">Email</a>
+                  </div>
+                </div>
                 <Button size={"sm"}>
-                  <EnvelopeOpenIcon className="mr-2 h-4 w-4" />{" "}
-                  <a href="mailto:deepesh.kumar.ug21@nsut.ac.in">Email</a>
+                  <a
+                    href="https://deepesh-portfolio.vercel.app/"
+                    target="__blank"
+                  >
+                    Portfolio
+                  </a>
                 </Button>
+
                 <div className="flex flex-row justify-between items-center gap-3 w-full">
                   <Button className="w-1/2" size={"sm"}>
                     <a href="https://github.com/akadeepesh" target="__blank">
