@@ -18,6 +18,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Label } from "@/components/ui/label";
 
 const Github: React.FC<{ className: string }> = ({ className }) => {
   return (
@@ -747,6 +748,26 @@ const DeCoder: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+        <div className="Hobbies">
+          <Card className="bg-primary-foreground">
+            <CardHeader>
+              <CardTitle className="font-bold">Hobbies & Interests</CardTitle>
+              <CardDescription>
+                <Separator className="bg-foreground" />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-5">
+                <Label className="cursor-default">Programming</Label>
+                <Label className="cursor-default">Automation</Label>
+                <Label className="cursor-default">Beatbox</Label>
+                <Label className="cursor-default">Poetry</Label>
+                <Label className="cursor-default">Dance</Label>
+                <Label className="cursor-default">Rap</Label>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
       <div className="font-bold">
         <Separator orientation="vertical" className="bg-foreground" />
@@ -969,46 +990,203 @@ const DeCoder: React.FC = () => {
         </div>
         <Separator orientation="horizontal" className="bg-foreground" />
         <div className="flex flex-col gap-5">
-          <div className="text-4xl">Certifications and Awards</div>
+          <div className="text-5xl">Certifications</div>
           <div className="flex flex-row justify-between">
             <div className="flex flex-col">
-              <a
-                href="https://hackerrank.com/certificates/a63c9ae3221c?utm_medium=email&utm_source=mail_template_1393&utm_campaign=hrc_skills_certificate"
-                target="__blank"
-              >
-                <Button variant={"link"}>Python (Basic) Certificate</Button>
-              </a>
-              <a
-                href="https://www.hackerrank.com/certificates/771a2eef8697"
-                target="__blank"
-              >
-                <Button variant={"link"}>HackerRank - Problem Solving</Button>
-              </a>
-              <a
-                href="https://www.hackerrank.com/certificates/8e579853d4fc"
-                target="__blank"
-              >
-                <Button variant={"link"}>HackerRank - SQL Basics</Button>
-              </a>
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Python (Basic) Certificate
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://hackerrank.com/certificates/a63c9ae3221c?utm_medium=email&utm_source=mail_template_1393&utm_campaign=hrc_skills_certificate"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                Python (Basic) Certificate
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Feb 2022</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>HackerRank</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : Python (Programming Language)</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Button>
+              </div>
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Problem Solving (Basic) Certificate
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://www.hackerrank.com/certificates/771a2eef8697"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                Problem Solving (Basic) Certificate
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Sep 2022</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>HackerRank</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : Logical Problem Solving</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Button>
+              </div>
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      SQL (Basic) Certificate
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://www.hackerrank.com/certificates/8e579853d4fc"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                SQL (Basic) Certificate
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Sep 2022</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>HackerRank</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : SQL</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Button>
+              </div>
             </div>
             <div className="flex flex-col items-end">
-              <a href="https://cert.devtown.in/verify/Z2tARCS" target="__blank">
-                <Button variant={"link"}>
-                  C++ Data Structures and Algorithms
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      C++ Data Structures and Algorithms
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://cert.devtown.in/verify/Z2tARCS"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                C++ Data Structures and Algorithms
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Oct 2022</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>DevTown</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : DSA in C++</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
                 </Button>
-              </a>
-              <a
-                href="https://learn.microsoft.com/en-us/users/deepeshkumar-5270/"
-                target="__blank"
-              >
-                <Button variant={"link"}>Microsoft Learn - Azure AI</Button>
-              </a>
-              <a
-                href="https://www.holopin.io/@akadeepesh#badges"
-                target="__blank"
-              >
-                <Button variant={"link"}>Holopin Badges - HacktoberFest</Button>
-              </a>
+              </div>
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Microsoft AI Skills Challenge
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://drive.google.com/file/d/1oUvEqEbVNdgr-oCm4iSio79ia3QwLNwE/view"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                Azure AI Skills Challenge
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Jan 2024</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>Microsoft</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : Microsoft Azure Machine Learning</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Button>
+              </div>
+              <div className="">
+                <Button variant={"ghost"}>
+                  <HoverCard>
+                    <HoverCardTrigger className="w-fit">
+                      Holopin Badges
+                    </HoverCardTrigger>
+                    <HoverCardContent className="flex flex-row">
+                      <a
+                        href="https://www.holopin.io/@akadeepesh#badges"
+                        target="__blank"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>
+                              <Button variant={"link"}>
+                                Holopin Badges - HacktoberFest
+                              </Button>
+                            </CardTitle>
+                            <CardDescription>Issued Jan 2023</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>DevTown</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>Skills : Open Source Contributions</p>
+                          </CardFooter>
+                        </Card>
+                      </a>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
