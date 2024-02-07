@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import Image from "next/image";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { EnvelopeOpenIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -38,19 +37,20 @@ const Github: React.FC<{ className: string }> = ({ className }) => {
 
 const DeCoder: React.FC = () => {
   return (
-    <div className="flex my-20 max-w-screen-lg flex-row justify-center gap-10 mx-10 lg:mx-60 md:mx-40 sm:mx-20">
+    <div className="flex my-20 max-w-screen-lg flex-col md:flex-row justify-center items-center gap-10 lg:mx-60 md:mx-40">
       <ModeToggle className="fixed right-5 top-5" />
-      <div className="Sidebar flex flex-col gap-10">
-        <div className="w-[391.23px]">
-          <AspectRatio ratio={384 / 501}>
+      <div className="Sidebar flex flex-col ml-24 md:ml-0 gap-10">
+        <div className="flex justify-center items-center w-[433.6px] sm:w-auto md:w-[391.23px] md:mb-10">
+          <div className="flex w-[192px] h-[250px]">
             <Image
               src="/DeepeshBrandBg.png"
-              width={384}
-              height={100}
+              width={192}
+              height={250}
               alt="Image"
-              className="rounded-md object-cover"
+              className="rounded-full object-cover"
+              priority
             />
-          </AspectRatio>
+          </div>
         </div>
         <div className="Contact">
           <Card className="bg-primary-foreground">
@@ -780,11 +780,16 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
       </div>
-      <div className="font-bold">
-        <Separator orientation="vertical" className="bg-foreground" />
-      </div>
-      <div className="flex flex-col gap-10">
-        <div className="About flex flex-col gap-5">
+      <Separator
+        orientation="horizontal"
+        className="bg-foreground ml-24 md:hidden w-full h-1 rounded"
+      />
+      <Separator
+        orientation="vertical"
+        className="bg-foreground hidden md:block"
+      />
+      <div className="flex flex-col items-center ml-auto gap-10">
+        <div className="About flex flex-col gap-5 w-screen md:w-auto">
           <div className="text-5xl">About</div>
           <Card>
             <CardHeader>
@@ -808,7 +813,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <Separator orientation="horizontal" className="bg-foreground" />
-        <div className="Exp flex flex-col gap-5">
+        <div className="Exp flex flex-col gap-5 w-screen md:w-auto">
           <div className="text-5xl">Experience</div>
           <Card>
             <CardHeader>
@@ -859,7 +864,7 @@ const DeCoder: React.FC = () => {
           </Card>
         </div>
         <Separator orientation="horizontal" className="bg-foreground" />
-        <div className="Project flex flex-col gap-5">
+        <div className="Project flex flex-col gap-5 w-screen md:w-auto">
           <div className="text-5xl">Projects</div>
           <div className="flex flex-col gap-10">
             <Card>
