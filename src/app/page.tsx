@@ -66,7 +66,7 @@ const DeCoder: React.FC = () => {
                   </span>
                   <div className="flex felx-row justify-center items-center text-muted-foreground text-sm">
                     <EnvelopeOpenIcon className="mr-2 h-4 w-4" />
-                    <a href="mailto:deepesh.kumar.ug21@nsut.ac.in">Email</a>
+                    <a href="https://mail.google.com/mail/u/0/?source=mailto&to=%5Bdeepesh.kumar.ug21@nsut.ac.in%5D&fs=1&tf=cm">Email</a>
                   </div>
                 </div>
                 <Button size={"sm"}>
