@@ -18,6 +18,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 const Github: React.FC<{ className: string }> = ({ className }) => {
   return (
@@ -59,39 +60,48 @@ const DeCoder: React.FC = () => {
               <CardDescription>New Delhi, India</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 w-full">
                 <div className="flex flex-row justify-between">
                   <span className="text-muted-foreground text-sm">
                     +91 9876543210
                   </span>
-                  <div className="flex felx-row justify-center items-center text-muted-foreground text-sm">
-                    <EnvelopeOpenIcon className="mr-2 h-4 w-4" />
-                    <a href="https://mail.google.com/mail/u/0/?source=mailto&to=%5Bdeepesh.kumar.ug21@nsut.ac.in%5D&fs=1&tf=cm">Email</a>
-                  </div>
-                </div>
-                <Button size={"sm"}>
-                  <a
-                    href="https://deepesh-portfolio.vercel.app/"
+                  <Link
+                    href="https://mail.google.com/mail/u/0/?source=mailto&to=%5Bdeepesh.kumar.ug21@nsut.ac.in%5D&fs=1&tf=cm"
                     target="__blank"
                   >
+                    <div className="flex felx-row justify-center items-center text-muted-foreground text-sm">
+                      <EnvelopeOpenIcon className="mr-2 h-4 w-4" />
+                      Email
+                    </div>
+                  </Link>
+                </div>
+                <Link
+                  href="https://deepesh-portfolio.vercel.app/"
+                  target="__blank"
+                >
+                  <Button className="w-full" size={"sm"}>
                     Portfolio
-                  </a>
-                </Button>
-
+                  </Button>
+                </Link>
                 <div className="flex flex-row justify-between items-center gap-3 w-full">
-                  <Button className="w-1/2" size={"sm"}>
-                    <a href="https://github.com/akadeepesh" target="__blank">
+                  <Link
+                    href="https://github.com/akadeepesh"
+                    target="__blank"
+                    className="w-1/2"
+                  >
+                    <Button className="w-full" size={"sm"}>
                       GitHub
-                    </a>
-                  </Button>
-                  <Button className="w-1/2" size={"sm"}>
-                    <a
-                      href="https://www.linkedin.com/in/akadeepesh/"
-                      target="__blank"
-                    >
+                    </Button>
+                  </Link>
+                  <Link
+                    href="https://www.linkedin.com/in/akadeepesh/"
+                    target="__blank"
+                    className="w-1/2"
+                  >
+                    <Button className="w-full" size={"sm"}>
                       LinkedIn
-                    </a>
-                  </Button>
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>
