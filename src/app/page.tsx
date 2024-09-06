@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import SkillsAndProjects from "@/components/SkillsAndProjects";
 
 const DeCoder: React.FC = () => {
   return (
@@ -63,29 +64,34 @@ const DeCoder: React.FC = () => {
               </CardFooter>
             </Card>
 
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Skills</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "Python",
-                    "React.js",
-                    "Django",
-                    "Next.js",
-                    "TypeScript",
-                    "C++",
-                    "HTML/CSS",
-                    "JavaScript",
-                  ].map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col">
+              <SkillsAndProjects />
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle>Tools | DevOps | Database</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "AWS",
+                      "Docker",
+                      "Git",
+                      "GitHub",
+                      "Postman",
+                      "MySQL",
+                      "PostgreSQL",
+                      "SQLite",
+                      "VS Code",
+                      "Pycharm",
+                    ].map((skill) => (
+                      <Badge key={skill} variant="secondary">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <Card className="mt-8">
               <CardHeader>
@@ -181,8 +187,7 @@ const DeCoder: React.FC = () => {
                     Python Developer
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    BrainIntelCorp (Startup) | 1 Jun 2023 - 31 Jul 2023 | New
-                    Delhi, IN
+                    Brain Intel Corp | 1 Jun 2023 - 31 Jul 2023 | New Delhi, IN
                   </p>
                   <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
                     <li>
