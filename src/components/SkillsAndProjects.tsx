@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github } from "lucide-react";
+import WordPressSkills from "./WordPressSkills";
 
 type Skill =
   | "Python"
@@ -71,7 +72,10 @@ const skillProjects: SkillProjects = {
     { name: "FirstDjangoAssignment" },
     { name: "FirstDjangoProject" },
   ],
-  "React.js": [],
+  "React.js": [
+    { name: "ML_Automation_Frontend" },
+    { name: "VirtualAssistant" },
+  ],
   WordPress: [],
   JavaScript: [
     { name: "quizify" },
@@ -83,8 +87,8 @@ const skillProjects: SkillProjects = {
     { name: "DjangoAuth" },
     { name: "VirtualMentor" },
   ],
-  SQL: [],
-  "C/C++": [],
+  SQL: [{ name: "BankManagement-Python" }],
+  "C/C++": [{ name: "Cpp-DSA" }],
   "HTML/CSS": [
     { name: "Deepesh-Portfolio" },
     { name: "chrome_personalization" },
@@ -154,7 +158,7 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
                   exit={{ opacity: 0 }}
                   className="dark:text-gray-600 text-gray-400"
                 >
-                  No projects available for this skill yet.
+                  <WordPressSkills />
                 </motion.p>
               )}
             </div>
