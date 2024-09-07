@@ -1,18 +1,18 @@
+"use client";
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { BackgroundBeamsWithCollision } from "./ui/background-beams-with-collision";
-import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Github } from "lucide-react";
 
 type Skill =
   | "Python"
@@ -53,15 +53,24 @@ const skillProjects: SkillProjects = {
     { name: "PizzaTheatre" },
     { name: "BioSignal-Recorder-Web" },
     { name: "OnlineResume" },
-    { name: "Simplicity" },
+    { name: "Virtual-Mentor-EY" },
   ],
   "Next.js": [
     { name: "BioSignal-Recorder-Web" },
     { name: "Simplicity" },
     { name: "PizzaTheatre" },
     { name: "OnlineResume" },
+    { name: "Virtual-Mentor-EY" },
   ],
-  Django: [],
+  Django: [
+    { name: "VirtualAssistant" },
+    { name: "DjangoSessionAuthentication" },
+    { name: "DjangoUserJWT" },
+    { name: "MySky" },
+    { name: "UserAuth" },
+    { name: "FirstDjangoAssignment" },
+    { name: "FirstDjangoProject" },
+  ],
   "React.js": [],
   WordPress: [],
   JavaScript: [
@@ -70,6 +79,7 @@ const skillProjects: SkillProjects = {
     { name: "ML_Automation_Frontend" },
     { name: "DataVisualizationWeb" },
     { name: "VirtualAssistant" },
+    { name: "UserAuth" },
     { name: "DjangoAuth" },
     { name: "VirtualMentor" },
   ],
@@ -86,60 +96,70 @@ const skillProjects: SkillProjects = {
 };
 
 const ProjectCard: React.FC<ProjectInfo> = ({ name }) => (
-  <div className="my-4 w-full max-w-[400px]">
-    <Link href={`https://github.com/akadeepesh/${name}`} target="_blank">
-      <img
-        src={`https://gh-card.dev/repos/akadeepesh/${name}.svg`}
-        alt={`${name} Repository`}
-        className="w-full"
-      />
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+    className="w-full max-w-[400px] bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
+  >
+    <Link
+      href={`https://github.com/akadeepesh/${name}`}
+      target="_blank"
+      className="block p-4"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+          {name}
+        </h3>
+        <Github className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-400">View on GitHub</p>
     </Link>
-  </div>
+  </motion.div>
 );
 
 interface SkillDialogProps {
   skill: Skill;
 }
 
-const gradientTextClass =
-  "bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]";
-
 const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
   <Dialog>
     <DialogTrigger asChild>
-      <Badge className="cursor-pointer hover:bg-blue-400" variant="secondary">
+      <Badge
+        className="cursor-pointer transition-all duration-300 hover:bg-blue-500 hover:text-white"
+        variant="secondary"
+      >
         {skill}
       </Badge>
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
-      <div className="relative w-full h-full">
-        <BackgroundBeamsWithCollision>
-          <div className="relative z-10 p-6">
-            <DialogHeader className="mb-4">
-              <DialogTitle
-                className={`text-2xl font-bold ${gradientTextClass}`}
-              >
-                {skill} Projects
-              </DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="h-[60vh] pr-4">
-              <div className="space-y-4 flex flex-col items-center -mt-4">
-                {skillProjects[skill].length > 0 ? (
-                  skillProjects[skill].map((project, index) => (
-                    <ProjectCard key={index} {...project} />
-                  ))
-                ) : (
-                  <p className={gradientTextClass}>
-                    {skill.includes("WordPress")
-                      ? "No projects available for this skill yet."
-                      : "hehe"}
-                  </p>
-                )}
-              </div>
-              <ScrollBar className={`${gradientTextClass}`} />
-            </ScrollArea>
-          </div>
-        </BackgroundBeamsWithCollision>
+    <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-gradient-to-br">
+      <div className="p-6">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-2xl font-bold dark:text-gray-800 text-white">
+            {skill} Projects
+          </DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="h-[60vh] pr-4">
+          <AnimatePresence>
+            <div className="space-y-4 flex flex-col items-center">
+              {skillProjects[skill].length > 0 ? (
+                skillProjects[skill].map((project, index) => (
+                  <ProjectCard key={index} {...project} />
+                ))
+              ) : (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="dark:text-gray-600 text-gray-400"
+                >
+                  No projects available for this skill yet.
+                </motion.p>
+              )}
+            </div>
+          </AnimatePresence>
+        </ScrollArea>
       </div>
     </DialogContent>
   </Dialog>
@@ -147,16 +167,28 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
 
 const SkillsAndProjects: React.FC = () => {
   return (
-    <Card className="mt-8">
+    <Card className="mt-8 shadow-lg">
       <CardHeader>
-        <CardTitle>Skills</CardTitle>
+        <CardTitle className="text-2xl font-bold">Skills & Projects</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-2">
+        <motion.div
+          className="flex flex-wrap gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1 }}
+        >
           {Object.keys(skillProjects).map((skill) => (
-            <SkillDialog key={skill} skill={skill as Skill} />
+            <motion.div
+              key={skill}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <SkillDialog skill={skill as Skill} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </CardContent>
     </Card>
   );
