@@ -4,28 +4,29 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Code, Globe } from "lucide-react";
 
 const wordpressProjects = [
   {
     title: "Upside Down Labs",
     url: "https://upsidedownlabs.tech/",
     description:
-      "Origin of awesome Open-Source Hardware and Software solutions!",
-    tags: ["WordPress", "Custom Theme", "E-commerce"],
+      "Contributed to the development of the Upside Down Labs website.",
+    tags: ["WordPress", "Custom Theme", "Responsive Design"],
   },
   {
     title: "Upside Down Labs Store",
     url: "https://store.upsidedownlabs.tech/",
-    description: "DIY Neuroscience Kits store page",
-    tags: ["WordPress", "WooCommerce", "Custom Plugin"],
+    description:
+      "Contributed to DIY Neuroscience Kits store page for Upside Down Labs.",
+    tags: ["WooCommerce", "E-commerce", "Product Showcase"],
   },
 ];
 
 const WordPressSkills: React.FC = () => {
   return (
     <div className="space-y-8">
-      <p className="text-lg dark:text-gray-700 text-gray-300">
+      <p className="text-lg text-muted-foreground">
         Showcasing my WordPress development skills through real-world projects:
       </p>
       <div className="grid gap-6 md:grid-cols-2">
@@ -38,36 +39,37 @@ const WordPressSkills: React.FC = () => {
           >
             <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
               <CardContent className="p-0">
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <div className="relative aspect-video bg-gradient-to-br from-purple-600 to-blue-500">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <h3 className="text-2xl mx-3 font-bold text-white">
-                        {project.title}
-                      </h3>
-                    </div>
+                <div className="relative aspect-video bg-gradient-to-br from-primary to-primary-foreground">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Globe className="w-12 h-12 text-white opacity-20" />
                   </div>
-                  <div className="p-4 dark:bg-white bg-gray-800">
-                    <p className="dark:text-gray-600 text-gray-300 mb-4">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag, tagIndex) => (
-                        <Badge key={tagIndex} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex items-center text-blue-500 hover:text-blue-600 transition-colors duration-200">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      <span className="text-sm font-medium">Visit Site</span>
-                    </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <h3 className="text-2xl mx-3 font-bold text-white text-center">
+                      {project.title}
+                    </h3>
                   </div>
-                </a>
+                </div>
+                <div className="p-4">
+                  <p className="text-muted-foreground mb-4">
+                    {project.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.tags.map((tag, tagIndex) => (
+                      <Badge key={tagIndex} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <a
+                    href={project.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-primary hover:text-primary-foreground hover:bg-primary px-3 py-2 rounded-md transition-colors duration-200"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    <span className="text-sm font-medium">Visit Site</span>
+                  </a>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
