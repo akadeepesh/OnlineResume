@@ -25,10 +25,10 @@ const ProfileCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-3xl">
+    <div className="bg-white rounded-xl overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-3xl">
       <div className="relative h-48 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
         <div className="absolute inset-0 bg-black opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white dark:from-gray-800"></div>
+        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white"></div>
       </div>
       <div className="relative px-6 pb-6">
         <div className="flex flex-col items-center -mt-20">
@@ -36,15 +36,13 @@ const ProfileCard: React.FC = () => {
             src="/DeepeshBrandBg.png"
             width={140}
             height={140}
-            className="rounded-full border-4 border-white dark:border-gray-800 shadow-lg"
+            className="rounded-full border-4 border-white shadow-lg"
             alt="Deepesh Kumar"
           />
-          <h2 className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
+          <h2 className="mt-4 text-3xl font-bold text-gray-800">
             Deepesh Kumar
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">
-            Full Stack Web Developer
-          </p>
+          <p className="text-gray-600 font-medium">Full Stack Web Developer</p>
           <div className="mt-4 flex space-x-3">
             <Link href="https://github.com/akadeepesh" passHref>
               <Button size="sm" variant="outline" className="rounded-full">
@@ -67,7 +65,7 @@ const ProfileCard: React.FC = () => {
           </div>
         </div>
         <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             Open Source Software Developer. Final year at Netaji Subhas
             University of Technology.
           </p>
