@@ -1,26 +1,41 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const AboutMe = () => {
+export default function AboutMe() {
   return (
-    <Card className="shadow-md">
-      <CardHeader>
-        <CardTitle>
-          <h2 className="text-3xl font-semibold tracking-tight">About Me</h2>
+    <Card className="bg-white shadow-md">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-2xl font-bold text-gray-800">
+          About Me
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-lg leading-relaxed">
-          Software developer and final-year student at Netaji Subhas University
-          of Technology. Proficient in Python, JavaScript, TypeScript, and
-          C/C++, with expertise in backend development using Django. Experienced
-          in creating REST APIs, implementing authentication systems, and
-          working with databases like MySQL and PostgreSQL. Skilled in Full
-          Stack Web Development, specializing in Next.js and
-          Backend-as-a-Service (BaaS) solutions for JavaScript-based projects.
+        <p className="text-base text-gray-700 leading-relaxed">
+          <span className="font-semibold">Software developer</span> and
+          final-year student at Netaji Subhas University of Technology.
+          Proficient in{" "}
+          <span className="font-semibold">
+            Python, JavaScript, TypeScript, and C/C++
+          </span>
+          , with expertise in
+          <span className="font-semibold">
+            {" "}
+            backend development using Django
+          </span>
+          . Experienced in creating
+          <span className="font-semibold"> REST APIs</span>, implementing{" "}
+          <span className="font-semibold">
+            authentication systems & authorisation flows
+          </span>
+          , and working with databases like{" "}
+          <span className="font-semibold">MySQL and PostgreSQL</span>. Skilled
+          in
+          <span className="font-semibold"> Full Stack Web Development</span>,
+          specializing in
+          <span className="font-semibold"> Next.js</span> and{" "}
+          <span className="font-semibold">Backend-as-a-Service (BaaS)</span>{" "}
+          solutions for JavaScript-based projects.
         </p>
       </CardContent>
     </Card>
   );
-};
-
-export default AboutMe;
+}
