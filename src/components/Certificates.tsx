@@ -1,5 +1,5 @@
 "use client";
-
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,13 @@ import {
   HoverCardContent,
 } from "@/components/ui/hover-card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   ExternalLink,
   Award,
   Code,
@@ -17,9 +24,19 @@ import {
   Cpu,
   Globe,
   Trophy,
+  X,
 } from "lucide-react";
 
-const certifications = [
+interface Certification {
+  name: string;
+  issuer: string;
+  date: string;
+  link: string;
+  icon: JSX.Element;
+  description: string;
+}
+
+const certifications: Certification[] = [
   {
     name: "Python (Basic)",
     issuer: "HackerRank",
@@ -87,7 +104,7 @@ const certifications = [
     name: "Microsoft Learn Student Ambassador",
     issuer: "Microsoft Azure",
     date: "Mar 2024",
-    link: "#",
+    link: "https://stdntpartners-my.sharepoint.com/personal/ashutosh_rana_studentambassadors_com/Documents/Azure%20Fundamentals%20Challenge%203Mar24-16Mar24/Sheet03%20Folder/sheet03/280.png",
     icon: <Globe className="h-6 w-6" />,
     description:
       "Recognized for leadership in promoting Microsoft technologies and fostering a learning community on campus.",
@@ -96,7 +113,7 @@ const certifications = [
     name: "Microsoft Learn Student Ambassador",
     issuer: "Microsoft",
     date: "Mar 2024",
-    link: "#",
+    link: "https://stdntpartners-my.sharepoint.com/personal/ashutosh_rana_studentambassadors_com/Documents/Azure%20Fundamentals%20Challenge%203Mar24-16Mar24/Sheet03%20Folder/sheet03/280.png",
     icon: <Globe className="h-6 w-6" />,
     description:
       "Demonstrated expertise in Microsoft technologies and commitment to sharing knowledge with peers.",
@@ -112,7 +129,102 @@ const certifications = [
   },
 ];
 
-export default function Certificates() {
+interface CertificateCardProps {
+  cert: Certification;
+  isMobile: boolean;
+}
+
+const CertificateCard: React.FC<CertificateCardProps> = ({
+  cert,
+  isMobile,
+}) => {
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
+  const content = (
+    <>
+      <div className={isMobile ? "bg-primary text-primary-foreground p-4" : ""}>
+        <h3 className="text-lg font-semibold mb-1">{cert.name}</h3>
+        <p className="text-sm opacity-90">{cert.issuer}</p>
+      </div>
+      <div className={isMobile ? "p-4" : ""}>
+        <Badge variant="outline" className="mb-2">
+          {cert.date}
+        </Badge>
+        <p className="text-sm text-muted-foreground mb-4">{cert.description}</p>
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full justify-center"
+          asChild
+        >
+          <a
+            href={cert.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center"
+          >
+            View Certificate
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </a>
+        </Button>
+      </div>
+    </>
+  );
+
+  return isMobile ? (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer">
+          <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+            <div className="text-primary mb-2">{cert.icon}</div>
+            <h3 className="font-medium text-center text-sm">{cert.name}</h3>
+            <Badge variant="secondary" className="mt-2 text-xs">
+              {cert.issuer}
+            </Badge>
+          </CardContent>
+        </Card>
+      </DialogTrigger>
+      <DialogContent className="w-[90%] rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            Certificate Details
+          </DialogTitle>
+        </DialogHeader>
+        {content}
+      </DialogContent>
+    </Dialog>
+  ) : (
+    <HoverCard openDelay={100} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer">
+          <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+            <div className="text-primary mb-2">{cert.icon}</div>
+            <h3 className="font-medium text-center text-sm">{cert.name}</h3>
+            <Badge variant="secondary" className="mt-2 text-xs">
+              {cert.issuer}
+            </Badge>
+          </CardContent>
+        </Card>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80 p-6 rounded-2xl shadow-lg">
+        {content}
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
+
+const Certificates: React.FC = () => {
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -124,54 +236,12 @@ export default function Certificates() {
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {certifications.map((cert, index) => (
-            <HoverCard key={index} openDelay={100} closeDelay={100}>
-              <HoverCardTrigger asChild>
-                <Card className="overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer">
-                  <CardContent className="p-4 flex flex-col items-center justify-center h-full">
-                    <div className="text-primary mb-2">{cert.icon}</div>
-                    <h3 className="font-medium text-center text-sm">
-                      {cert.name}
-                    </h3>
-                    <Badge variant="secondary" className="mt-2 text-xs">
-                      {cert.issuer}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-80 p-0 shadow-lg">
-                <div className="bg-primary text-primary-foreground p-4">
-                  <h3 className="text-lg font-semibold mb-1">{cert.name}</h3>
-                  <p className="text-sm opacity-90">{cert.issuer}</p>
-                </div>
-                <div className="p-4">
-                  <Badge variant="outline" className="mb-2">
-                    {cert.date}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {cert.description}
-                  </p>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="w-full justify-center"
-                    asChild
-                  >
-                    <a
-                      href={cert.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center"
-                    >
-                      View Certificate
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+            <CertificateCard key={index} cert={cert} isMobile={isMobile} />
           ))}
         </div>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default Certificates;
