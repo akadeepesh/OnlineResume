@@ -25,7 +25,13 @@ const projects: Project[] = [
       "Implemented secure user management, allowing users to control their poems, interact with content, and report issues.",
       "Developed robust filtering options, empowering users to navigate poems based on author, title, content, date, and popularity.",
     ],
-    technologies: ["Next.js", "React", "Node.js", "MongoDB"],
+    technologies: [
+      "Next.js",
+      "TypeScript",
+      "Convex dev",
+      "Shadcn Ui",
+      "Aceternity UI",
+    ],
   },
   {
     name: "PizzaTheatre",
@@ -36,7 +42,13 @@ const projects: Project[] = [
       "Created a dynamic online pizza ordering system, enabling users to customize orders, manage their cart, and complete purchases.",
       "Built a comprehensive admin dashboard for managing pizza offerings, tracking orders, and providing exceptional customer service.",
     ],
-    technologies: ["React", "Node.js", "Express", "MongoDB"],
+    technologies: [
+      "Next.js",
+      "TypeScript",
+      "Convex dev",
+      "Shadcn Ui",
+      "Aceternity UI",
+    ],
   },
   {
     name: "Personal Voice Assistant",
@@ -55,7 +67,7 @@ const projects: Project[] = [
     details: [
       "Developed a suite of Python automation tools, including grammar correction, playlist management, news aggregation, and web search automation.",
     ],
-    technologies: ["Python", "BeautifulSoup", "Selenium"],
+    technologies: ["Python", "BeautifulSoup", "Gingerit", "Spotipy"],
   },
 ];
 

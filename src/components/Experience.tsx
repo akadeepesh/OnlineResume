@@ -74,6 +74,7 @@ const Experience: React.FC = () => {
         "Next.js",
         "Django",
         "WebSocket",
+        "Django Channels",
         "Signal Processing",
         "Data Visualization",
       ],
