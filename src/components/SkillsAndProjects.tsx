@@ -53,6 +53,7 @@ const skillProjects: SkillProjects = {
   ],
   TypeScript: [
     { name: "PizzaTheatre" },
+    { name: "Simplicity" },
     { name: "BioSignal-Recorder-Web" },
     { name: "OnlineResume" },
     { name: "Virtual-Mentor-EY" },
