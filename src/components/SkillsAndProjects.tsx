@@ -156,7 +156,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
           `https://api.github.com/repos/akadeepesh/${name}`,
           {
             headers: {
-              Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+              Authorization: `token ${process.env.GITHUB_TOKEN}`,
             },
           }
         );
