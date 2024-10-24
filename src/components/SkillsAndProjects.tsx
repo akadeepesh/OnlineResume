@@ -152,14 +152,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   useEffect(() => {
     const fetchRepoData = async () => {
       try {
-        const response = await fetch(
-          `https://api.github.com/repos/akadeepesh/${name}`,
-          {
-            headers: {
-              Authorization: `token ${process.env.GITHUB_TOKEN}`,
-            },
-          }
-        );
+        const response = await fetch(`/api/github/${name}`);
         if (response.ok) {
           const data = await response.json();
           setRepoData(data);
