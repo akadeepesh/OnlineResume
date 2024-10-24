@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,7 +13,19 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Github, Code, Folder, Database, FileCode, Globe } from "lucide-react";
+import {
+  Github,
+  Code,
+  Folder,
+  Database,
+  FileCode,
+  Globe,
+  Star,
+  GitFork,
+  ArrowUpRight,
+  Activity,
+  AlertCircle,
+} from "lucide-react";
 import WordPressSkills from "./WordPressSkills";
 
 type Skill =
@@ -54,12 +66,12 @@ const skillProjects: SkillProjects = {
   TypeScript: [
     { name: "PizzaTheatre" },
     { name: "Simplicity" },
-    { name: "BioSignal-Recorder-Web" },
+    { name: "Chords" },
     { name: "OnlineResume" },
     { name: "Virtual-Mentor-EY" },
   ],
   "Next.js": [
-    { name: "BioSignal-Recorder-Web" },
+    { name: "Chords" },
     { name: "Simplicity" },
     { name: "PizzaTheatre" },
     { name: "OnlineResume" },
@@ -123,27 +135,175 @@ const getSkillIcon = (skill: Skill) => {
   }
 };
 
-const ProjectCard: React.FC<ProjectInfo> = ({ name }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.3 }}
-    className="w-full bg-card text-card-foreground rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105"
-  >
-    <Link
-      href={`https://github.com/akadeepesh/${name}`}
-      target="_blank"
-      className="block p-4"
+interface RepoData {
+  stargazers_count: number;
+  forks_count: number;
+  updated_at: string;
+  description: string;
+  open_issues_count: number;
+  topics: string[];
+  size: number;
+}
+
+const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
+  const [repoData, setRepoData] = useState<RepoData | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const fetchRepoData = async () => {
+      try {
+        const response = await fetch(
+          `https://api.github.com/repos/akadeepesh/${name}`,
+          {
+            headers: {
+              Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setRepoData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching repo data:", error);
+      }
+    };
+
+    fetchRepoData();
+  }, [name]);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatSize = (bytes: number) => {
+    const kb = bytes;
+    if (kb < 1024) return `${kb} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+  };
+
+  const getTopicColor = (index: number) => {
+    const colors = [
+      "bg-blue-50 text-blue-700 border-blue-200",
+      "bg-purple-50 text-purple-700 border-purple-200",
+      "bg-green-50 text-green-700 border-green-200",
+      "bg-rose-50 text-rose-700 border-rose-200",
+      "bg-amber-50 text-amber-700 border-amber-200",
+    ];
+    return colors[index % colors.length];
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 relative overflow-hidden"
     >
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <Github className="w-5 h-5 text-muted-foreground" />
-      </div>
-      <p className="text-sm text-muted-foreground">View on GitHub</p>
-    </Link>
-  </motion.div>
-);
+      <Link
+        href={`https://github.com/akadeepesh/${name}`}
+        target="_blank"
+        className="block p-6 relative z-10"
+      >
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.05 }}
+            className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 z-0"
+          />
+        )}
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative">
+              <Github className="w-6 h-6 text-gray-700 dark:text-gray-300 flex-shrink-0" />
+              {isHovered && (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"
+                />
+              )}
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+              {name}
+            </h3>
+          </div>
+
+          {repoData && (
+            <div className="flex items-center gap-4 text-sm">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-1 rounded-full"
+              >
+                <Star className="w-4 h-4" />
+                <span>{repoData.stargazers_count}</span>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-full"
+              >
+                <GitFork className="w-4 h-4" />
+                <span>{repoData.forks_count}</span>
+              </motion.div>
+              {repoData.open_issues_count > 0 && (
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="flex items-center gap-1 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-1 rounded-full"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{repoData.open_issues_count}</span>
+                </motion.div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {repoData?.description && (
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            {repoData.description}
+          </p>
+        )}
+
+        {repoData?.topics && repoData.topics.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {repoData.topics.slice(0, 5).map((topic: string, index: number) => (
+              <motion.span
+                key={topic}
+                whileHover={{ scale: 1.05 }}
+                className={`px-2.5 py-1 text-xs font-medium rounded-full border ${getTopicColor(
+                  index
+                )}`}
+              >
+                {topic}
+              </motion.span>
+            ))}
+          </div>
+        )}
+
+        {repoData && (
+          <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              <span>Updated {formatDate(repoData.updated_at)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              <span>{formatSize(repoData.size)}</span>
+            </div>
+          </div>
+        )}
+      </Link>
+    </motion.div>
+  );
+};
 
 interface SkillDialogProps {
   skill: Skill;
@@ -172,7 +332,7 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           <AnimatePresence>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {skillProjects[skill].length > 0 ? (
                 skillProjects[skill].map((project, index) => (
                   <ProjectCard key={index} {...project} />
