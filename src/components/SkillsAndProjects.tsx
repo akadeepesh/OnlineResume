@@ -148,6 +148,8 @@ interface RepoData {
 const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   const [repoData, setRepoData] = useState<RepoData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchRepoData = async () => {
@@ -156,9 +158,14 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
         if (response.ok) {
           const data = await response.json();
           setRepoData(data);
+        } else {
+          setError(true);
         }
       } catch (error) {
         console.error("Error fetching repo data:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -230,6 +237,13 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
             </h3>
           </div>
 
+          {loading && (
+            <div className="animate-pulse flex items-center space-x-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full w-12"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full w-8"></div>
+            </div>
+          )}
+
           {repoData && (
             <div className="flex items-center gap-4 text-sm">
               <motion.div
@@ -258,6 +272,12 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
             </div>
           )}
         </div>
+
+        {loading && (
+          <p className="mt-3 text-sm text-gray-400 dark:text-gray-600">
+            Loading description...
+          </p>
+        )}
 
         {repoData?.description && (
           <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
@@ -292,6 +312,12 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
               <span>{formatSize(repoData.size)}</span>
             </div>
           </div>
+        )}
+
+        {error && (
+          <p className="mt-3 text-sm text-red-500 dark:text-red-400">
+            Failed to load repository data. Try again later.
+          </p>
         )}
       </Link>
     </motion.div>
