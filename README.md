@@ -43,7 +43,7 @@ To get started with **OnlineResume**, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/OnlineResume.git
+   git clone https://github.com/akadeepesh/OnlineResume.git
    ```
 2. **Install dependencies**:
    ```bash
