@@ -55,14 +55,6 @@ To get started with **OnlineResume**, follow these steps:
    ```
 4. **Open your browser** at [http://localhost:3000](http://localhost:3000).
 
-## Deployment
-
-You can deploy **OnlineResume** to various platforms, such as:
-
-- **Vercel**
-- **Netlify**
-- **GitHub Pages**
-
 Refer to the respective platform’s documentation for detailed deployment instructions.
 
 ## License
