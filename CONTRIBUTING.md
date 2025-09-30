@@ -17,7 +17,7 @@ We appreciate your interest in contributing to **OnlineResume**! Your contributi
 1. Fork the repository to your own GitHub account.
 2. Clone your fork to your local machine:
    ```bash
-   git clone https://github.com/akadeepesh/OnlineResume.git
+   git clone https://github.com/your-username/OnlineResume.git
    ```
 3. Create a new branch for your feature or fix:
    ```bash
