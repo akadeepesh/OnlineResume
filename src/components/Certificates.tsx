@@ -41,7 +41,7 @@ const certifications: Certification[] = [
     name: "Python (Basic)",
     issuer: "HackerRank",
     date: "Feb 2022",
-    link: "https://hackerrank.com/certificates/a63c9ae3221c",
+    link: "https://example.com/certificate",
     icon: <Code className="h-6 w-6" />,
     description:
       "Demonstrated proficiency in Python fundamentals, including data types, control structures, and basic problem-solving skills.",
@@ -50,7 +50,7 @@ const certifications: Certification[] = [
     name: "C/C++",
     issuer: "Aptech Learning",
     date: "Feb 2022",
-    link: "https://drive.google.com/file/d/1JNIzerF8RnVqeDKMz-Lc4X7cUU9l_9YE/view?usp=sharing",
+    link: "https://example.com/certificate",
     icon: <Cpu className="h-6 w-6" />,
     description:
       "Mastered core concepts of C and C++ programming, including memory management, object-oriented programming, and standard libraries.",
@@ -59,7 +59,7 @@ const certifications: Certification[] = [
     name: "Problem Solving (Basic)",
     issuer: "HackerRank",
     date: "Sep 2022",
-    link: "https://www.hackerrank.com/certificates/771a2eef8697",
+    link: "https://example.com/certificate",
     icon: <Brain className="h-6 w-6" />,
     description:
       "Developed strong analytical and algorithmic thinking skills to solve a variety of coding challenges efficiently.",
@@ -68,7 +68,7 @@ const certifications: Certification[] = [
     name: "C++ DSA",
     issuer: "DevTown",
     date: "Oct 2022",
-    link: "https://cert.devtown.in/verify/Z2tARCS",
+    link: "https://example.com/certificate",
     icon: <Code className="h-6 w-6" />,
     description:
       "Advanced understanding of Data Structures and Algorithms implementation in C++, enhancing problem-solving capabilities.",
@@ -77,7 +77,7 @@ const certifications: Certification[] = [
     name: "Hopin Badge",
     issuer: "Hopin",
     date: "Jan 2023",
-    link: "https://www.holopin.me/akadeepesh",
+    link: "https://example.com/certificate",
     icon: <Trophy className="h-6 w-6" />,
     description:
       "Earned the Hopin Badge for outstanding performance in Hacktoberfest 2023, finishing globally 11th. This achievement demonstrates exceptional contribution to open-source projects and collaboration within the developer community.",
@@ -86,7 +86,7 @@ const certifications: Certification[] = [
     name: "SQL (Basic)",
     issuer: "HackerRank",
     date: "Feb 2023",
-    link: "https://www.hackerrank.com/certificates/8e579853d4fc",
+    link: "https://example.com/certificate",
     icon: <Database className="h-6 w-6" />,
     description:
       "Acquired fundamental SQL skills for database querying, including SELECT statements, filtering, and basic joins.",
@@ -95,7 +95,7 @@ const certifications: Certification[] = [
     name: "Microsoft AI Skills Challenge",
     issuer: "Microsoft",
     date: "Jan 2024",
-    link: "https://drive.google.com/file/d/1oUvEqEbVNdgr-oCm4iSio79ia3QwLNwE/view?usp=sharing",
+    link: "https://example.com/certificate",
     icon: <Brain className="h-6 w-6" />,
     description:
       "Explored cutting-edge AI technologies and their practical applications in solving real-world problems.",
@@ -104,7 +104,7 @@ const certifications: Certification[] = [
     name: "Microsoft Learn Student Ambassador",
     issuer: "Microsoft Azure",
     date: "Mar 2024",
-    link: "https://stdntpartners-my.sharepoint.com/personal/ashutosh_rana_studentambassadors_com/Documents/Azure%20Fundamentals%20Challenge%203Mar24-16Mar24/Sheet03%20Folder/sheet03/280.png",
+    link: "https://example.com/certificate",
     icon: <Globe className="h-6 w-6" />,
     description:
       "Recognized for leadership in promoting Microsoft technologies and fostering a learning community on campus.",
@@ -113,7 +113,7 @@ const certifications: Certification[] = [
     name: "Microsoft Learn Student Ambassador",
     issuer: "Microsoft",
     date: "Mar 2024",
-    link: "https://stdntpartners-my.sharepoint.com/personal/ashutosh_rana_studentambassadors_com/Documents/Azure%20Fundamentals%20Challenge%203Mar24-16Mar24/Sheet03%20Folder/sheet03/280.png",
+    link: "https://example.com/certificate",
     icon: <Globe className="h-6 w-6" />,
     description:
       "Demonstrated expertise in Microsoft technologies and commitment to sharing knowledge with peers.",
@@ -122,7 +122,7 @@ const certifications: Certification[] = [
     name: "Postman API Fundamentals Student Expert",
     issuer: "Postman",
     date: "Aug 2024",
-    link: "https://api.badgr.io/public/assertions/9uMjWCCnTDeEwh3-nlfTHA?identity__email=deepesh.kumar.ug21%40nsut.ac.in",
+    link: "https://example.com/certificate",
     icon: <Code className="h-6 w-6" />,
     description:
       "Mastered API testing and development using Postman, showcasing proficiency in API workflows and documentation.",
