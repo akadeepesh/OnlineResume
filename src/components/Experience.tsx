@@ -64,7 +64,7 @@ const Experience: React.FC = () => {
       title: "Software Development Engineer",
       company: "Upside Down Labs",
       date: "3 Jun 2024 - 3 Aug 2024",
-      location: "New Delhi, IN",
+      location: "SA, USA",
       responsibilities: [
         "Developed a full-stack Signal Visualizer web app using Next.js and Django for real-time biopotential signal analysis (EMG, ECG, EEG and EOG).",
         "Implemented WebSocket communication, Serial port connection and automatic port detection via pyserial.",
@@ -81,9 +81,9 @@ const Experience: React.FC = () => {
     },
     {
       title: "Python Developer",
-      company: "Brain Intel Corp",
+      company: "MFTS Corp",
       date: "1 Jun 2023 - 31 Jul 2023",
-      location: "New Delhi, IN",
+      location: "Seattle",
       responsibilities: [
         "Engineered a neural network model for voice-based emotion detection, achieving 85% accuracy using CNN and transfer learning techniques.",
         "Implemented feature extraction and model training using open-source datasets from Kaggle.",

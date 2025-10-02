@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button";
 
 const ProfileCard: React.FC = () => {
   const handleDownloadResume = () => {
-    const resumeUrl = "/Deepesh_Kumar_Resume.pdf";
+    const resumeUrl = "/John_Doe_Resume.pdf";
 
     const link = document.createElement("a");
     link.href = resumeUrl;
-    link.setAttribute("download", "Deepesh_Kumar_Resume.pdf");
+    link.setAttribute("download", "John_Doe_Resume.pdf");
 
     document.body.appendChild(link);
     link.click();
@@ -44,19 +44,19 @@ const ProfileCard: React.FC = () => {
           </h2>
           <p className="text-gray-600 font-medium">Full Stack Web Developer</p>
           <div className="mt-4 flex space-x-3">
-            <Link href="https://github.com/akadeepesh" passHref>
+            <Link href="https://github.com/john" passHref>
               <Button size="sm" variant="outline" className="rounded-full">
                 <GitHubLogoIcon className="h-4 w-4 mr-2" />
                 GitHub
               </Button>
             </Link>
-            <Link href="https://www.linkedin.com/in/akadeepesh/" passHref>
+            <Link href="https://www.linkedin.com/in/John/" passHref>
               <Button size="sm" variant="outline" className="rounded-full">
                 <LinkedInLogoIcon className="h-4 w-4 mr-2" />
                 LinkedIn
               </Button>
             </Link>
-            <Link href="mailto:deepesh.kumar.ug21@nsut.ac.in" passHref>
+            <Link href="mailto:johndoe@gmail.com" passHref>
               <Button size="sm" variant="outline" className="rounded-full">
                 <EnvelopeOpenIcon className="h-4 w-4 mr-2" />
                 Email
@@ -66,8 +66,7 @@ const ProfileCard: React.FC = () => {
         </div>
         <div className="mt-6 text-center">
           <p className="text-gray-600 mb-4">
-            Open Source Software Developer. Final year at Netaji Subhas
-            University of Technology.
+            Open Source Software Developer. Final year at MIT.
           </p>
           <Button
             className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
