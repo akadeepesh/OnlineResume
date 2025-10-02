@@ -11,7 +11,7 @@ export default function AboutMe() {
       <CardContent>
         <p className="text-base text-gray-700 leading-relaxed">
           <span className="font-semibold">Software developer</span> and
-          final-year student at Netaji Subhas University of Technology.
+          final-year student at MIT.
           Proficient in{" "}
           <span className="font-semibold">
             Python, JavaScript, TypeScript, and C/C++
