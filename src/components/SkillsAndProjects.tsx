@@ -48,48 +48,29 @@ type SkillProjects = {
   [key in Skill]: ProjectInfo[];
 };
 
+// ====== Projects mapped to skills ======
 const skillProjects: SkillProjects = {
   Python: [
-    { name: "VirtualAssistant" },
-    { name: "SpeakToGpt" },
-    { name: "BankManagement-Python" },
-    { name: "DjangoSessionAuthentication" },
-    { name: "DataVisualizer" },
-    { name: "Tkinter-Programs" },
-    { name: "FirstDjangoProject" },
-    { name: "PySerialTry" },
-    { name: "PixelToRem" },
-    { name: "DeleteCopiedFiles" },
-    { name: "PythonAutomation" },
-    { name: "GithubViewsCounter" },
+    { name: "Python Project 1" },
+    { name: "Python Project 2" },
+    { name: "Python Project 3" },
   ],
   TypeScript: [
-    { name: "PizzaTheatre" },
-    { name: "Simplicity" },
-    { name: "Chords" },
-    { name: "OnlineResume" },
-    { name: "Virtual-Mentor-EY" },
+    { name: "TypeScript Project 1" },
+    { name: "TypeScript Project 2" },
+    { name: "TypeScript Project 3" },
   ],
   "Next.js": [
-    { name: "Chords" },
-    { name: "Simplicity" },
-    { name: "PizzaTheatre" },
-    { name: "OnlineResume" },
-    { name: "Virtual-Mentor-EY" },
+    { name: "Next.js Project 1" },
+    { name: "Next.js Project 2" },
+    { name: "Next.js Project 3" },
   ],
   Django: [
-    { name: "VirtualAssistant" },
-    { name: "DjangoSessionAuthentication" },
-    { name: "DjangoUserJWT" },
-    { name: "MySky" },
-    { name: "UserAuth" },
-    { name: "FirstDjangoAssignment" },
-    { name: "FirstDjangoProject" },
+    { name: "Django Project 1" },
+    { name: "Django Project 2" },
+    { name: "Django Project 3" },
   ],
-  "React.js": [
-    { name: "ML_Automation_Frontend" },
-    { name: "VirtualAssistant" },
-  ],
+  "React.js": [{ name: "React Project 1" }, { name: "React Project 2" }],
   WordPress: [],
   JavaScript: [
     { name: "quizify" },
@@ -113,6 +94,7 @@ const skillProjects: SkillProjects = {
   ],
 };
 
+// ====== Skill Icons ======
 const getSkillIcon = (skill: Skill) => {
   switch (skill) {
     case "Python":
@@ -135,6 +117,7 @@ const getSkillIcon = (skill: Skill) => {
   }
 };
 
+// ====== Repo Data ======
 interface RepoData {
   stargazers_count: number;
   forks_count: number;
@@ -145,6 +128,7 @@ interface RepoData {
   size: number;
 }
 
+// ====== Project Card ======
 const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   const [repoData, setRepoData] = useState<RepoData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -168,17 +152,15 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
         setLoading(false);
       }
     };
-
     fetchRepoData();
   }, [name]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
   const formatSize = (bytes: number) => {
     const kb = bytes;
@@ -208,7 +190,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
       className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 relative overflow-hidden"
     >
       <Link
-        href={`https://github.com/john/${name}`}
+        href={`https://github.com/placeholder/${name}`}
         target="_blank"
         className="block p-6 relative z-10"
       >
@@ -324,6 +306,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   );
 };
 
+// ====== Skill Dialog ======
 interface SkillDialogProps {
   skill: Skill;
 }
@@ -374,6 +357,7 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
   </Dialog>
 );
 
+// ====== Main Component ======
 const SkillsAndProjects: React.FC = () => {
   return (
     <Card className="mt-8 shadow-lg">
