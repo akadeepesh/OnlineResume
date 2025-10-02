@@ -33,7 +33,7 @@ const ProfileCard: React.FC = () => {
       <div className="relative px-6 pb-6">
         <div className="flex flex-col items-center -mt-20">
           <Image
-            src="/DeepeshBrandBg.png"
+            src="/avatar.png"
             width={140}
             height={140}
             className="rounded-full border-4 border-white shadow-lg"
