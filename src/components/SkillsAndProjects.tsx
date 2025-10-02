@@ -48,6 +48,7 @@ type SkillProjects = {
   [key in Skill]: ProjectInfo[];
 };
 
+// ====== Projects mapped to skills ======
 const skillProjects: SkillProjects = {
   Python: [
     { name: "Python Project 1" },
@@ -72,15 +73,28 @@ const skillProjects: SkillProjects = {
   "React.js": [{ name: "React Project 1" }, { name: "React Project 2" }],
   WordPress: [],
   JavaScript: [
-    { name: "JavaScript Project 1" },
-    { name: "JavaScript Project 2" },
-    { name: "JavaScript Project 3" },
+    { name: "quizify" },
+    { name: "MySky" },
+    { name: "ML_Automation_Frontend" },
+    { name: "DataVisualizationWeb" },
+    { name: "VirtualAssistant" },
+    { name: "UserAuth" },
+    { name: "DjangoAuth" },
+    { name: "VirtualMentor" },
   ],
-  SQL: [{ name: "SQL Project 1" }],
-  "C/C++": [{ name: "C/C++ Project 1" }],
-  "HTML/CSS": [{ name: "HTML/CSS Project 1" }, { name: "HTML/CSS Project 2" }],
+  SQL: [{ name: "BankManagement-Python" }],
+  "C/C++": [{ name: "Cpp-DSA" }],
+  "HTML/CSS": [
+    { name: "John-Portfolio" },
+    { name: "chrome_personalization" },
+    { name: "HappyBirthday" },
+    { name: "KeepItSimple" },
+    { name: "Page_404" },
+    { name: "Django" },
+  ],
 };
 
+// ====== Skill Icons ======
 const getSkillIcon = (skill: Skill) => {
   switch (skill) {
     case "Python":
@@ -103,6 +117,7 @@ const getSkillIcon = (skill: Skill) => {
   }
 };
 
+// ====== Repo Data ======
 interface RepoData {
   stargazers_count: number;
   forks_count: number;
@@ -113,6 +128,7 @@ interface RepoData {
   size: number;
 }
 
+// ====== Project Card ======
 const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   const [repoData, setRepoData] = useState<RepoData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -136,17 +152,15 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
         setLoading(false);
       }
     };
-
     fetchRepoData();
   }, [name]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
   const formatSize = (bytes: number) => {
     const kb = bytes;
@@ -292,6 +306,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   );
 };
 
+// ====== Skill Dialog ======
 interface SkillDialogProps {
   skill: Skill;
 }
@@ -342,6 +357,7 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
   </Dialog>
 );
 
+// ====== Main Component ======
 const SkillsAndProjects: React.FC = () => {
   return (
     <Card className="mt-8 shadow-lg">
