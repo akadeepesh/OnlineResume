@@ -18,7 +18,7 @@ const projects: Project[] = [
   {
     name: "Simplicity",
     description: "Poetry Platform | April 2024 | Personal Project",
-    github: "https://github.com/akadeepesh/Simplicity",
+    github: "https://github.com/jon/Simplicity",
     demo: "https://simplicity-poetries.vercel.app/",
     details: [
       "Built a user-friendly platform for discovering and sharing poetry, featuring content creation, liking, and community features.",
@@ -36,7 +36,7 @@ const projects: Project[] = [
   {
     name: "PizzaTheatre",
     description: "E-commerce Platform | December 2023 | Personal Project",
-    github: "https://github.com/akadeepesh/PizzaTheatre",
+    github: "https://github.com/john/PizzaTheatre",
     demo: "https://pizza-theater.vercel.app/",
     details: [
       "Created a dynamic online pizza ordering system, enabling users to customize orders, manage their cart, and complete purchases.",
@@ -53,7 +53,7 @@ const projects: Project[] = [
   {
     name: "Personal Voice Assistant",
     description: "Python & AI Project | October 2022 | Personal Project",
-    github: "https://github.com/akadeepesh/VirtualAssistant",
+    github: "https://github.com/john/VirtualAssistant",
     details: [
       "Developed a responsive voice assistant using Python, Django, and React.js, enabling users to control various tasks through speech commands.",
       "Integrated GPT4ALL for advanced natural language understanding, allowing the assistant to handle complex requests and provide intelligent responses.",
@@ -63,7 +63,7 @@ const projects: Project[] = [
   {
     name: "Python Automation Projects",
     description: "Automation Tools | July 2023 | Personal Projects",
-    github: "https://github.com/akadeepesh/",
+    github: "https://github.com/john/",
     details: [
       "Developed a suite of Python automation tools, including grammar correction, playlist management, news aggregation, and web search automation.",
     ],

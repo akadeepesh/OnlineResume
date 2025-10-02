@@ -14,16 +14,16 @@ interface EducationEntry {
 
 const educationData: EducationEntry[] = [
   {
-    institution: "Netaji Subhas University of Technology",
+    institution: "MIT",
     degree: "Bachelor of Technology",
     period: "2021 - 2025 (expected)",
-    location: "Delhi, India",
+    location: "Chicago, USA",
   },
   {
-    institution: "Kendriya Vidyalaya No.2 Delhi Cantt",
+    institution: "Cambridge High School",
     degree: "High School",
     period: "2019 - 2021",
-    location: "Delhi, India",
+    location: "Dallas, USA",
   },
 ];
 

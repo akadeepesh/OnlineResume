@@ -61,10 +61,17 @@ interface Experience {
 const Experience: React.FC = () => {
   const experiences: Experience[] = [
     {
+
+      title: "Software Development Engineer",
+      company: "Upside Down Labs",
+      date: "3 Jun 2024 - 3 Aug 2024",
+      location: "SA, USA",
+
       title: "Software Engineer at Tech Solutions Inc.",
       company: "Tech Solutions Inc.",
       date: "Jan 2022 - Present",
       location: "San Francisco, CA",
+
       responsibilities: [
         "Developed and maintained scalable web applications using modern JavaScript frameworks.",
         "Collaborated with cross-functional teams to define, design, and ship new features.",
@@ -91,10 +98,17 @@ const Experience: React.FC = () => {
       ],
     },
     {
+
+      title: "Python Developer",
+      company: "MFTS Corp",
+      date: "1 Jun 2023 - 31 Jul 2023",
+      location: "Seattle",
+
       title: "Data Analyst Intern at Data Insights Co.",
       company: "Data Insights Co.",
       date: "May 2019 - Aug 2019",
       location: "Boston, MA",
+
       responsibilities: [
         "Assisted in collecting, cleaning, and analyzing large datasets to identify key trends.",
         "Prepared reports and visualizations to present findings to senior analysts.",

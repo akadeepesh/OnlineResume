@@ -12,7 +12,7 @@ Currently, we maintain security updates for the following versions of OnlineResu
 
 We take the security of OnlineResume seriously. If you discover a security vulnerability, please report it through one of these channels:
 
-1. **Email**: akadeepesh1710@gmail.com
+1. **Email**: johndoe@gmail.com
 2. **GitHub Issues**: Create an issue in our repository
 
 ### When Reporting

@@ -104,7 +104,7 @@ const skillProjects: SkillProjects = {
   SQL: [{ name: "BankManagement-Python" }],
   "C/C++": [{ name: "Cpp-DSA" }],
   "HTML/CSS": [
-    { name: "Deepesh-Portfolio" },
+    { name: "John-Portfolio" },
     { name: "chrome_personalization" },
     { name: "HappyBirthday" },
     { name: "KeepItSimple" },
@@ -208,7 +208,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
       className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 relative overflow-hidden"
     >
       <Link
-        href={`https://github.com/akadeepesh/${name}`}
+        href={`https://github.com/john/${name}`}
         target="_blank"
         className="block p-6 relative z-10"
       >
