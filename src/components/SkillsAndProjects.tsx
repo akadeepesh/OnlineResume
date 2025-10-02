@@ -50,67 +50,35 @@ type SkillProjects = {
 
 const skillProjects: SkillProjects = {
   Python: [
-    { name: "VirtualAssistant" },
-    { name: "SpeakToGpt" },
-    { name: "BankManagement-Python" },
-    { name: "DjangoSessionAuthentication" },
-    { name: "DataVisualizer" },
-    { name: "Tkinter-Programs" },
-    { name: "FirstDjangoProject" },
-    { name: "PySerialTry" },
-    { name: "PixelToRem" },
-    { name: "DeleteCopiedFiles" },
-    { name: "PythonAutomation" },
-    { name: "GithubViewsCounter" },
+    { name: "Python Project 1" },
+    { name: "Python Project 2" },
+    { name: "Python Project 3" },
   ],
   TypeScript: [
-    { name: "PizzaTheatre" },
-    { name: "Simplicity" },
-    { name: "Chords" },
-    { name: "OnlineResume" },
-    { name: "Virtual-Mentor-EY" },
+    { name: "TypeScript Project 1" },
+    { name: "TypeScript Project 2" },
+    { name: "TypeScript Project 3" },
   ],
   "Next.js": [
-    { name: "Chords" },
-    { name: "Simplicity" },
-    { name: "PizzaTheatre" },
-    { name: "OnlineResume" },
-    { name: "Virtual-Mentor-EY" },
+    { name: "Next.js Project 1" },
+    { name: "Next.js Project 2" },
+    { name: "Next.js Project 3" },
   ],
   Django: [
-    { name: "VirtualAssistant" },
-    { name: "DjangoSessionAuthentication" },
-    { name: "DjangoUserJWT" },
-    { name: "MySky" },
-    { name: "UserAuth" },
-    { name: "FirstDjangoAssignment" },
-    { name: "FirstDjangoProject" },
+    { name: "Django Project 1" },
+    { name: "Django Project 2" },
+    { name: "Django Project 3" },
   ],
-  "React.js": [
-    { name: "ML_Automation_Frontend" },
-    { name: "VirtualAssistant" },
-  ],
+  "React.js": [{ name: "React Project 1" }, { name: "React Project 2" }],
   WordPress: [],
   JavaScript: [
-    { name: "quizify" },
-    { name: "MySky" },
-    { name: "ML_Automation_Frontend" },
-    { name: "DataVisualizationWeb" },
-    { name: "VirtualAssistant" },
-    { name: "UserAuth" },
-    { name: "DjangoAuth" },
-    { name: "VirtualMentor" },
+    { name: "JavaScript Project 1" },
+    { name: "JavaScript Project 2" },
+    { name: "JavaScript Project 3" },
   ],
-  SQL: [{ name: "BankManagement-Python" }],
-  "C/C++": [{ name: "Cpp-DSA" }],
-  "HTML/CSS": [
-    { name: "Deepesh-Portfolio" },
-    { name: "chrome_personalization" },
-    { name: "HappyBirthday" },
-    { name: "KeepItSimple" },
-    { name: "Page_404" },
-    { name: "Django" },
-  ],
+  SQL: [{ name: "SQL Project 1" }],
+  "C/C++": [{ name: "C/C++ Project 1" }],
+  "HTML/CSS": [{ name: "HTML/CSS Project 1" }, { name: "HTML/CSS Project 2" }],
 };
 
 const getSkillIcon = (skill: Skill) => {
@@ -208,7 +176,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
       className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 relative overflow-hidden"
     >
       <Link
-        href={`https://github.com/akadeepesh/${name}`}
+        href={`https://github.com/placeholder/${name}`}
         target="_blank"
         className="block p-6 relative z-10"
       >

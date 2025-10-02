@@ -16,58 +16,53 @@ interface Project {
 
 const projects: Project[] = [
   {
-    name: "Simplicity",
-    description: "Poetry Platform | April 2024 | Personal Project",
-    github: "https://github.com/akadeepesh/Simplicity",
-    demo: "https://simplicity-poetries.vercel.app/",
+    name: "Project A - Portfolio Website",
+    description:
+      "A responsive portfolio website template built with modern web technologies.",
+    github: "https://github.com/placeholder/project-a",
+    demo: "https://project-a-demo.vercel.app/",
     details: [
-      "Built a user-friendly platform for discovering and sharing poetry, featuring content creation, liking, and community features.",
-      "Implemented secure user management, allowing users to control their poems, interact with content, and report issues.",
-      "Developed robust filtering options, empowering users to navigate poems based on author, title, content, date, and popularity.",
+      "Showcases a clean, modern design suitable for various professional portfolios.",
+      "Includes sections for projects, experience, skills, and contact information.",
+      "Optimized for performance and SEO, ensuring a fast and discoverable online presence.",
     ],
-    technologies: [
-      "Next.js",
-      "TypeScript",
-      "Convex dev",
-      "Shadcn Ui",
-      "Aceternity UI",
-    ],
+    technologies: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
   },
   {
-    name: "PizzaTheatre",
-    description: "E-commerce Platform | December 2023 | Personal Project",
-    github: "https://github.com/akadeepesh/PizzaTheatre",
-    demo: "https://pizza-theater.vercel.app/",
+    name: "Project B - Data Dashboard",
+    description:
+      "An interactive data visualization dashboard for business analytics.",
+    github: "https://github.com/placeholder/project-b",
+    demo: "https://project-b-demo.vercel.app/",
     details: [
-      "Created a dynamic online pizza ordering system, enabling users to customize orders, manage their cart, and complete purchases.",
-      "Built a comprehensive admin dashboard for managing pizza offerings, tracking orders, and providing exceptional customer service.",
+      "Features dynamic charts and graphs to represent complex datasets clearly.",
+      "Provides customizable widgets and real-time data updates for informed decision-making.",
+      "Designed with a focus on user experience, offering intuitive navigation and data exploration.",
     ],
-    technologies: [
-      "Next.js",
-      "TypeScript",
-      "Convex dev",
-      "Shadcn Ui",
-      "Aceternity UI",
-    ],
+    technologies: ["Vue.js", "D3.js", "Node.js", "Express", "PostgreSQL"],
   },
   {
-    name: "Personal Voice Assistant",
-    description: "Python & AI Project | October 2022 | Personal Project",
-    github: "https://github.com/akadeepesh/VirtualAssistant",
+    name: "Project C - Mobile E-commerce App",
+    description: "A cross-platform mobile application for online shopping.",
+    github: "https://github.com/placeholder/project-c",
     details: [
-      "Developed a responsive voice assistant using Python, Django, and React.js, enabling users to control various tasks through speech commands.",
-      "Integrated GPT4ALL for advanced natural language understanding, allowing the assistant to handle complex requests and provide intelligent responses.",
+      "Enables users to browse products, add items to cart, and complete secure purchases.",
+      "Incorporates user authentication, product search, and order history features.",
+      "Built with a single codebase for both iOS and Android platforms, ensuring broad accessibility.",
     ],
-    technologies: ["Python", "Django", "React", "GPT4ALL"],
+    technologies: ["React Native", "Firebase", "Redux", "Stripe API"],
   },
   {
-    name: "Python Automation Projects",
-    description: "Automation Tools | July 2023 | Personal Projects",
-    github: "https://github.com/akadeepesh/",
+    name: "Project D - Task Management API",
+    description:
+      "A robust backend API for managing tasks and user productivity.",
+    github: "https://github.com/placeholder/project-d",
     details: [
-      "Developed a suite of Python automation tools, including grammar correction, playlist management, news aggregation, and web search automation.",
+      "Offers endpoints for creating, reading, updating, and deleting tasks.",
+      "Includes user authentication and authorization to secure task data.",
+      "Designed for scalability and easy integration with various frontend applications.",
     ],
-    technologies: ["Python", "BeautifulSoup", "Gingerit", "Spotipy"],
+    technologies: ["Python", "Django REST Framework", "Docker", "MongoDB"],
   },
 ];
 
