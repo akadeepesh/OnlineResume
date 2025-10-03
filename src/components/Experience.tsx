@@ -23,9 +23,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
 }) => (
   <div className="space-y-4">
     <div>
-      <h3 className="text-2xl font-bold tracking-tight text-primary">
-        {title}
-      </h3>
+      <h3 className="text-2xl font-bold tracking-tight text-primary">{title}</h3>
       <p className="text-lg font-semibold text-muted-foreground">{company}</p>
       <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
         <Calendar className="h-4 w-4" />
@@ -34,18 +32,24 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
         <span>{location}</span>
       </div>
     </div>
-    <ul className="list-disc pl-5 space-y-2 text-base">
-      {responsibilities.map((resp, index) => (
-        <li key={index}>{resp}</li>
-      ))}
-    </ul>
-    <div className="flex flex-wrap gap-2 mt-3">
-      {skills.map((skill, index) => (
-        <Badge key={index} variant="secondary">
-          {skill}
-        </Badge>
-      ))}
-    </div>
+
+    {responsibilities.length > 0 && (
+      <ul className="list-disc pl-5 space-y-2 text-base">
+        {responsibilities.map((resp, index) => (
+          <li key={index}>{resp}</li>
+        ))}
+      </ul>
+    )}
+
+    {skills.length > 0 && (
+      <div className="flex flex-wrap gap-2 mt-3">
+        {skills.map((skill, index) => (
+          <Badge key={index} variant="secondary">
+            {skill}
+          </Badge>
+        ))}
+      </div>
+    )}
   </div>
 );
 
@@ -61,17 +65,18 @@ interface Experience {
 const Experience: React.FC = () => {
   const experiences: Experience[] = [
     {
-
       title: "Software Development Engineer",
       company: "Upside Down Labs",
       date: "3 Jun 2024 - 3 Aug 2024",
       location: "SA, USA",
-
-      title: "Software Engineer at Tech Solutions Inc.",
+      responsibilities: [],
+      skills: [],
+    },
+    {
+      title: "Software Engineer",
       company: "Tech Solutions Inc.",
       date: "Jan 2022 - Present",
       location: "San Francisco, CA",
-
       responsibilities: [
         "Developed and maintained scalable web applications using modern JavaScript frameworks.",
         "Collaborated with cross-functional teams to define, design, and ship new features.",
@@ -80,47 +85,24 @@ const Experience: React.FC = () => {
       skills: ["JavaScript", "React", "Node.js", "AWS", "Docker"],
     },
     {
-      title: "Marketing Specialist at Global Innovations",
-      company: "Global Innovations",
-      date: "Jun 2020 - Dec 2021",
-      location: "New York, NY",
-      responsibilities: [
-        "Managed digital marketing campaigns across various platforms, increasing lead generation by 20%.",
-        "Analyzed market trends and customer behavior to optimize marketing strategies.",
-        "Created engaging content for social media, email newsletters, and company blogs.",
-      ],
-      skills: [
-        "Digital Marketing",
-        "SEO",
-        "Content Creation",
-        "Google Analytics",
-        "Social Media",
-      ],
-    },
-    {
-
       title: "Python Developer",
       company: "MFTS Corp",
       date: "1 Jun 2023 - 31 Jul 2023",
       location: "Seattle",
-
-      title: "Data Analyst Intern at Data Insights Co.",
+      responsibilities: [],
+      skills: [],
+    },
+    {
+      title: "Data Analyst Intern",
       company: "Data Insights Co.",
       date: "May 2019 - Aug 2019",
       location: "Boston, MA",
-
       responsibilities: [
         "Assisted in collecting, cleaning, and analyzing large datasets to identify key trends.",
         "Prepared reports and visualizations to present findings to senior analysts.",
         "Gained hands-on experience with SQL and various data visualization tools.",
       ],
-      skills: [
-        "SQL",
-        "Excel",
-        "Data Visualization",
-        "Python (Pandas)",
-        "Statistical Analysis",
-      ],
+      skills: ["SQL", "Excel", "Data Visualization", "Python (Pandas)", "Statistical Analysis"],
     },
   ];
 
