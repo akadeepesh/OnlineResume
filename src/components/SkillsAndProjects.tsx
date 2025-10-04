@@ -27,6 +27,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import WordPressSkills from "./WordPressSkills";
+import { EnvData, getEnvData } from "../../env";
 
 type Skill =
   | "Python"
@@ -128,32 +129,50 @@ interface RepoData {
   size: number;
 }
 
+// this object contains all the environment variables
+const envData: EnvData = getEnvData();
+
 // ====== Project Card ======
 const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   const [repoData, setRepoData] = useState<RepoData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [githubFetchEnabled, setGithubFetchEnabled] = useState(true);
 
   useEffect(() => {
+
+    const enableGithubFetch = envData.NEXT_PUBLIC_GITHUB_FETCH_ENABLED === "true";
+    const githubOwner = envData.NEXT_PUBLIC_GH_OWNER;
+
+    if (!enableGithubFetch || !githubOwner) {
+      setGithubFetchEnabled(false);
+      setLoading(false);
+      return;
+    }
+
     const fetchRepoData = async () => {
       try {
         const response = await fetch(`/api/github/${name}`);
         if (response.ok) {
           const data = await response.json();
           setRepoData(data);
-        } else {
+          
+        } else{
           setError(true);
         }
+        
       } catch (error) {
         console.error("Error fetching repo data:", error);
         setError(true);
+        
       } finally {
         setLoading(false);
       }
     };
     fetchRepoData();
   }, [name]);
+
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", {
@@ -190,7 +209,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
       className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 relative overflow-hidden"
     >
       <Link
-        href={`https://github.com/placeholder/${name}`}
+        href={`https://github.com/${process.env.NEXT_PUBLIC_GH_OWNER || 'placeholder'}/${name}`}
         target="_blank"
         className="block p-6 relative z-10"
       >
@@ -298,7 +317,17 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
 
         {error && (
           <p className="mt-3 text-sm text-red-500 dark:text-red-400">
-            Failed to load repository data. Try again later.
+            Failed to load repository data.
+          </p>
+        )}
+
+        {/* 
+           this is shown to the user only when github fetch is disabled if the env variables NEXT_PUBLIC_ENABLE_GITHUB_FETCH
+            and NEXT_PUBLIC_GH_OWNER are not set in the .env file
+        */}
+        {!githubFetchEnabled && (
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            GitHub stats disabled. Set NEXT_PUBLIC_GH_OWNER and NEXT_PUBLIC_ENABLE_GITHUB_FETCH=true to enable.
           </p>
         )}
       </Link>
