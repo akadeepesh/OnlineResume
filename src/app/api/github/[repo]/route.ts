@@ -32,6 +32,13 @@ export async function GET(
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: "Repository not found. Please make sure the repository name is valid." },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
         { error: "Failed to fetch repository data from GitHub API" },
         { status: response.status }

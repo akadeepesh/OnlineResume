@@ -137,7 +137,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
   const [repoData, setRepoData] = useState<RepoData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [githubFetchEnabled, setGithubFetchEnabled] = useState(true);
 
   useEffect(() => {
@@ -157,14 +157,16 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
         if (response.ok) {
           const data = await response.json();
           setRepoData(data);
+          setError(null);
           
         } else{
-          setError(true);
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to load repository data.");
         }
         
       } catch (error) {
         console.error("Error fetching repo data:", error);
-        setError(true);
+        setError("Failed to load repository data.");
         
       } finally {
         setLoading(false);
@@ -317,7 +319,7 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
 
         {error && (
           <p className="mt-3 text-sm text-red-500 dark:text-red-400">
-            Failed to load repository data.
+            {error}
           </p>
         )}
 
