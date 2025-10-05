@@ -103,15 +103,3 @@ Thank you for considering contributing to **OnlineResume**! Every contribution, 
   </a>
 </center>
 
-### Project Team
-
-**Owner:** [@akadeepesh](https://github.com/akadeepesh)
-
-**Contributors:**
-- [@falconcode16](https://github.com/falconcode16)
-- [@992manav](https://github.com/992manav)
-- [@mohammednumaan](https://github.com/mohammednumaan)
-- [@sammyifelse](https://github.com/sammyifelse)
-- [@Kinshu-Learner](https://github.com/Kinshu-Learner)
-- [@priyankeshh](https://github.com/priyankeshh)
-- [@aayushspirit](https://github.com/aayushspirit)
