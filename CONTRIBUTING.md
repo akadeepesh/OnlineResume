@@ -105,13 +105,46 @@ Thank you for considering contributing to **OnlineResume**! Every contribution, 
 
 ### Project Team
 
-**Owner:** [@akadeepesh](https://github.com/akadeepesh)
+**Owner:**
+
+<a href="https://github.com/akadeepesh">
+  <img src="https://github.com/akadeepesh.png" width="50" height="50" alt="akadeepesh"/>
+</a>
+<a href="https://github.com/akadeepesh">akadeepesh</a>
 
 **Contributors:**
-- [@falconcode16](https://github.com/falconcode16)
-- [@992manav](https://github.com/992manav)
-- [@mohammednumaan](https://github.com/mohammednumaan)
-- [@sammyifelse](https://github.com/sammyifelse)
-- [@Kinshu-Learner](https://github.com/Kinshu-Learner)
-- [@priyankeshh](https://github.com/priyankeshh)
-- [@aayushspirit](https://github.com/aayushspirit)
+
+<a href="https://github.com/falconcode16">
+  <img src="https://github.com/falconcode16.png" width="50" height="50" alt="falconcode16"/>
+</a>
+<a href="https://github.com/falconcode16">falconcode16</a>
+
+<a href="https://github.com/992manav">
+  <img src="https://github.com/992manav.png" width="50" height="50" alt="992manav"/>
+</a>
+<a href="https://github.com/992manav">992manav</a>
+
+<a href="https://github.com/mohammednumaan">
+  <img src="https://github.com/mohammednumaan.png" width="50" height="50" alt="mohammednumaan"/>
+</a>
+<a href="https://github.com/mohammednumaan">mohammednumaan</a>
+
+<a href="https://github.com/sammyifelse">
+  <img src="https://github.com/sammyifelse.png" width="50" height="50" alt="sammyifelse"/>
+</a>
+<a href="https://github.com/sammyifelse">sammyifelse</a>
+
+<a href="https://github.com/Kinshu-Learner">
+  <img src="https://github.com/Kinshu-Learner.png" width="50" height="50" alt="Kinshu-Learner"/>
+</a>
+<a href="https://github.com/Kinshu-Learner">Kinshu-Learner</a>
+
+<a href="https://github.com/priyankeshh">
+  <img src="https://github.com/priyankeshh.png" width="50" height="50" alt="priyankeshh"/>
+</a>
+<a href="https://github.com/priyankeshh">priyankeshh</a>
+
+<a href="https://github.com/aayushspirit">
+  <img src="https://github.com/aayushspirit.png" width="50" height="50" alt="aayushspirit"/>
+</a>
+<a href="https://github.com/aayushspirit">aayushspirit</a>
