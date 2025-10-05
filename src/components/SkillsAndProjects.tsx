@@ -25,6 +25,7 @@ import {
   ArrowUpRight,
   Activity,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import WordPressSkills from "./WordPressSkills";
 import { EnvData, getEnvData } from "../../env";
@@ -235,9 +236,9 @@ const ProjectCard: React.FC<ProjectInfo> = ({ name }) => {
                 />
               )}
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
               {name}
-            </h3>
+            </h4>
           </div>
 
           {loading && (
@@ -363,6 +364,20 @@ const SkillDialog: React.FC<SkillDialogProps> = ({ skill }) => (
             {skill} Projects
           </DialogTitle>
         </DialogHeader>
+        
+        {/* Helper Message Banner */}
+        <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
+          <div className="flex items-start gap-2">
+            <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="font-medium">Tip: These cards can show live GitHub stats.</p>
+              <p className="mt-1 text-blue-600 dark:text-blue-400">
+                Set <code className="px-1 py-0.5 bg-blue-100 dark:bg-blue-800/50 rounded text-xs font-mono">NEXT_PUBLIC_GH_OWNER</code> to your GitHub username to fetch stars, forks, and topics for each project.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <ScrollArea className="h-[60vh] pr-4">
           <AnimatePresence>
             <div className="grid grid-cols-1 gap-4">
