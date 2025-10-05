@@ -29,7 +29,7 @@ We appreciate your interest in contributing to **OnlineResume**! Your contributi
    ```bash
    git push origin feature/your-feature-name
    ```
-7. Open a pull request against the main repository’s `main` branch, describing the changes you’ve made.
+7. Open a pull request against the main repository's `main` branch, describing the changes you've made.
 
 ## Development Workflow
 
@@ -42,7 +42,7 @@ We appreciate your interest in contributing to **OnlineResume**! Your contributi
    npm run dev
    ```
 3. **Make Your Changes**: Work on your feature or bug fix. Test your changes thoroughly.
-4. **Run Linting & Tests**: Ensure that your code meets the project’s coding standards:
+4. **Run Linting & Tests**: Ensure that your code meets the project's coding standards:
    ```bash
    npm run lint
    ```
@@ -91,6 +91,27 @@ By contributing to this project, you agree that your contributions will be licen
 
 ---
 
-### Thank You!
+## Thank You!
 
 Thank you for considering contributing to **OnlineResume**! Every contribution, no matter how small, helps make this project better for everyone.
+
+## Contributors
+
+<center>
+  <a href="https://github.com/akadeepesh/OnlineResume/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" />
+  </a>
+</center>
+
+### Project Team
+
+**Owner:** [@akadeepesh](https://github.com/akadeepesh)
+
+**Contributors:**
+- [@falconcode16](https://github.com/falconcode16)
+- [@992manav](https://github.com/992manav)
+- [@mohammednumaan](https://github.com/mohammednumaan)
+- [@sammyifelse](https://github.com/sammyifelse)
+- [@Kinshu-Learner](https://github.com/Kinshu-Learner)
+- [@priyankeshh](https://github.com/priyankeshh)
+- [@aayushspirit](https://github.com/aayushspirit)
