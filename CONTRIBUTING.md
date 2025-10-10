@@ -94,12 +94,3 @@ By contributing to this project, you agree that your contributions will be licen
 ## Thank You!
 
 Thank you for considering contributing to **OnlineResume**! Every contribution, no matter how small, helps make this project better for everyone.
-
-## Contributors
-
-<center>
-  <a href="https://github.com/akadeepesh/OnlineResume/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" />
-  </a>
-</center>
-

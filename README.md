@@ -60,3 +60,11 @@ Refer to the respective platform’s documentation for detailed deployment instr
 ## License
 
 This project is licensed under the **[MIT License](LICENSE)**. You are free to use, modify, and distribute this project as you see fit.
+
+## Contributors
+
+<center>
+  <a href="https://github.com/akadeepesh/OnlineResume/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" />
+  </a>
+</center>
