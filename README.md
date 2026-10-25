@@ -13,6 +13,24 @@
 - **Customizable**: Tailor the design, color scheme, and content to match your personal brand.
 - **Interactive Skills Showcase**: Explore projects by clicking on specific skills to view all related work.
 
+## Templates
+
+All content lives in one file — [`src/data/resume.ts`](src/data/resume.ts) — and every template renders from it, so you edit your details once and switch designs freely.
+
+| Template    | Style                                                                 |
+| ----------- | --------------------------------------------------------------------- |
+| `classic`   | Light sidebar profile with clean content cards and a timeline         |
+| `editorial` | Print-inspired serif CV on paper, numbered sections, inline expansion |
+| `spotlight` | Dark split-screen, sticky nav that tracks the section, cursor glow    |
+| `terminal`  | Interactive shell — visitors can type `help`, `skills python`, …      |
+| `bento`     | Modern tile grid with stats, accordion experience and skill drawer    |
+
+- Preview any template at `/templates/<name>` (e.g. `/templates/bento`).
+- Choose the one served at `/` with `NEXT_PUBLIC_TEMPLATE=bento` (defaults to `classic`).
+- A floating template picker is shown by default; hide it with `NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER=false`.
+
+To add your own, create `src/templates/<name>/` with a component that takes `{ data: Resume }`, then register it in [`src/templates/meta.ts`](src/templates/meta.ts) and [`src/templates/index.ts`](src/templates/index.ts).
+
 ## Tech Stack
 
 - **Next.js 14**: A powerful React framework for production-grade websites.

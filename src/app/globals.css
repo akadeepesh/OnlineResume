@@ -61,3 +61,10 @@
 html {
   scroll-behavior: smooth;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-marquee {
+    animation: none !important;
+  }
+}
