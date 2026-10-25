@@ -4,9 +4,9 @@ import { EnvData, getEnvData } from "../../../../../env";
 const envData: EnvData = getEnvData();
 export async function GET(
   request: Request,
-  { params }: { params: { repo: string } }
+  { params }: { params: Promise<{ repo: string }> }
 ) {
-  const repo = params.repo;
+  const { repo } = await params;
   const enableGithubFetch = envData.NEXT_PUBLIC_GITHUB_FETCH_ENABLED === "true";
   const githubOwner = envData.NEXT_PUBLIC_GH_OWNER;
 
