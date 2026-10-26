@@ -86,3 +86,9 @@ This project is licensed under the **[MIT License](LICENSE)**. You are free to u
     <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" />
   </a>
 </center>
+
+---
+
+<p align="center"><sub>
+  Built by <a href="https://akadeepesh.com?ref=github">Deepesh Kumar</a> · more work at <a href="https://akadeepesh.com?ref=github">akadeepesh.com</a>
+</sub></p>
