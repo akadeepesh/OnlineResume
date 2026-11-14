@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { plainText } from "@/components/shared/RichText";
 import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume } from "@/data/resume";
@@ -94,6 +94,22 @@ const Json: React.FC<{ value: unknown; indent?: number }> = ({ value, indent = 0
 
 type Entry = { id: number; cmd: string; output: React.ReactNode };
 
+const Prompt = ({ handle, host }: { handle: string; host: string }) => (
+  <span className="flex-shrink-0">
+    <span className={c.green}>
+      {handle}@{host}
+    </span>
+    <span className={c.muted}>:</span>
+    <span className={c.blue}>~</span>
+    <span className={c.muted}>$ </span>
+  </span>
+);
+
+// Login date is client-only (avoids a server/client hydration mismatch).
+const noopSubscribe = () => () => {};
+const getLoginDate = () => new Date().toDateString();
+const getServerLoginDate = () => null;
+
 export default function TerminalTemplate({ data }: { data: Resume }) {
   const { profile, about, experience, projects, skills, tools, education, certifications } =
     data;
@@ -106,8 +122,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
-  const [loginDate, setLoginDate] = useState<string | null>(null);
-  useEffect(() => setLoginDate(new Date().toDateString()), []);
+  const loginDate = useSyncExternalStore(noopSubscribe, getLoginDate, getServerLoginDate);
 
   // ---- command implementations --------------------------------------------
   const commands = useMemo(() => {
@@ -441,17 +456,6 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
     }
   };
 
-  const Prompt = () => (
-    <span className="flex-shrink-0">
-      <span className={c.green}>
-        {handle}@{host}
-      </span>
-      <span className={c.muted}>:</span>
-      <span className={c.blue}>~</span>
-      <span className={c.muted}>$ </span>
-    </span>
-  );
-
   const quick = ["help", "about", "experience", "projects", "skills", "contact", "resume", "clear"];
 
   return (
@@ -506,7 +510,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
           {history.map((entry) => (
             <div key={entry.id}>
               <p className="flex flex-wrap">
-                <Prompt />
+                <Prompt handle={handle} host={host} />
                 <span className={c.fg}>{entry.cmd}</span>
               </p>
               {entry.output && <div className="mt-1.5">{entry.output}</div>}
@@ -514,7 +518,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
           ))}
 
           <div className="flex items-center" ref={endRef}>
-            <Prompt />
+            <Prompt handle={handle} host={host} />
             <div className="relative flex-1">
               <input
                 ref={inputRef}
