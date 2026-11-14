@@ -122,7 +122,7 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
   const show = presentSections(data);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const year = new Date().getFullYear();
-  const socials = socialLinks(profile.socials);
+  const socials = socialLinks(profile.socials, ["email", "github", "linkedin"]);
   const headline = joinParts([profile.role, profile.tagline], " — ");
   const anySkillWork = skills.some((s) => workCount(s) > 0);
 

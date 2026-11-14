@@ -120,7 +120,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
   const { profile, about, experience, projects, skills, tools, education, certifications } =
     data;
   const show = presentSections(data);
-  const socials = socialLinks(profile.socials);
+  const socials = socialLinks(profile.socials, ["email", "github", "linkedin"]);
   // Non-Latin names slug to "", so fall back to a neutral handle.
   const handle = slug(firstName(profile.name)) || "guest";
   const host = "resume";
@@ -295,20 +295,29 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
       return (
         <div>
           <div className="flex flex-wrap gap-x-5 gap-y-1">
-            {skills.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => run(`skills ${s.name}`)}
-                className={`${c.green} hover:bg-[#7ee787]/10`}
-              >
-                {s.name}
-                <span className={c.muted}>({s.repos.length + (s.sites?.length ?? 0)})</span>
-              </button>
-            ))}
+            {skills.map((s, i) => {
+              const count = s.repos.length + (s.sites?.length ?? 0);
+              return count > 0 ? (
+                <button
+                  key={i}
+                  onClick={() => run(`skills ${s.name}`)}
+                  className={`${c.green} hover:bg-[#7ee787]/10`}
+                >
+                  {s.name}
+                  <span className={c.muted}>({count})</span>
+                </button>
+              ) : (
+                <span key={i} className={c.green}>
+                  {s.name}
+                </span>
+              );
+            })}
           </div>
-          <p className={`mt-2 ${c.muted}`}>
-            Click a skill or run <span className={c.fg}>skills &lt;name&gt;</span> to list its repos.
-          </p>
+          {skills.some((s) => s.repos.length + (s.sites?.length ?? 0) > 0) && (
+            <p className={`mt-2 ${c.muted}`}>
+              Click a skill or run <span className={c.fg}>skills &lt;name&gt;</span> to list its repos.
+            </p>
+          )}
         </div>
       );
     };
@@ -365,7 +374,8 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
           {socials.map(({ kind, href, display }) => (
             <React.Fragment key={kind}>
               <span className={c.orange}>{kind}</span>
-              <Link href={href}>{display}</Link>
+              {/* Full URLs suit the shell look; email shows the bare address. */}
+              <Link href={href}>{kind === "email" ? display : href}</Link>
             </React.Fragment>
           ))}
         </div>

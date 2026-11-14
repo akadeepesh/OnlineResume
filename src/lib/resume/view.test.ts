@@ -47,6 +47,12 @@ describe("socialLinks", () => {
       { kind: "email", label: "Email", href: "mailto:a@example.com", display: "a@example.com" },
     ]);
     expect(socialLinks({})).toEqual([]);
+    expect(
+      socialLinks({ github: "https://github.com/example", email: "a@example.com" }, [
+        "email",
+        "github",
+      ]).map((l) => l.kind)
+    ).toEqual(["email", "github"]);
     expect(socialLinks(undefined)).toEqual([]);
   });
 });

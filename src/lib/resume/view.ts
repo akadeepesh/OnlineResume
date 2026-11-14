@@ -52,11 +52,16 @@ const SOCIAL_LABELS: Record<SocialKind, string> = {
   email: "Email",
 };
 
-/** The profile's social links that are actually filled in, in a stable order. */
-export function socialLinks(socials: Socials | undefined): SocialLink[] {
+const DEFAULT_SOCIAL_ORDER: SocialKind[] = ["github", "linkedin", "email"];
+
+/** The profile's social links that are actually filled in, in the given order. */
+export function socialLinks(
+  socials: Socials | undefined,
+  order: SocialKind[] = DEFAULT_SOCIAL_ORDER
+): SocialLink[] {
   if (!socials) return [];
   const links: SocialLink[] = [];
-  for (const kind of ["github", "linkedin", "email"] as const) {
+  for (const kind of order) {
     const value = socials[kind];
     if (!has(value)) continue;
     const trimmed = value.trim();
