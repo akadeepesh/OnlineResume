@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ResumePage from "@/components/ResumePage";
-import { profile } from "@/data/resume";
+import { sampleResume } from "@/lib/resume/sample";
+
+const { profile } = sampleResume;
 import { isTemplateSlug, templateMeta } from "@/templates/meta";
 
 type Props = { params: Promise<{ slug: string }> };

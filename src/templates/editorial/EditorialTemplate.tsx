@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RichText } from "@/components/shared/RichText";
 import { repoUrl, useRepoData } from "@/lib/github";
-import type { Resume, Skill } from "@/data/resume";
+import type { Resume, Skill } from "@/lib/resume/schema";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 

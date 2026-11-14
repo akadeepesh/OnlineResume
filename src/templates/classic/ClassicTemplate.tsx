@@ -41,7 +41,7 @@ import {
   repoUrl,
   useRepoData,
 } from "@/lib/github";
-import type { Resume, Skill, Site } from "@/data/resume";
+import type { Resume, Skill, Site } from "@/lib/resume/schema";
 
 // ---------------------------------------------------------------------------
 // Building blocks

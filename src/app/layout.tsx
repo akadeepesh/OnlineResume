@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
-import { profile } from "@/data/resume";
+import { sampleResume } from "@/lib/resume/sample";
+
+const { profile } = sampleResume;
 
 import { cn } from "@/lib/utils";
 
