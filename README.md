@@ -15,7 +15,7 @@
 
 ## Templates
 
-All content lives in one file — [`src/data/resume.ts`](src/data/resume.ts) — and every template renders from it, so you edit your details once and switch designs freely.
+Resume data follows one validated schema — [`src/lib/resume/schema.ts`](src/lib/resume/schema.ts) — and every template renders from it, so the same content works in any design. Template previews use the fictional sample in [`src/lib/resume/sample.ts`](src/lib/resume/sample.ts).
 
 | Template    | Style                                                                 |
 | ----------- | --------------------------------------------------------------------- |

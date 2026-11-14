@@ -9,7 +9,7 @@ import {
   Trophy,
   type LucideProps,
 } from "lucide-react";
-import type { IconKey } from "@/data/resume";
+import type { IconKey } from "@/lib/resume/schema";
 
 const icons = {
   code: Code,

@@ -15,7 +15,7 @@ import {
 import { RichText } from "@/components/shared/RichText";
 import { SkillIcon } from "@/components/shared/SkillIcon";
 import { formatRepoDate, repoUrl, useRepoData } from "@/lib/github";
-import type { Resume, Skill } from "@/data/resume";
+import type { Resume, Skill } from "@/lib/resume/schema";
 
 const NAV = [
   { id: "about", label: "About" },

@@ -20,7 +20,7 @@ import {
 import { RichText } from "@/components/shared/RichText";
 import { SkillIcon } from "@/components/shared/SkillIcon";
 import { repoUrl, useRepoData } from "@/lib/github";
-import type { Resume, Skill } from "@/data/resume";
+import type { Resume, Skill } from "@/lib/resume/schema";
 
 const Tile: React.FC<{
   children: React.ReactNode;

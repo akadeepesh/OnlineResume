@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { Resume } from "@/data/resume";
+import type { Resume } from "@/lib/resume/schema";
 import type { TemplateSlug } from "./meta";
 import ClassicTemplate from "./classic/ClassicTemplate";
 import EditorialTemplate from "./editorial/EditorialTemplate";

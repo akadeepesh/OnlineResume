@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { plainText } from "@/components/shared/RichText";
 import { repoUrl, useRepoData } from "@/lib/github";
-import type { Resume } from "@/data/resume";
+import type { Resume } from "@/lib/resume/schema";
 
 // GitHub-dark inspired palette
 const c = {
