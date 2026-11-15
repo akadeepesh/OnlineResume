@@ -71,8 +71,8 @@ export default function StartFromMenu() {
           <DialogHeader>
             <DialogTitle>{pending && choices[pending].confirm}</DialogTitle>
             <DialogDescription>
-              Everything you&apos;ve written in this browser will be replaced. This can&apos;t be
-              undone yet.
+              Everything you&apos;ve written in this browser will be replaced. Changed your mind
+              afterwards? Undo brings it back until you close this tab.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">

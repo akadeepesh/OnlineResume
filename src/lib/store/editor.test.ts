@@ -316,3 +316,166 @@ describe("persistence", () => {
     expect(store.getState().resume.profile.name).toBe("Server");
   });
 });
+
+describe("section layout", () => {
+  it("hides and shows a section", () => {
+    const { store } = newStore();
+    store.getState().setSectionHidden("tools", true);
+    store.getState().setSectionHidden("tools", true);
+    expect(store.getState().resume.hiddenSections).toEqual(["tools"]);
+    store.getState().setSectionHidden("tools", false);
+    expect(store.getState().resume.hiddenSections).toEqual([]);
+  });
+
+  it("moves a section and clamps the target", () => {
+    const { store } = newStore();
+    store.getState().moveSection(6, 0);
+    expect(store.getState().resume.sectionOrder[0]).toBe("certifications");
+    store.getState().moveSection(0, 99);
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+  });
+});
+
+describe("undo and redo", () => {
+  /** A store with a clock the test controls. */
+  const timed = () => {
+    let time = 1_000_000;
+    const { storage } = memoryStorage();
+    const store = createEditorStore({ storage, skipHydration: true, now: () => time });
+    return { store, tick: (ms: number) => (time += ms) };
+  };
+
+  it("undoes and redoes an edit", () => {
+    const { store } = timed();
+    store.getState().updateProfile({ role: "Designer" });
+    expect(store.getState().undo()).toBe("profile");
+    expect(store.getState().resume.profile.role).toBe(sampleResume.profile.role);
+    expect(store.getState().redo()).toBe("profile");
+    expect(store.getState().resume.profile.role).toBe("Designer");
+  });
+
+  it("does nothing when there is nothing to undo or redo", () => {
+    const { store } = timed();
+    const before = store.getState().resume;
+    expect(store.getState().undo()).toBeUndefined();
+    expect(store.getState().redo()).toBeUndefined();
+    expect(store.getState().resume).toBe(before);
+  });
+
+  it("groups quick typing in one field into one step", () => {
+    const { store, tick } = timed();
+    for (const name of ["S", "Sa", "Sam"]) {
+      store.getState().updateProfile({ name });
+      tick(300);
+    }
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Alex Morgan");
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("starts a new step after a pause, in another field, or after 5 seconds of typing", () => {
+    const { store, tick } = timed();
+    store.getState().updateProfile({ name: "Sam" });
+    tick(1500); // pause
+    store.getState().updateProfile({ name: "Sam Lee" });
+    store.getState().updateProfile({ role: "Chef" }); // another field
+    expect(store.getState().past).toHaveLength(3);
+
+    const long = timed();
+    for (let i = 1; i <= 30; i++) {
+      long.store.getState().setAbout("x".repeat(i));
+      long.tick(400); // never pausing, 12 seconds in all
+    }
+    expect(long.store.getState().past.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps every structural change as its own step, however quick", () => {
+    const { store } = timed();
+    store.getState().addItem("skills");
+    store.getState().addItem("skills");
+    store.getState().moveItem("skills", 0, 1);
+    expect(store.getState().past).toHaveLength(3);
+  });
+
+  it("ignores changes that change nothing", () => {
+    const { store } = timed();
+    store.getState().removeItem("skills", 99);
+    store.getState().moveItem("skills", 0, 0);
+    store.getState().setSectionHidden("about", false);
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("clears redo after a new edit", () => {
+    const { store } = timed();
+    store.getState().setAbout("One");
+    store.getState().undo();
+    store.getState().addItem("tools");
+    expect(store.getState().future).toHaveLength(0);
+    expect(store.getState().redo()).toBeUndefined();
+  });
+
+  it("can undo start over, start blank and loading a resume", () => {
+    const { store } = timed();
+    store.getState().updateProfile({ name: "Mine" });
+    store.getState().startBlank();
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+    store.getState().resetToExample();
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+    store.getState().loadResume(blankResume());
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+  });
+
+  it("undoes section moves and visibility without jumping to a section", () => {
+    const { store } = timed();
+    store.getState().moveSection(0, 3);
+    store.getState().setSectionHidden("projects", true);
+    expect(store.getState().undo()).toBeNull();
+    expect(store.getState().resume.hiddenSections).toEqual([]);
+    expect(store.getState().undo()).toBeNull();
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+  });
+
+  it("reports which section a list change was in", () => {
+    const { store } = timed();
+    store.getState().updateItem("education", 0, { degree: "BA" });
+    store.getState().removeItem("projects", 0);
+    expect(store.getState().undo()).toBe("projects");
+    expect(store.getState().undo()).toBe("education");
+  });
+
+  it("doesn't track the template: it's a view choice, not content", () => {
+    const { store } = timed();
+    store.getState().setTemplate("bento");
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("keeps at most 100 steps", () => {
+    const { store } = timed();
+    for (let i = 0; i < 120; i++) store.getState().addItem("tools");
+    expect(store.getState().past).toHaveLength(100);
+  });
+
+  it("bumps the revision only when the whole resume is swapped (undo, redo, load)", () => {
+    const { store } = timed();
+    const start = store.getState().revision;
+    store.getState().setAbout("Typed");
+    store.getState().addItem("skills");
+    expect(store.getState().revision).toBe(start);
+    store.getState().undo();
+    store.getState().redo();
+    store.getState().resetToExample();
+    expect(store.getState().revision).toBe(start + 3);
+  });
+
+  it("is not saved, and starts empty after loading a draft", async () => {
+    const { store, data } = newStore(saved({ resume: blankResume() }));
+    store.getState().setAbout("Before load");
+    await store.persist.rehydrate();
+    expect(store.getState().past).toHaveLength(0);
+    store.getState().setAbout("After load");
+    expect(Object.keys(JSON.parse(data.get(EDITOR_STORAGE_KEY)!).state)).toEqual(["resume", "template"]);
+  });
+});

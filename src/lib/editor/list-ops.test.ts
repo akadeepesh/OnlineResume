@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { insertAt, mergeBullets, moveIndex, parseTags, reconcileIds, removeAt, splitBullet, splitPastedBullets } from "./list-ops";
+import {
+  insertAt,
+  mergeBullets,
+  moveIndex,
+  parseTags,
+  reconcileByIdentity,
+  reconcileIds,
+  removeAt,
+  splitBullet,
+  splitPastedBullets,
+} from "./list-ops";
 import { createEditorStore } from "@/lib/store/editor";
 
 describe("moveIndex", () => {
@@ -46,6 +56,39 @@ describe("reconcileIds", () => {
   it("trims or extends to the new length", () => {
     expect(reconcileIds(["x", "y", "z"], 1, make)).toEqual(["x"]);
     expect(reconcileIds(["x"], 3, make)).toEqual(["x", "new1", "new2"]);
+  });
+});
+
+describe("reconcileByIdentity", () => {
+  // After undo/redo the list is an older array. Items the user didn't touch
+  // are the very same objects, so each keeps its id wherever it moved to.
+  let n = 0;
+  const make = () => `new${++n}`;
+  const a = { name: "a" };
+  const b = { name: "b" };
+  const c = { name: "c" };
+
+  it("follows items that moved (undoing a drag)", () => {
+    expect(reconcileByIdentity([a, b, c], ["1", "2", "3"], [c, a, b], make)).toEqual(["3", "1", "2"]);
+  });
+
+  it("gives a restored item a new id and leaves the others alone (undoing a delete)", () => {
+    expect(reconcileByIdentity([a, c], ["1", "3"], [a, b, c], make)).toEqual(["1", "new1", "3"]);
+  });
+
+  it("keeps the id of an item whose text was reverted in place (undoing typing)", () => {
+    const edited = { name: "b, edited" };
+    expect(reconcileByIdentity([a, edited], ["1", "2"], [a, b], make)).toEqual(["1", "2"]);
+  });
+
+  it("drops ids of items that are gone (undoing an add)", () => {
+    expect(reconcileByIdentity([a, b, c], ["1", "2", "3"], [a, c], make)).toEqual(["1", "3"]);
+  });
+
+  it("handles equal strings without giving two items the same id", () => {
+    const ids = reconcileByIdentity(["x", "x", "y"], ["1", "2", "3"], ["y", "x", "x", "x"], make);
+    expect(new Set(ids).size).toBe(4);
+    expect(ids[0]).toBe("3");
   });
 });
 

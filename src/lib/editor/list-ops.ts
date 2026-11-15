@@ -37,6 +37,36 @@ export function reconcileIds(ids: readonly string[], length: number, makeId: () 
 }
 
 /**
+ * Line ids up with a list that was swapped for another version of itself
+ * (undo, redo). The store never mutates, so an item that wasn't edited is the
+ * same object in both versions: it keeps its id wherever it moved to. An
+ * item that changed keeps the id of whatever stood at its index, if that is
+ * free; anything else gets a fresh id. Ids stay unique.
+ */
+export function reconcileByIdentity<T>(
+  prev: readonly T[],
+  prevIds: readonly string[],
+  next: readonly T[],
+  makeId: () => string,
+): string[] {
+  const used = new Set<number>();
+  const ids: (string | undefined)[] = next.map((item) => {
+    const j = prev.findIndex((p, k) => p === item && !used.has(k));
+    if (j < 0) return undefined;
+    used.add(j);
+    return prevIds[j];
+  });
+  return ids.map((id, i) => {
+    if (id !== undefined) return id;
+    if (i < prevIds.length && !used.has(i)) {
+      used.add(i);
+      return prevIds[i];
+    }
+    return makeId();
+  });
+}
+
+/**
  * Turn pasted text into bullets: one per line, without the bullet markers
  * people paste from Word, PDFs or old resumes ("•", "-", "*", "1.").
  */

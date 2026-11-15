@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { toggleBold } from "@/lib/editor/bold";
-import { insertAt, moveIndex, reconcileIds, removeAt } from "@/lib/editor/list-ops";
+import { insertAt, moveIndex, reconcileByIdentity, reconcileIds, removeAt } from "@/lib/editor/list-ops";
 
 let counter = 0;
 const makeId = () => `item-${++counter}`;
@@ -14,29 +14,54 @@ export interface StableIdOps {
   move: (from: number, to: number) => void;
 }
 
+interface IdState<T> {
+  ids: string[];
+  /** The items the ids were last matched to. */
+  items: readonly T[];
+  revision: number;
+}
+
 /**
  * Stable ids for a list whose items have none. Call the matching op in the
  * same event handler as the store action, so both update in one render.
- * If the list length changes some other way (e.g. "Start over"), the ids are
- * adjusted during render, the pattern React recommends for derived state.
+ *
+ * When the list changes some other way, the ids are adjusted during render
+ * (the pattern React recommends for derived state):
+ * - the store's `revision` changed (undo, redo, start over): ids follow the
+ *   items by identity, so undoing a drag doesn't swap two cards' ids;
+ * - only the length changed: keep what fits, add fresh ids for the rest.
  */
-export function useStableIds(length: number): [string[], StableIdOps] {
-  const [ids, setIds] = useState<string[]>(() => reconcileIds([], length, makeId));
-  let current = ids;
-  if (ids.length !== length) {
-    current = reconcileIds(ids, length, makeId);
-    setIds(current);
+export function useStableIds<T>(items: readonly T[], revision = 0): [string[], StableIdOps] {
+  const [state, setState] = useState<IdState<T>>(() => ({
+    ids: reconcileIds([], items.length, makeId),
+    items,
+    revision,
+  }));
+  let ids = state.ids;
+  if (state.items !== items || state.revision !== revision) {
+    ids =
+      state.revision !== revision
+        ? reconcileByIdentity(state.items, state.ids, items, makeId)
+        : reconcileIds(state.ids, items.length, makeId);
+    setState({ ids, items, revision });
   }
 
-  const insert = useCallback((index?: number) => {
-    const id = makeId();
-    setIds((prev) => insertAt(prev, index ?? prev.length, id));
-    return id;
-  }, []);
-  const remove = useCallback((index: number) => setIds((prev) => removeAt(prev, index)), []);
-  const move = useCallback((from: number, to: number) => setIds((prev) => moveIndex(prev, from, to)), []);
+  const update = useCallback(
+    (fn: (ids: string[]) => string[]) => setState((prev) => ({ ...prev, ids: fn(prev.ids) })),
+    [],
+  );
+  const insert = useCallback(
+    (index?: number) => {
+      const id = makeId();
+      update((prev) => insertAt(prev, index ?? prev.length, id));
+      return id;
+    },
+    [update],
+  );
+  const remove = useCallback((index: number) => update((prev) => removeAt(prev, index)), [update]);
+  const move = useCallback((from: number, to: number) => update((prev) => moveIndex(prev, from, to)), [update]);
 
-  return [current, { insert, remove, move }];
+  return [ids, { insert, remove, move }];
 }
 
 /**

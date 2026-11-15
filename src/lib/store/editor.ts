@@ -3,7 +3,8 @@ import { createJSONStorage, persist, type StateStorage } from "zustand/middlewar
 import { useEffect } from "react";
 import { blankResume, parseResumeDraft } from "@/lib/resume/draft";
 import { sampleResume } from "@/lib/resume/sample";
-import type { Profile, Resume, Socials } from "@/lib/resume/schema";
+import type { Profile, Resume, SectionKey, Socials } from "@/lib/resume/schema";
+import type { SectionId } from "@/lib/editor/sections";
 import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
 
 // ============================================================================
@@ -16,7 +17,11 @@ import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
 // silently deleted.
 //
 // Actions never mutate: each one returns new objects, so React selectors and
-// (later) undo/redo can compare by reference.
+// undo/redo can compare by reference, and history snapshots share every part
+// of the resume that didn't change (a photo is stored once, not per step).
+//
+// Undo/redo covers the resume only. The template is a way of looking at it,
+// and history lives in memory: it isn't saved and starts empty on each load.
 // ============================================================================
 
 export const EDITOR_STORAGE_KEY = "onlineresume:editor-draft";
@@ -30,6 +35,13 @@ export const EDITOR_BACKUP_KEY = `${EDITOR_STORAGE_KEY}:invalid`;
  */
 const STORE_VERSION = 2;
 const DEFAULT_TEMPLATE: TemplateSlug = "classic";
+
+/** Steps kept for undo. Snapshots share unchanged objects, so this is cheap. */
+export const HISTORY_LIMIT = 100;
+/** Edits to the same field closer together than this are one undo step... */
+const GROUP_GAP_MS = 1000;
+/** ...unless the burst has gone on longer than this (a long paragraph). */
+const GROUP_MAX_MS = 5000;
 
 /** Resume sections that are lists of items. */
 export type ListSection =
@@ -57,6 +69,13 @@ export interface EditorData {
   template: TemplateSlug;
 }
 
+/** One undo (or redo) step: the resume to go back to, and where the change was. */
+export interface HistoryEntry {
+  resume: Resume;
+  /** The editor section the change happened in; null for section layout changes. */
+  section: SectionId | null;
+}
+
 export interface EditorState extends EditorData {
   /** False until the saved draft has been read from storage. */
   hasHydrated: boolean;
@@ -66,6 +85,22 @@ export interface EditorState extends EditorData {
    * the UI must not claim the work is saved.
    */
   storageAvailable: boolean;
+
+  /** Undo steps, oldest first. */
+  past: HistoryEntry[];
+  /** Redo steps, the next one last. */
+  future: HistoryEntry[];
+  /**
+   * Bumped whenever the resume is swapped from outside the forms (undo, redo,
+   * load, start over). List editors use it to re-match their item ids.
+   */
+  revision: number;
+  /**
+   * Step back. Returns the section the change was in (null for section
+   * layout changes), or undefined when there was nothing to undo.
+   */
+  undo: () => SectionId | null | undefined;
+  redo: () => SectionId | null | undefined;
 
   updateProfile: (patch: Partial<Omit<Profile, "socials">>) => void;
   updateSocials: (patch: Partial<Socials>) => void;
@@ -78,6 +113,10 @@ export interface EditorState extends EditorData {
   duplicateItem: (section: ListSection, index: number) => void;
   moveItem: (section: ListSection, from: number, to: number) => void;
 
+  setSectionHidden: (key: SectionKey, hidden: boolean) => void;
+  /** Move a section within `resume.sectionOrder` (indexes into it). */
+  moveSection: (from: number, to: number) => void;
+
   setTemplate: (template: TemplateSlug) => void;
   /** Replace the whole draft, e.g. after an import. */
   loadResume: (resume: Resume) => void;
@@ -89,6 +128,17 @@ const exampleResume = (): Resume => structuredClone(sampleResume);
 
 const inRange = (list: readonly unknown[], index: number) =>
   Number.isInteger(index) && index >= 0 && index < list.length;
+
+/** The list with one entry moved (target clamped), or the same list if nothing moves. */
+function moved<T>(list: T[], from: number, to: number): T[] {
+  if (!inRange(list, from) || !Number.isInteger(to)) return list;
+  const target = Math.min(Math.max(to, 0), list.length - 1);
+  if (target === from) return list;
+  const next = [...list];
+  const [entry] = next.splice(from, 1);
+  next.splice(target, 0, entry);
+  return next;
+}
 
 /** No-op storage for the server, where localStorage doesn't exist. */
 const noopStorage: StateStorage = {
@@ -115,11 +165,14 @@ export interface CreateEditorStoreOptions {
   storage?: StateStorage;
   /** Wait for an explicit `persist.rehydrate()` (avoids SSR hydration mismatches). */
   skipHydration?: boolean;
+  /** Clock for grouping undo steps. Tests pass their own. */
+  now?: () => number;
 }
 
 export function createEditorStore({
   storage = browserStorage(),
   skipHydration = false,
+  now = Date.now,
 }: CreateEditorStoreOptions = {}) {
   // Storage can throw at any time: blocked site data, private modes, or a
   // full quota (photos are stored as data URLs). An unhandled throw inside
@@ -163,44 +216,122 @@ export function createEditorStore({
 
   const store = createStore<EditorState>()(
     persist(
-      (set) => {
-        const updateResume = (fn: (resume: Resume) => Resume) =>
-          set((state) => ({ resume: fn(state.resume) }));
+      (set, get) => {
+        // The field currently being typed into, while its edits are grouped.
+        let typing: { key: string; started: number; last: number } | null = null;
+
+        /**
+         * Apply a change to the resume and record it for undo. `group` names
+         * the field being typed into: changes with the same name in quick
+         * succession become one step. Structural changes pass no name, so
+         * each is its own step. A change that changes nothing records nothing.
+         */
+        const updateResume = (
+          fn: (resume: Resume) => Resume,
+          where: { section: SectionId | null; group?: string; swap?: boolean },
+        ) => {
+          const { resume, past, revision } = get();
+          const next = fn(resume);
+          if (next === resume) return;
+          const time = now();
+          const continues =
+            typing !== null &&
+            typing.key === where.group &&
+            time - typing.last < GROUP_GAP_MS &&
+            time - typing.started < GROUP_MAX_MS;
+          if (where.group === undefined) typing = null;
+          else if (continues && typing) typing = { ...typing, last: time };
+          else typing = { key: where.group, started: time, last: time };
+          // One set call: list editors must never see the new resume with
+          // the old revision, or they'd keep stale item ids.
+          set({
+            resume: next,
+            future: [],
+            past: continues ? past : [...past, { resume, section: where.section }].slice(-HISTORY_LIMIT),
+            revision: where.swap ? revision + 1 : revision,
+          });
+        };
+
+        /** Swap the whole resume (start over, import). Undoable. */
+        const replaceResume = (next: Resume) => updateResume(() => next, { section: null, swap: true });
 
         const updateList = <S extends ListSection>(
           section: S,
           fn: (list: ItemOf<S>[]) => ItemOf<S>[],
+          group?: string,
         ) =>
-          updateResume((resume) => ({
-            ...resume,
-            [section]: fn(resume[section] as ItemOf<S>[]),
-          }));
+          updateResume(
+            (resume) => {
+              const list = resume[section] as ItemOf<S>[];
+              const next = fn(list);
+              return next === list ? resume : { ...resume, [section]: next };
+            },
+            { section, group },
+          );
+
+        /** Step through history: pop one stack, push the current resume onto the other. */
+        const travel = (from: "past" | "future") => {
+          const state = get();
+          const stack = state[from];
+          const entry = stack[stack.length - 1];
+          if (!entry) return undefined;
+          const to = from === "past" ? "future" : "past";
+          typing = null;
+          set({
+            resume: entry.resume,
+            [from]: stack.slice(0, -1),
+            [to]: [...state[to], { resume: state.resume, section: entry.section }],
+            revision: state.revision + 1,
+          });
+          return entry.section;
+        };
+
+        const fields = (patch: object) => Object.keys(patch).sort().join(",");
 
         return {
           resume: exampleResume(),
           template: DEFAULT_TEMPLATE,
           hasHydrated: false,
           storageAvailable: true,
+          past: [],
+          future: [],
+          revision: 0,
+
+          undo: () => travel("past"),
+          redo: () => travel("future"),
 
           updateProfile: (patch) =>
-            updateResume((r) => ({ ...r, profile: { ...r.profile, ...patch } })),
+            updateResume((r) => ({ ...r, profile: { ...r.profile, ...patch } }), {
+              section: "profile",
+              group: `profile:${fields(patch)}`,
+            }),
 
           updateSocials: (patch) =>
-            updateResume((r) => ({
-              ...r,
-              profile: { ...r.profile, socials: { ...r.profile.socials, ...patch } },
-            })),
+            updateResume(
+              (r) => ({
+                ...r,
+                profile: { ...r.profile, socials: { ...r.profile.socials, ...patch } },
+              }),
+              { section: "profile", group: `socials:${fields(patch)}` },
+            ),
 
-          setAbout: (about) => updateResume((r) => ({ ...r, about })),
+          setAbout: (about) =>
+            updateResume((r) => (r.about === about ? r : { ...r, about }), {
+              section: "about",
+              group: "about",
+            }),
 
           addItem: (section, item) =>
             updateList(section, (list) => [...list, { ...emptyItem[section](), ...item }]),
 
           updateItem: (section, index, patch) =>
-            updateList(section, (list) =>
-              inRange(list, index)
-                ? list.map((it, i) => (i === index ? { ...it, ...patch } : it))
-                : list,
+            updateList(
+              section,
+              (list) =>
+                inRange(list, index)
+                  ? list.map((it, i) => (i === index ? { ...it, ...patch } : it))
+                  : list,
+              `item:${section}:${index}:${fields(patch)}`,
             ),
 
           removeItem: (section, index) =>
@@ -215,21 +346,35 @@ export function createEditorStore({
                 : list,
             ),
 
-          moveItem: (section, from, to) =>
-            updateList(section, (list) => {
-              if (!inRange(list, from) || !Number.isInteger(to)) return list;
-              const target = Math.min(Math.max(to, 0), list.length - 1);
-              if (target === from) return list;
-              const next = [...list];
-              const [moved] = next.splice(from, 1);
-              next.splice(target, 0, moved);
-              return next;
-            }),
+          moveItem: (section, from, to) => updateList(section, (list) => moved(list, from, to)),
+
+          setSectionHidden: (key, hidden) =>
+            updateResume(
+              (r) => {
+                if (r.hiddenSections.includes(key) === hidden) return r;
+                return {
+                  ...r,
+                  hiddenSections: hidden
+                    ? [...r.hiddenSections, key]
+                    : r.hiddenSections.filter((k) => k !== key),
+                };
+              },
+              { section: null },
+            ),
+
+          moveSection: (from, to) =>
+            updateResume(
+              (r) => {
+                const sectionOrder = moved(r.sectionOrder, from, to);
+                return sectionOrder === r.sectionOrder ? r : { ...r, sectionOrder };
+              },
+              { section: null },
+            ),
 
           setTemplate: (template) => set({ template }),
-          loadResume: (resume) => set({ resume: structuredClone(resume) }),
-          resetToExample: () => set({ resume: exampleResume() }),
-          startBlank: () => set({ resume: blankResume() }),
+          loadResume: (resume) => replaceResume(structuredClone(resume)),
+          resetToExample: () => replaceResume(exampleResume()),
+          startBlank: () => replaceResume(blankResume()),
         };
       },
       {
@@ -250,7 +395,8 @@ export function createEditorStore({
         // so this is where hydration is marked as finished.
         merge: (persisted, currentState) => {
           hydrated = true;
-          const current = { ...currentState, hasHydrated: true };
+          // History belongs to this page visit; it starts at the loaded draft.
+          const current = { ...currentState, hasHydrated: true, past: [], future: [] };
           if (persisted == null) return current;
           const saved = persisted as Partial<EditorData>;
           const parsed = parseResumeDraft(saved.resume);
