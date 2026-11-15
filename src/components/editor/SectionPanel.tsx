@@ -5,12 +5,16 @@ import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { neighbours, sections, type SectionId } from "@/lib/editor/sections";
 import AboutForm from "./forms/AboutForm";
+import EducationForm from "./forms/EducationForm";
+import ExperienceForm from "./forms/ExperienceForm";
 import ProfileForm from "./forms/ProfileForm";
 
 /** The form for each section. Sections without one yet show a placeholder. */
 const forms: Partial<Record<SectionId, ComponentType>> = {
   profile: ProfileForm,
   about: AboutForm,
+  experience: ExperienceForm,
+  education: EducationForm,
 };
 
 type Props = { active: SectionId; onSelect: (id: SectionId) => void };
