@@ -300,7 +300,9 @@ export default function SpotlightTemplate({ data }: { data: Resume }) {
                           {exp.responsibilities.length > 0 && (
                             <ul className="mt-2 space-y-1 text-sm leading-normal">
                               {exp.responsibilities.map((r, j) => (
-                                <li key={j}>{r}</li>
+                                <li key={j}>
+                                  <RichText text={r} strongClassName="font-medium text-slate-200" />
+                                </li>
                               ))}
                             </ul>
                           )}
@@ -362,7 +364,9 @@ export default function SpotlightTemplate({ data }: { data: Resume }) {
                             {project.details.length > 0 && (
                               <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-normal text-slate-500 marker:text-slate-700">
                                 {project.details.map((d, j) => (
-                                  <li key={j}>{d}</li>
+                                  <li key={j}>
+                                    <RichText text={d} strongClassName="font-medium text-slate-200" />
+                                  </li>
                                 ))}
                               </ul>
                             )}

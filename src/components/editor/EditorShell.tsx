@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Eye, PencilLine } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, Eye, PencilLine } from "lucide-react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
 import { useEditorHydration, useEditorStore } from "@/lib/store/editor";
@@ -28,6 +28,20 @@ function useIsDesktop(): boolean | null {
 }
 
 function SaveStatus() {
+  const available = useEditorStore((s) => s.storageAvailable);
+  if (!available) {
+    return (
+      <span
+        className="flex items-center gap-1 text-xs font-medium text-amber-700"
+        role="status"
+        title="Your browser blocked saving (private mode, blocked site data, or storage full). Changes are kept until you close this tab."
+      >
+        <AlertTriangle className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Not saved: browser storage unavailable</span>
+        <span className="sm:hidden">Not saved</span>
+      </span>
+    );
+  }
   return (
     <span
       className="hidden items-center gap-1 text-xs text-neutral-500 md:flex"
@@ -90,8 +104,12 @@ function DesktopLayout({ section, onSelect }: { section: SectionId; onSelect: (i
         <SectionSidebar active={section} onSelect={onSelect} />
       </aside>
       <Group orientation="horizontal" className="min-w-0 flex-1">
-        <Panel id="form" defaultSize="45%" minSize="30%" className="overflow-y-auto bg-white">
-          <SectionPanel active={section} onSelect={onSelect} />
+        <Panel id="form" defaultSize="45%" minSize="30%">
+          {/* Panel puts extra props on an outer, non-scrolling div, so the
+              scroll container (and its marker) is our own element. */}
+          <div className="h-full overflow-y-auto bg-white" data-editor-scroll>
+            <SectionPanel active={section} onSelect={onSelect} />
+          </div>
         </Panel>
         <Separator
           onPointerDown={() => setDragging(true)}
@@ -138,7 +156,7 @@ function MobileLayout({ section, onSelect }: { section: SectionId; onSelect: (id
         </div>
       </div>
       {view === "edit" ? (
-        <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-white" data-editor-scroll>
           <div className="px-5 pt-4">
             <SectionSelect active={section} onSelect={onSelect} />
           </div>

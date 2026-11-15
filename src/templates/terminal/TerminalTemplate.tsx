@@ -215,7 +215,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
                   <span className={c.muted}>
                     {j === exp.responsibilities.length - 1 ? "└─" : "├─"}
                   </span>
-                  <span>{r}</span>
+                  <span>{plainText(r)}</span>
                 </p>
               ))}
               {exp.skills.length > 0 && (
@@ -244,7 +244,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
               {has(p.description) && <p>{p.description}</p>}
               {p.details.map((d, j) => (
                 <p key={j} className={c.muted}>
-                  - {d}
+                  - {plainText(d)}
                 </p>
               ))}
               {p.technologies.length > 0 && (

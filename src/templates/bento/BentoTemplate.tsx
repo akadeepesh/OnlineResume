@@ -438,7 +438,9 @@ export default function BentoTemplate({ data }: { data: Resume }) {
                                 {exp.responsibilities.map((r, j) => (
                                   <li key={j} className="flex gap-2">
                                     <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff5b2e]" />
-                                    {r}
+                                    <span>
+                                      <RichText text={r} strongClassName="font-medium text-neutral-900" />
+                                    </span>
                                   </li>
                                 ))}
                               </ul>

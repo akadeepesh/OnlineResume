@@ -396,7 +396,9 @@ export default function ClassicTemplate({ data }: { data: Resume }) {
                           {exp.responsibilities.map((r, j) => (
                             <li key={j} className="flex gap-2">
                               <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-400" />
-                              {r}
+                              <span>
+                                <RichText text={r} strongClassName="font-semibold text-slate-900" />
+                              </span>
                             </li>
                           ))}
                         </ul>
@@ -459,7 +461,7 @@ export default function ClassicTemplate({ data }: { data: Resume }) {
                           {project.details.map((d, j) => (
                             <li key={j} className="flex gap-2">
                               <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-300" />
-                              {d}
+                              <RichText text={d} strongClassName="font-semibold text-slate-900" />
                             </li>
                           ))}
                         </ul>
