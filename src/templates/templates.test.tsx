@@ -152,3 +152,37 @@ describe.each(slugs)("%s template", (slug) => {
     }
   });
 });
+
+describe("rich text in every template", () => {
+  // Bold is stored as **double asterisks** (the editor's B button writes them).
+  // Every field the editor offers bold for must render it, never show the marks.
+  const bolded = parse({
+    schemaVersion: RESUME_SCHEMA_VERSION,
+    profile: { name: "Sam Lee" },
+    about: "About with **bold about**.",
+    experience: [
+      { title: "Engineer", company: "Acme", responsibilities: ["Grew sales by **40%** in a year."] },
+    ],
+    projects: [{ name: "Tool", details: ["Handles **2M requests**."] }],
+  });
+
+  // Terminal is plain text by design: it drops the marks instead of bolding.
+  const plainTemplates: TemplateSlug[] = ["terminal"];
+
+  it.each(Object.keys(templates) as TemplateSlug[])("%s renders bold marks, never the raw **", (slug) => {
+    const Template = templates[slug];
+    const html = renderToStaticMarkup(<Template data={bolded} />);
+    expect(html).not.toContain("**");
+    for (const phrase of ["bold about", "40%", "2M requests"]) {
+      if (!html.includes(phrase)) continue; // some templates don't show every field
+      if (plainTemplates.includes(slug)) expect(html).not.toMatch(new RegExp(`<strong[^>]*>${phrase}`));
+      else expect(html).toMatch(new RegExp(`<strong[^>]*>${phrase}</strong>`));
+    }
+    expect(html).toContain("40%"); // every template shows experience bullets
+  });
+
+  it.each(Object.keys(templates) as TemplateSlug[])("%s shows no raw marks for the sample", (slug) => {
+    const Template = templates[slug];
+    expect(renderToStaticMarkup(<Template data={sampleResume} />)).not.toContain("**");
+  });
+});

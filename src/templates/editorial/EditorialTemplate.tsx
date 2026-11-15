@@ -218,7 +218,7 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
                           {exp.responsibilities.map((r, j) => (
                             <li key={j} className="relative pl-5">
                               <span className="absolute left-0 text-stone-400">—</span>
-                              {r}
+                              <RichText text={r} strongClassName="font-medium text-stone-950" />
                             </li>
                           ))}
                         </ul>
@@ -256,7 +256,7 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
                         {project.details.map((d, j) => (
                           <li key={j} className="relative pl-5">
                             <span className="absolute left-0 text-stone-400">—</span>
-                            {d}
+                            <RichText text={d} strongClassName="font-medium text-stone-950" />
                           </li>
                         ))}
                       </ul>
