@@ -60,3 +60,19 @@ export function parseTags(input: string, existing: readonly string[] = []): stri
   }
   return tags;
 }
+
+/** Split a bullet at the selection, Enter-style. The new bullet doesn't start with spaces. */
+export function splitBullet(text: string, start: number, end: number): [string, string] {
+  return [text.slice(0, start).replace(/\s+$/, ""), text.slice(end).replace(/^\s+/, "")];
+}
+
+/**
+ * Merge a bullet into the one above, Backspace-style. Adds a space at the
+ * join when neither side has one, so "shipped it" + "on time" doesn't become
+ * "shipped iton time". Returns where the caret should go.
+ */
+export function mergeBullets(above: string, below: string): { text: string; caret: number } {
+  const needsSpace = above.length > 0 && below.length > 0 && !/\s$/.test(above) && !/^\s/.test(below);
+  const joined = needsSpace ? `${above} ` : above;
+  return { text: joined + below, caret: joined.length };
+}

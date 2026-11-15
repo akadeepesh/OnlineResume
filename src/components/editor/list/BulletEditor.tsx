@@ -4,7 +4,7 @@ import { useCallback, useLayoutEffect, useRef, type ClipboardEvent, type Keyboar
 import { Bold, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { insertAt, moveIndex, removeAt, splitPastedBullets } from "@/lib/editor/list-ops";
+import { insertAt, mergeBullets, moveIndex, removeAt, splitBullet, splitPastedBullets } from "@/lib/editor/list-ops";
 import { useAutosize, useBoldShortcut, useStableIds } from "./hooks";
 import { DragHandle, SortableList, useSortableRow } from "./Sortable";
 
@@ -76,9 +76,9 @@ export function BulletEditor({
     if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       // Split at the caret: the text after it moves to a new bullet below.
       e.preventDefault();
-      const text = value[index];
+      const [before, after] = splitBullet(value[index], start, end);
       idOps.insert(index + 1);
-      onChange(insertAt(value.map((v, i) => (i === index ? text.slice(0, start) : v)), index + 1, text.slice(end)));
+      onChange(insertAt(value.map((v, i) => (i === index ? before : v)), index + 1, after));
       pendingFocus.current = { index: index + 1, caret: 0 };
       return;
     }
@@ -86,10 +86,10 @@ export function BulletEditor({
     if (e.key === "Backspace" && start === 0 && end === 0 && index > 0) {
       // Merge into the previous bullet (or just delete an empty one).
       e.preventDefault();
-      const prev = value[index - 1];
+      const merged = mergeBullets(value[index - 1], value[index]);
       idOps.remove(index);
-      onChange(removeAt(value.map((v, i) => (i === index - 1 ? prev + value[index] : v)), index));
-      pendingFocus.current = { index: index - 1, caret: prev.length };
+      onChange(removeAt(value.map((v, i) => (i === index - 1 ? merged.text : v)), index));
+      pendingFocus.current = { index: index - 1, caret: merged.caret };
       return;
     }
 

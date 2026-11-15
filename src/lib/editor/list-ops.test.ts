@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { insertAt, moveIndex, parseTags, reconcileIds, removeAt, splitPastedBullets } from "./list-ops";
+import { insertAt, mergeBullets, moveIndex, parseTags, reconcileIds, removeAt, splitBullet, splitPastedBullets } from "./list-ops";
 import { createEditorStore } from "@/lib/store/editor";
 
 describe("moveIndex", () => {
@@ -77,5 +77,25 @@ describe("parseTags", () => {
 
   it("skips blanks and duplicates, including existing tags", () => {
     expect(parseTags("react, , React, Vue", ["vue"])).toEqual(["react"]);
+  });
+});
+
+describe("splitBullet / mergeBullets", () => {
+  it("splits without leaving edge spaces", () => {
+    expect(splitBullet("Shipped the API and cut latency", 19, 19)).toEqual(["Shipped the API and", "cut latency"]);
+    expect(splitBullet("abc", 3, 3)).toEqual(["abc", ""]);
+  });
+
+  it("merges with a space only when needed", () => {
+    expect(mergeBullets("shipped it", "on time")).toEqual({ text: "shipped it on time", caret: 11 });
+    expect(mergeBullets("shipped it ", "on time")).toEqual({ text: "shipped it on time", caret: 11 });
+    expect(mergeBullets("shipped it", "")).toEqual({ text: "shipped it", caret: 10 });
+    expect(mergeBullets("", "on time")).toEqual({ text: "on time", caret: 0 });
+  });
+
+  it("round-trips a split and merge", () => {
+    const text = "Shipped the API and cut latency";
+    const [a, b] = splitBullet(text, 15, 15);
+    expect(mergeBullets(a, b).text).toBe(text);
   });
 });
