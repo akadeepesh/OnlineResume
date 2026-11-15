@@ -1,5 +1,5 @@
 import { has } from "@/lib/resume/view";
-import type { Resume } from "@/lib/resume/schema";
+import { DEFAULT_SECTION_ORDER, type Resume } from "@/lib/resume/schema";
 
 // ============================================================================
 // Editor sections: the order, copy and "is this filled in?" rule for each step
@@ -7,16 +7,8 @@ import type { Resume } from "@/lib/resume/schema";
 // sidebar, the mobile picker and the Back/Next buttons.
 // ============================================================================
 
-export const sectionIds = [
-  "profile",
-  "about",
-  "experience",
-  "education",
-  "projects",
-  "skills",
-  "tools",
-  "certifications",
-] as const;
+/** Every editor step in the default order: the profile, then the resume's sections. */
+export const sectionIds = ["profile", ...DEFAULT_SECTION_ORDER] as const;
 
 export type SectionId = (typeof sectionIds)[number];
 
@@ -105,8 +97,27 @@ export function isSectionFilled(resume: Resume, id: SectionId): boolean {
   }
 }
 
-/** The sections before and after `id`, for Back/Next buttons. */
-export function neighbours(id: SectionId): { prev?: SectionMeta; next?: SectionMeta } {
-  const index = sectionIds.indexOf(id);
-  return { prev: sections[index - 1], next: sections[index + 1] };
+export const sectionMeta = (id: SectionId): SectionMeta => sections.find((s) => s.id === id) ?? sections[0];
+
+/**
+ * The editor's steps for this resume: the profile, then the sections in the
+ * order the person arranged them, so editing follows the resume top to bottom.
+ */
+export const editorOrder = (resume: Pick<Resume, "sectionOrder">): SectionId[] => [
+  "profile",
+  ...resume.sectionOrder,
+];
+
+/** True when the section is left off the resume. The profile can't be hidden. */
+export const isSectionHidden = (resume: Resume, id: SectionId): boolean =>
+  id !== "profile" && resume.hiddenSections.includes(id);
+
+/** The sections before and after `id` in `order`, for Back/Next buttons. */
+export function neighbours(
+  id: SectionId,
+  order: readonly SectionId[] = sectionIds,
+): { prev?: SectionMeta; next?: SectionMeta } {
+  const index = order.indexOf(id);
+  const at = (i: number) => (i >= 0 && i < order.length ? sectionMeta(order[i]) : undefined);
+  return { prev: at(index - 1), next: at(index + 1) };
 }

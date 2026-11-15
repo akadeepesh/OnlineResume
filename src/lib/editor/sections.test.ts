@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { blankResume } from "@/lib/resume/draft";
 import { sampleResume } from "@/lib/resume/sample";
-import { isSectionFilled, isSectionId, neighbours, sectionIds, sections } from "./sections";
+import { DEFAULT_SECTION_ORDER } from "@/lib/resume/schema";
+import { editorOrder, isSectionFilled, isSectionHidden, isSectionId, neighbours, sectionIds, sections } from "./sections";
 
 describe("sections", () => {
   it("has metadata for every id, in order", () => {
@@ -17,6 +18,35 @@ describe("sections", () => {
     expect(neighbours("profile").prev).toBeUndefined();
     expect(neighbours("profile").next?.id).toBe("about");
     expect(neighbours("certifications").next).toBeUndefined();
+  });
+
+  it("matches the schema's default order", () => {
+    expect(sectionIds).toEqual(["profile", ...DEFAULT_SECTION_ORDER]);
+  });
+});
+
+describe("the editor follows the resume's own order", () => {
+  const reordered = {
+    ...sampleResume,
+    sectionOrder: ["projects", "about", "experience", "education", "skills", "tools", "certifications"] as const,
+  };
+  const resume = { ...reordered, sectionOrder: [...reordered.sectionOrder], hiddenSections: ["about" as const] };
+
+  it("lists profile first, then the sections in the resume's order", () => {
+    expect(editorOrder(resume)).toEqual(["profile", ...resume.sectionOrder]);
+  });
+
+  it("finds neighbours in that order, hidden sections included (they can still be edited)", () => {
+    const order = editorOrder(resume);
+    expect(neighbours("profile", order).next?.id).toBe("projects");
+    expect(neighbours("about", order).prev?.id).toBe("projects");
+    expect(neighbours("certifications", order).next).toBeUndefined();
+  });
+
+  it("knows which sections are hidden; the profile never is", () => {
+    expect(isSectionHidden(resume, "about")).toBe(true);
+    expect(isSectionHidden(resume, "projects")).toBe(false);
+    expect(isSectionHidden(resume, "profile")).toBe(false);
   });
 });
 

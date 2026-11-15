@@ -5,6 +5,7 @@ import { Bold, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { insertAt, mergeBullets, moveIndex, removeAt, splitBullet, splitPastedBullets } from "@/lib/editor/list-ops";
+import { useEditorStore } from "@/lib/store/editor";
 import { useAutosize, useBoldShortcut, useStableIds } from "./hooks";
 import { DragHandle, SortableList, useSortableRow } from "./Sortable";
 
@@ -29,7 +30,9 @@ export function BulletEditor({
   /** id of the visible label for the whole list */
   labelledBy?: string;
 }) {
-  const [ids, idOps] = useStableIds(value.length);
+  // Undo/redo can swap the bullets for an older list; ids follow by identity.
+  const revision = useEditorStore((s) => s.revision);
+  const [ids, idOps] = useStableIds(value, revision);
   const inputs = useRef(new Map<string, HTMLTextAreaElement>());
   const pendingFocus = useRef<Focus | null>(null);
 

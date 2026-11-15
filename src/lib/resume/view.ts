@@ -1,4 +1,4 @@
-import type { Resume } from "./schema";
+import type { Resume, SectionKey } from "./schema";
 
 type Socials = Partial<Resume["profile"]["socials"]>;
 
@@ -158,6 +158,25 @@ export const itemHasContent = (item: object): boolean =>
 const hasContent = itemHasContent;
 
 export function visibleResume(resume: Resume): Resume {
+  // A hidden section is emptied here, so every template leaves it out the
+  // same way it leaves out a section with nothing in it.
+  const hidden = new Set(resume.hiddenSections);
+  const list = <K extends Exclude<SectionKey, "about">>(key: K, items: Resume[K]): Resume[K] =>
+    hidden.has(key) ? [] : items;
+  const visible = visibleContent(resume);
+  return {
+    ...visible,
+    about: hidden.has("about") ? undefined : visible.about,
+    experience: list("experience", visible.experience),
+    projects: list("projects", visible.projects),
+    skills: list("skills", visible.skills),
+    tools: list("tools", visible.tools),
+    education: list("education", visible.education),
+    certifications: list("certifications", visible.certifications),
+  };
+}
+
+function visibleContent(resume: Resume): Resume {
   return {
     ...resume,
     // Links are typed by users and end up on public pages. Clean them once
@@ -198,4 +217,39 @@ export function visibleResume(resume: Resume): Resume {
       .map((c) => ({ ...c, link: safeHref(c.link) }))
       .filter(hasContent),
   };
+}
+
+// ----------------------------------------------------------------------------
+// Section order.
+//
+// Templates group sections into blocks of their own design: Editorial puts
+// skills and tools under one "Expertise" heading, Spotlight puts education
+// and certifications under "Credentials". `arrangeBlocks` orders those blocks
+// by the person's section order, so every template respects it without
+// giving up its layout.
+// ----------------------------------------------------------------------------
+
+/** The sections a visitor sees, in the person's order. */
+export const visibleSectionOrder = (resume: Resume): SectionKey[] =>
+  resume.sectionOrder.filter((key) => !resume.hiddenSections.includes(key));
+
+/**
+ * Sort a template's blocks by section order. A block covering several
+ * sections takes the place of the first visible one; a block whose sections
+ * are all hidden is dropped. Blocks keep their relative order on ties.
+ */
+export function arrangeBlocks<B extends { sections: readonly SectionKey[] }>(
+  resume: Resume,
+  blocks: readonly B[]
+): B[] {
+  const order = visibleSectionOrder(resume);
+  const position = (block: B) => {
+    const found = block.sections.map((key) => order.indexOf(key)).filter((i) => i >= 0);
+    return found.length > 0 ? Math.min(...found) : -1;
+  };
+  return blocks
+    .map((block) => ({ block, at: position(block) }))
+    .filter(({ at }) => at >= 0)
+    .sort((a, b) => a.at - b.at)
+    .map(({ block }) => block);
 }

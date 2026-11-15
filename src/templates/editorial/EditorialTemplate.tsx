@@ -6,6 +6,7 @@ import { RichText } from "@/components/shared/RichText";
 import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume, Skill } from "@/lib/resume/schema";
 import { has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { renderBlocks } from "../blocks";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
@@ -126,9 +127,6 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
   const headline = joinParts([profile.role, profile.tagline], " — ");
   const anySkillWork = skills.some((s) => workCount(s) > 0);
 
-  // Roman numerals only count the sections that are actually rendered.
-  let section = 0;
-
   return (
     <div className="min-h-screen bg-[#f6f3ec] text-stone-800 selection:bg-[#8b2c24] selection:text-white print:bg-white">
       <div className="mx-auto max-w-5xl px-6 sm:px-10">
@@ -191,222 +189,258 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
             </div>
           )}
         </header>
+        {renderBlocks(data, [
+          show.about && {
+            id: "about",
+            sections: ["about"],
+            render: (position) => (
+              <Section index={position} title="Profile">
+                <p className="font-serif text-xl leading-relaxed text-stone-700 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-serif first-letter:text-7xl first-letter:font-normal first-letter:leading-[0.8] first-letter:text-[#8b2c24] md:text-[22px]">
+                  <RichText text={about ?? ""} strongClassName="font-medium text-stone-950" />
+                </p>
+              </Section>
+            ),
+          },
 
-        {show.about && (
-          <Section index={section++} title="Profile">
-            <p className="font-serif text-xl leading-relaxed text-stone-700 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-serif first-letter:text-7xl first-letter:font-normal first-letter:leading-[0.8] first-letter:text-[#8b2c24] md:text-[22px]">
-              <RichText text={about ?? ""} strongClassName="font-medium text-stone-950" />
-            </p>
-          </Section>
-        )}
-
-        {show.experience && (
-          <Section index={section++} title="Experience">
-            <div className="space-y-10">
-              {experience.map((exp, i) => {
-                const where = joinParts([exp.company, exp.location], ", ");
-                return (
-                  <article key={i} className="grid gap-1 sm:grid-cols-[150px_1fr] sm:gap-6">
-                    <p className="pt-1.5 font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
-                      {exp.date}
-                    </p>
-                    <div>
-                      <h3 className="font-serif text-2xl text-stone-950">{exp.title}</h3>
-                      {where && <p className="font-serif text-lg italic text-stone-600">{where}</p>}
-                      {exp.responsibilities.length > 0 && (
-                        <ul className="mt-3 space-y-2 text-[15px] leading-relaxed text-stone-700">
-                          {exp.responsibilities.map((r, j) => (
-                            <li key={j} className="relative pl-5">
-                              <span className="absolute left-0 text-stone-400">—</span>
-                              <RichText text={r} strongClassName="font-medium text-stone-950" />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {exp.skills.length > 0 && (
-                        <p className="mt-3 font-sans text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                          {exp.skills.join(" · ")}
+          show.experience && {
+            id: "experience",
+            sections: ["experience"],
+            render: (position) => (
+              <Section index={position} title="Experience">
+                <div className="space-y-10">
+                  {experience.map((exp, i) => {
+                    const where = joinParts([exp.company, exp.location], ", ");
+                    return (
+                      <article key={i} className="grid gap-1 sm:grid-cols-[150px_1fr] sm:gap-6">
+                        <p className="pt-1.5 font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
+                          {exp.date}
                         </p>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </Section>
-        )}
+                        <div>
+                          <h3 className="font-serif text-2xl text-stone-950">{exp.title}</h3>
+                          {where && <p className="font-serif text-lg italic text-stone-600">{where}</p>}
+                          {exp.responsibilities.length > 0 && (
+                            <ul className="mt-3 space-y-2 text-[15px] leading-relaxed text-stone-700">
+                              {exp.responsibilities.map((r, j) => (
+                                <li key={j} className="relative pl-5">
+                                  <span className="absolute left-0 text-stone-400">—</span>
+                                  <RichText text={r} strongClassName="font-medium text-stone-950" />
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {exp.skills.length > 0 && (
+                            <p className="mt-3 font-sans text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                              {exp.skills.join(" · ")}
+                            </p>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </Section>
+            ),
+          },
 
-        {show.projects && (
-          <Section index={section++} title="Selected Work">
-            <div className="space-y-12">
-              {projects.map((project, i) => (
-                <article key={i} className="grid gap-2 sm:grid-cols-[64px_1fr]">
-                  <span className="font-serif text-4xl font-light italic text-[#8b2c24]">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <div>
-                    <h3 className="font-serif text-2xl text-stone-950">{project.name}</h3>
-                    {has(project.description) && (
-                      <p className="mt-1 font-serif text-lg italic text-stone-600">
-                        {project.description}
-                      </p>
-                    )}
-                    {project.details.length > 0 && (
-                      <ul className="mt-3 space-y-1.5 text-[15px] leading-relaxed text-stone-700">
-                        {project.details.map((d, j) => (
-                          <li key={j} className="relative pl-5">
-                            <span className="absolute left-0 text-stone-400">—</span>
-                            <RichText text={d} strongClassName="font-medium text-stone-950" />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {(project.technologies.length > 0 ||
-                      has(project.github) ||
-                      has(project.demo)) && (
-                      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-                        {project.technologies.length > 0 && (
-                          <p className="font-sans text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                            {project.technologies.join(" · ")}
+          show.projects && {
+            id: "projects",
+            sections: ["projects"],
+            render: (position) => (
+              <Section index={position} title="Selected Work">
+                <div className="space-y-12">
+                  {projects.map((project, i) => (
+                    <article key={i} className="grid gap-2 sm:grid-cols-[64px_1fr]">
+                      <span className="font-serif text-4xl font-light italic text-[#8b2c24]">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <h3 className="font-serif text-2xl text-stone-950">{project.name}</h3>
+                        {has(project.description) && (
+                          <p className="mt-1 font-serif text-lg italic text-stone-600">
+                            {project.description}
                           </p>
                         )}
-                        {(has(project.github) || has(project.demo)) && (
-                          <div className="flex gap-4 print:hidden">
-                            {has(project.github) && (
-                              <ArrowLink href={project.github}>Source</ArrowLink>
+                        {project.details.length > 0 && (
+                          <ul className="mt-3 space-y-1.5 text-[15px] leading-relaxed text-stone-700">
+                            {project.details.map((d, j) => (
+                              <li key={j} className="relative pl-5">
+                                <span className="absolute left-0 text-stone-400">—</span>
+                                <RichText text={d} strongClassName="font-medium text-stone-950" />
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {(project.technologies.length > 0 ||
+                          has(project.github) ||
+                          has(project.demo)) && (
+                          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+                            {project.technologies.length > 0 && (
+                              <p className="font-sans text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                                {project.technologies.join(" · ")}
+                              </p>
                             )}
-                            {has(project.demo) && <ArrowLink href={project.demo}>Live</ArrowLink>}
+                            {(has(project.github) || has(project.demo)) && (
+                              <div className="flex gap-4 print:hidden">
+                                {has(project.github) && (
+                                  <ArrowLink href={project.github}>Source</ArrowLink>
+                                )}
+                                {has(project.demo) && <ArrowLink href={project.demo}>Live</ArrowLink>}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </Section>
-        )}
+                    </article>
+                  ))}
+                </div>
+              </Section>
+            ),
+          },
 
-        {(show.skills || show.tools) && (
-          <Section index={section++} title="Expertise">
-            {anySkillWork && (
-              <p className="mb-5 font-serif text-lg italic text-stone-500 print:hidden">
-                Select a discipline to read the related work.
-              </p>
-            )}
-            {show.skills && (
-              <div className="flex flex-wrap gap-x-1 gap-y-2 font-serif text-2xl leading-snug md:text-3xl">
-                {skills.map((skill, i) => {
-                  const active = activeSkill?.name === skill.name;
-                  return (
-                    <React.Fragment key={i}>
-                      {workCount(skill) > 0 ? (
-                        <button
-                          onClick={() => setActiveSkill(active ? null : skill)}
-                          className={`transition-colors ${
-                            active
-                              ? "italic text-[#8b2c24] underline decoration-1 underline-offset-[6px]"
-                              : "text-stone-900 hover:text-[#8b2c24]"
-                          }`}
-                        >
-                          {skill.name}
-                        </button>
-                      ) : (
-                        <span className="text-stone-900">{skill.name}</span>
-                      )}
-                      {i < skills.length - 1 && <span className="text-stone-300">,</span>}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            )}
-            <AnimatePresence mode="wait">
-              {activeSkill && <SkillPanel key={activeSkill.name} skill={activeSkill} />}
-            </AnimatePresence>
-
-            {show.tools && (
-              <dl className={`grid gap-x-10 gap-y-5 sm:grid-cols-2 ${show.skills ? "mt-10" : ""}`}>
-                {tools.map((cat, i) => (
-                  <div key={i}>
-                    <dt className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
-                      {cat.name}
-                    </dt>
-                    {cat.skills.length > 0 && (
-                      <dd className="mt-1 font-serif text-lg text-stone-800">
-                        {cat.skills.join(", ")}
-                      </dd>
-                    )}
-                  </div>
-                ))}
-              </dl>
-            )}
-          </Section>
-        )}
-
-        {show.education && (
-          <Section index={section++} title="Education">
-            <div className="space-y-6">
-              {education.map((edu, i) => {
-                const detail = joinParts([edu.degree, edu.location], ", ");
-                return (
-                  <article key={i} className="grid gap-1 sm:grid-cols-[150px_1fr] sm:gap-6">
-                    <p className="pt-1.5 font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
-                      {edu.period}
-                    </p>
-                    <div>
-                      <h3 className="font-serif text-2xl text-stone-950">{edu.institution}</h3>
-                      {detail && (
-                        <p className="font-serif text-lg italic text-stone-600">{detail}</p>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </Section>
-        )}
-
-        {show.certifications && (
-          <Section index={section++} title="Honours">
-            <ul className="grid gap-x-10 sm:grid-cols-2">
-              {certifications.map((cert, i) => {
-                const body = (
-                  <>
-                    <span className="font-serif text-lg leading-tight text-stone-900 group-hover:text-[#8b2c24]">
-                      {cert.name}
-                    </span>
-                    {(has(cert.issuer) || has(cert.date)) && (
-                      <span className="mt-0.5 flex justify-between font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
-                        <span>{cert.issuer}</span>
-                        <span className="tabular-nums">{cert.date}</span>
-                      </span>
-                    )}
-                  </>
-                );
-                return (
-                  <li key={i} className="border-b border-stone-900/10 py-3">
-                    {has(cert.link) ? (
-                      <a
-                        href={cert.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={cert.description}
-                        className="group block"
-                      >
-                        {body}
-                      </a>
-                    ) : (
-                      <div title={cert.description} className="group block">
-                        {body}
+          (show.skills || show.tools) && {
+            id: "expertise",
+            sections: ["skills", "tools"],
+            render: (position) => (
+              <Section index={position} title="Expertise">
+                {anySkillWork && (
+                  <p className="mb-5 font-serif text-lg italic text-stone-500 print:hidden">
+                    Select a discipline to read the related work.
+                  </p>
+                )}
+                {renderBlocks(data, [
+                  show.skills && {
+                    id: "skills",
+                    sections: ["skills"],
+                    render: (inner) => (
+                      <div className={inner > 0 ? "mt-10" : ""}>
+                        <div className="flex flex-wrap gap-x-1 gap-y-2 font-serif text-2xl leading-snug md:text-3xl">
+                          {skills.map((skill, i) => {
+                            const active = activeSkill?.name === skill.name;
+                            return (
+                              <React.Fragment key={i}>
+                                {workCount(skill) > 0 ? (
+                                  <button
+                                    onClick={() => setActiveSkill(active ? null : skill)}
+                                    className={`transition-colors ${
+                                      active
+                                        ? "italic text-[#8b2c24] underline decoration-1 underline-offset-[6px]"
+                                        : "text-stone-900 hover:text-[#8b2c24]"
+                                    }`}
+                                  >
+                                    {skill.name}
+                                  </button>
+                                ) : (
+                                  <span className="text-stone-900">{skill.name}</span>
+                                )}
+                                {i < skills.length - 1 && <span className="text-stone-300">,</span>}
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
+                        <AnimatePresence mode="wait">
+                          {activeSkill && <SkillPanel key={activeSkill.name} skill={activeSkill} />}
+                        </AnimatePresence>
                       </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Section>
-        )}
+                    ),
+                  },
+                  show.tools && {
+                    id: "tools",
+                    sections: ["tools"],
+                    render: (inner) => (
+                      <dl className={`grid gap-x-10 gap-y-5 sm:grid-cols-2 ${inner > 0 ? "mt-10" : ""}`}>
+                        {tools.map((cat, i) => (
+                          <div key={i}>
+                            <dt className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                              {cat.name}
+                            </dt>
+                            {cat.skills.length > 0 && (
+                              <dd className="mt-1 font-serif text-lg text-stone-800">
+                                {cat.skills.join(", ")}
+                              </dd>
+                            )}
+                          </div>
+                        ))}
+                      </dl>
+                    ),
+                  },
+                ])}
+              </Section>
+            ),
+          },
 
+          show.education && {
+            id: "education",
+            sections: ["education"],
+            render: (position) => (
+              <Section index={position} title="Education">
+                <div className="space-y-6">
+                  {education.map((edu, i) => {
+                    const detail = joinParts([edu.degree, edu.location], ", ");
+                    return (
+                      <article key={i} className="grid gap-1 sm:grid-cols-[150px_1fr] sm:gap-6">
+                        <p className="pt-1.5 font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
+                          {edu.period}
+                        </p>
+                        <div>
+                          <h3 className="font-serif text-2xl text-stone-950">{edu.institution}</h3>
+                          {detail && (
+                            <p className="font-serif text-lg italic text-stone-600">{detail}</p>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </Section>
+            ),
+          },
+
+          show.certifications && {
+            id: "certifications",
+            sections: ["certifications"],
+            render: (position) => (
+              <Section index={position} title="Honours">
+                <ul className="grid gap-x-10 sm:grid-cols-2">
+                  {certifications.map((cert, i) => {
+                    const body = (
+                      <>
+                        <span className="font-serif text-lg leading-tight text-stone-900 group-hover:text-[#8b2c24]">
+                          {cert.name}
+                        </span>
+                        {(has(cert.issuer) || has(cert.date)) && (
+                          <span className="mt-0.5 flex justify-between font-sans text-xs uppercase tracking-[0.12em] text-stone-500">
+                            <span>{cert.issuer}</span>
+                            <span className="tabular-nums">{cert.date}</span>
+                          </span>
+                        )}
+                      </>
+                    );
+                    return (
+                      <li key={i} className="border-b border-stone-900/10 py-3">
+                        {has(cert.link) ? (
+                          <a
+                            href={cert.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={cert.description}
+                            className="group block"
+                          >
+                            {body}
+                          </a>
+                        ) : (
+                          <div title={cert.description} className="group block">
+                            {body}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Section>
+            ),
+          },
+
+        ])}
         <footer className="flex flex-col justify-between gap-2 border-t border-stone-900 py-6 font-sans text-[11px] uppercase tracking-[0.22em] text-stone-500 sm:flex-row">
           <span>© {year} {profile.name}</span>
           <span className="italic normal-case tracking-normal font-serif text-sm">

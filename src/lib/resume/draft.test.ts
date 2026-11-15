@@ -21,7 +21,7 @@ describe("parseResumeDraft", () => {
   });
 
   it("fills defaults for missing lists", () => {
-    const result = parseResumeDraft({ schemaVersion: 1, profile: { name: "" } });
+    const result = parseResumeDraft({ schemaVersion: 2, profile: { name: "" } });
     expect(result.success && result.data.projects).toEqual([]);
   });
 });

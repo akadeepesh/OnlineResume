@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { displayUrl, firstName, has, initials, joinParts, safeHref, safeImageSrc, socialLinks, visibleResume } from "./view";
+import { arrangeBlocks, displayUrl, firstName, has, initials, joinParts, safeHref, safeImageSrc, socialLinks, visibleResume } from "./view";
+import { DEFAULT_SECTION_ORDER, type SectionKey } from "./schema";
 import { sampleResume } from "./sample";
 import { blankResume } from "./draft";
 
@@ -138,5 +139,45 @@ describe("safeImageSrc", () => {
     expect(safeImageSrc("data:text/html,<script>")).toBeUndefined();
     expect(safeImageSrc("//evil.example/x.png")).toBeUndefined();
     expect(safeImageSrc("  ")).toBeUndefined();
+  });
+});
+
+describe("hidden sections", () => {
+  it("are emptied, so no template can show them", () => {
+    const visible = visibleResume({ ...sampleResume, hiddenSections: ["about", "projects", "tools"] });
+    expect(visible.about).toBeUndefined();
+    expect(visible.projects).toEqual([]);
+    expect(visible.tools).toEqual([]);
+    expect(visible.experience).toEqual(sampleResume.experience);
+    // The draft itself keeps everything: hiding is reversible.
+    expect(sampleResume.projects.length).toBeGreaterThan(0);
+  });
+});
+
+describe("arrangeBlocks", () => {
+  const block = (id: string, ...sections: SectionKey[]) => ({ id, sections });
+  const resume = (sectionOrder: SectionKey[], hiddenSections: SectionKey[] = []) => ({
+    ...sampleResume,
+    sectionOrder,
+    hiddenSections,
+  });
+  const ids = (blocks: { id: string }[]) => blocks.map((b) => b.id);
+
+  it("puts blocks in the person's section order", () => {
+    const order: SectionKey[] = ["projects", "about", "certifications", "skills", "experience", "tools", "education"];
+    const blocks = [block("about", "about"), block("experience", "experience"), block("projects", "projects")];
+    expect(ids(arrangeBlocks(resume(order), blocks))).toEqual(["projects", "about", "experience"]);
+  });
+
+  it("places a block covering several sections where the first of them is", () => {
+    const order: SectionKey[] = ["tools", "about", "experience", "education", "projects", "skills", "certifications"];
+    const blocks = [block("about", "about"), block("expertise", "skills", "tools"), block("projects", "projects")];
+    expect(ids(arrangeBlocks(resume(order), blocks))).toEqual(["expertise", "about", "projects"]);
+  });
+
+  it("drops blocks whose sections are all hidden, and keeps partly hidden ones", () => {
+    const blocks = [block("about", "about"), block("expertise", "skills", "tools"), block("projects", "projects")];
+    const r = resume([...DEFAULT_SECTION_ORDER], ["about", "skills"]);
+    expect(ids(arrangeBlocks(r, blocks))).toEqual(["projects", "expertise"]);
   });
 });

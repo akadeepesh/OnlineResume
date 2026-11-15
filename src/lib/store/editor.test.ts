@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StateStorage } from "zustand/middleware";
 import { blankResume } from "@/lib/resume/draft";
 import { sampleResume } from "@/lib/resume/sample";
+import { DEFAULT_SECTION_ORDER, RESUME_SCHEMA_VERSION } from "@/lib/resume/schema";
 import {
   EDITOR_BACKUP_KEY,
   EDITOR_STORAGE_KEY,
@@ -20,7 +21,7 @@ const memoryStorage = (initial: Record<string, string> = {}) => {
   return { storage, data };
 };
 
-const saved = (state: unknown, version = 1) => ({
+const saved = (state: unknown, version = 2) => ({
   [EDITOR_STORAGE_KEY]: JSON.stringify({ state, version }),
 });
 
@@ -181,7 +182,7 @@ describe("persistence", () => {
   });
 
   it("fills in defaults the saved draft left out", async () => {
-    const { store } = newStore(saved({ resume: { schemaVersion: 1, profile: { name: "Old" } } }));
+    const { store } = newStore(saved({ resume: { schemaVersion: RESUME_SCHEMA_VERSION, profile: { name: "Old" } } }));
     await store.persist.rehydrate();
     expect(store.getState().resume.profile.name).toBe("Old");
     expect(store.getState().resume.experience).toEqual([]);
@@ -197,7 +198,7 @@ describe("persistence", () => {
 
   it("backs up an invalid draft instead of deleting it, and falls back to the example", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const bad = { resume: { schemaVersion: 1, profile: { name: 42 } }, template: "bento" };
+    const bad = { resume: { schemaVersion: RESUME_SCHEMA_VERSION, profile: { name: 42 } }, template: "bento" };
     const { store, data } = newStore(saved(bad));
     await store.persist.rehydrate();
 
@@ -205,6 +206,42 @@ describe("persistence", () => {
     expect(store.getState().hasHydrated).toBe(true);
     expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(bad);
     expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("upgrades a draft saved by the previous version instead of dropping it", async () => {
+    // What PR #45–#49 wrote: store version 1, resume schema version 1.
+    const old = { resume: { schemaVersion: 1, profile: { name: "Kept" }, about: "Old" }, template: "bento" };
+    const { store, data } = newStore(saved(old, 1));
+    await store.persist.rehydrate();
+
+    expect(store.getState().resume.profile.name).toBe("Kept");
+    expect(store.getState().resume.about).toBe("Old");
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+    expect(store.getState().template).toBe("bento");
+    // Written back in the new format straight away.
+    const raw = JSON.parse(data.get(EDITOR_STORAGE_KEY)!);
+    expect(raw.version).toBe(2);
+    expect(raw.state.resume.schemaVersion).toBe(RESUME_SCHEMA_VERSION);
+    expect(data.has(EDITOR_BACKUP_KEY)).toBe(false);
+  });
+
+  it("backs up a draft from an old version that can't be upgraded", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const old = { resume: { schemaVersion: 1, profile: { name: 42 } } };
+    const { store, data } = newStore(saved(old, 1));
+    await store.persist.rehydrate();
+    expect(store.getState().resume).toEqual(sampleResume);
+    expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(old);
+  });
+
+  it("backs up a draft written by a newer version rather than guessing at it", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const future = { resume: { schemaVersion: 9, profile: { name: "From the future" } }, template: "classic" };
+    const { store, data } = newStore(saved(future, 9));
+    await store.persist.rehydrate();
+    expect(store.getState().hasHydrated).toBe(true);
+    expect(store.getState().resume).toEqual(sampleResume);
+    expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(future);
   });
 
   it("marks itself hydrated even when nothing was saved", async () => {
@@ -277,5 +314,264 @@ describe("persistence", () => {
     const store = createEditorStore({ skipHydration: true });
     store.getState().updateProfile({ name: "Server" });
     expect(store.getState().resume.profile.name).toBe("Server");
+  });
+});
+
+describe("section layout", () => {
+  it("hides and shows a section", () => {
+    const { store } = newStore();
+    store.getState().setSectionHidden("tools", true);
+    store.getState().setSectionHidden("tools", true);
+    expect(store.getState().resume.hiddenSections).toEqual(["tools"]);
+    store.getState().setSectionHidden("tools", false);
+    expect(store.getState().resume.hiddenSections).toEqual([]);
+  });
+
+  it("moves a section and clamps the target", () => {
+    const { store } = newStore();
+    store.getState().moveSection(6, 0);
+    expect(store.getState().resume.sectionOrder[0]).toBe("certifications");
+    store.getState().moveSection(0, 99);
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+  });
+});
+
+describe("undo and redo", () => {
+  /** A store with a clock the test controls. */
+  const timed = () => {
+    let time = 1_000_000;
+    const { storage } = memoryStorage();
+    const store = createEditorStore({ storage, skipHydration: true, now: () => time });
+    return { store, tick: (ms: number) => (time += ms) };
+  };
+
+  it("undoes and redoes an edit", () => {
+    const { store } = timed();
+    store.getState().updateProfile({ role: "Designer" });
+    expect(store.getState().undo()).toBe("profile");
+    expect(store.getState().resume.profile.role).toBe(sampleResume.profile.role);
+    expect(store.getState().redo()).toBe("profile");
+    expect(store.getState().resume.profile.role).toBe("Designer");
+  });
+
+  it("does nothing when there is nothing to undo or redo", () => {
+    const { store } = timed();
+    const before = store.getState().resume;
+    expect(store.getState().undo()).toBeUndefined();
+    expect(store.getState().redo()).toBeUndefined();
+    expect(store.getState().resume).toBe(before);
+  });
+
+  it("groups quick typing in one field into one step", () => {
+    const { store, tick } = timed();
+    for (const name of ["S", "Sa", "Sam"]) {
+      store.getState().updateProfile({ name });
+      tick(300);
+    }
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Alex Morgan");
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("starts a new step after a pause, in another field, or after 5 seconds of typing", () => {
+    const { store, tick } = timed();
+    store.getState().updateProfile({ name: "Sam" });
+    tick(1500); // pause
+    store.getState().updateProfile({ name: "Sam Lee" });
+    store.getState().updateProfile({ role: "Chef" }); // another field
+    expect(store.getState().past).toHaveLength(3);
+
+    const long = timed();
+    for (let i = 1; i <= 30; i++) {
+      long.store.getState().setAbout("x".repeat(i));
+      long.tick(400); // never pausing, 12 seconds in all
+    }
+    expect(long.store.getState().past.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps every structural change as its own step, however quick", () => {
+    const { store } = timed();
+    store.getState().addItem("skills");
+    store.getState().addItem("skills");
+    store.getState().moveItem("skills", 0, 1);
+    expect(store.getState().past).toHaveLength(3);
+  });
+
+  it("ignores changes that change nothing", () => {
+    const { store } = timed();
+    store.getState().removeItem("skills", 99);
+    store.getState().moveItem("skills", 0, 0);
+    store.getState().setSectionHidden("about", false);
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("clears redo after a new edit", () => {
+    const { store } = timed();
+    store.getState().setAbout("One");
+    store.getState().undo();
+    store.getState().addItem("tools");
+    expect(store.getState().future).toHaveLength(0);
+    expect(store.getState().redo()).toBeUndefined();
+  });
+
+  it("can undo start over, start blank and loading a resume", () => {
+    const { store } = timed();
+    store.getState().updateProfile({ name: "Mine" });
+    store.getState().startBlank();
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+    store.getState().resetToExample();
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+    store.getState().loadResume(blankResume());
+    store.getState().undo();
+    expect(store.getState().resume.profile.name).toBe("Mine");
+  });
+
+  it("undoes section moves and visibility without jumping to a section", () => {
+    const { store } = timed();
+    store.getState().moveSection(0, 3);
+    store.getState().setSectionHidden("projects", true);
+    expect(store.getState().undo()).toBeNull();
+    expect(store.getState().resume.hiddenSections).toEqual([]);
+    expect(store.getState().undo()).toBeNull();
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+  });
+
+  it("reports which section a list change was in", () => {
+    const { store } = timed();
+    store.getState().updateItem("education", 0, { degree: "BA" });
+    store.getState().removeItem("projects", 0);
+    expect(store.getState().undo()).toBe("projects");
+    expect(store.getState().undo()).toBe("education");
+  });
+
+  it("doesn't track the template: it's a view choice, not content", () => {
+    const { store } = timed();
+    store.getState().setTemplate("bento");
+    expect(store.getState().past).toHaveLength(0);
+  });
+
+  it("keeps at most 100 steps", () => {
+    const { store } = timed();
+    for (let i = 0; i < 120; i++) store.getState().addItem("tools");
+    expect(store.getState().past).toHaveLength(100);
+  });
+
+  it("bumps the revision only when the whole resume is swapped (undo, redo, load)", () => {
+    const { store } = timed();
+    const start = store.getState().revision;
+    store.getState().setAbout("Typed");
+    store.getState().addItem("skills");
+    expect(store.getState().revision).toBe(start);
+    store.getState().undo();
+    store.getState().redo();
+    store.getState().resetToExample();
+    expect(store.getState().revision).toBe(start + 3);
+  });
+
+  it("is not saved, and starts empty after loading a draft", async () => {
+    const { store, data } = newStore(saved({ resume: blankResume() }));
+    store.getState().setAbout("Before load");
+    await store.persist.rehydrate();
+    expect(store.getState().past).toHaveLength(0);
+    store.getState().setAbout("After load");
+    expect(Object.keys(JSON.parse(data.get(EDITOR_STORAGE_KEY)!).state)).toEqual(["resume", "template"]);
+  });
+});
+
+describe("autosave", () => {
+  /** A store that waits `saveDelayMs` before writing, with a counting storage. */
+  const delayed = (initial?: Record<string, string>) => {
+    const { storage, data } = memoryStorage(initial);
+    let writes = 0;
+    let failing = false;
+    const counting: StateStorage = {
+      ...storage,
+      setItem: (key, value) => {
+        if (failing) throw new DOMException("Quota exceeded", "QuotaExceededError");
+        if (key === EDITOR_STORAGE_KEY) writes++;
+        storage.setItem(key, value);
+      },
+    };
+    let time = 5_000;
+    const store = createEditorStore({ storage: counting, skipHydration: true, saveDelayMs: 500, now: () => time });
+    return {
+      store,
+      data,
+      writes: () => writes,
+      fail: (on: boolean) => (failing = on),
+      setTime: (t: number) => (time = t),
+    };
+  };
+  const savedName = (data: Map<string, string>) =>
+    JSON.parse(data.get(EDITOR_STORAGE_KEY) ?? "null")?.state.resume.profile.name;
+
+  afterEach(() => vi.useRealTimers());
+
+  it("waits for a pause in typing, then writes once", async () => {
+    vi.useFakeTimers();
+    const { store, data, writes } = delayed();
+    await store.persist.rehydrate();
+    const before = writes();
+    for (const name of ["S", "Sa", "Sam"]) {
+      store.getState().updateProfile({ name });
+      vi.advanceTimersByTime(200);
+    }
+    expect(store.getState().savePending).toBe(true);
+    expect(savedName(data)).not.toBe("Sam");
+
+    vi.advanceTimersByTime(500);
+    expect(savedName(data)).toBe("Sam");
+    expect(writes() - before).toBe(1);
+    expect(store.getState().savePending).toBe(false);
+  });
+
+  it("records when it last saved, and only when something was written", async () => {
+    vi.useFakeTimers();
+    const { store, writes, setTime } = delayed();
+    await store.persist.rehydrate();
+    expect(store.getState().lastSavedAt).toBeNull();
+
+    setTime(42_000);
+    store.getState().setAbout("Hello");
+    vi.advanceTimersByTime(500);
+    expect(store.getState().lastSavedAt).toBe(42_000);
+
+    // Undo then redo lands on the resume already written: nothing to write.
+    const count = writes();
+    store.getState().undo();
+    store.getState().redo();
+    vi.advanceTimersByTime(500);
+    expect(writes()).toBe(count); // same resume as last written: nothing to do
+  });
+
+  it("writes straight away when the page is being left", async () => {
+    vi.useFakeTimers();
+    const { store, data } = delayed();
+    await store.persist.rehydrate();
+    store.getState().updateProfile({ name: "Leaving" });
+    store.flushSave();
+    expect(savedName(data)).toBe("Leaving");
+    expect(store.getState().savePending).toBe(false);
+  });
+
+  it("reports a failed save, then recovers once a save works again", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { store, data, fail } = delayed();
+    await store.persist.rehydrate();
+
+    fail(true);
+    store.getState().updateProfile({ avatar: "data:image/jpeg;base64,big" });
+    vi.advanceTimersByTime(500);
+    expect(store.getState().storageAvailable).toBe(false);
+    expect(store.getState().savePending).toBe(false);
+
+    fail(false);
+    store.getState().updateProfile({ avatar: undefined });
+    vi.advanceTimersByTime(500);
+    expect(store.getState().storageAvailable).toBe(true);
+    expect(savedName(data)).toBe("Alex Morgan");
   });
 });

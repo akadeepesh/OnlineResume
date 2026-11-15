@@ -56,7 +56,8 @@ export function ItemListEditor<S extends ListSection>({
   const duplicateItem = useEditorStore((s) => s.duplicateItem);
   const moveItem = useEditorStore((s) => s.moveItem);
 
-  const [ids, idOps] = useStableIds(items.length);
+  const revision = useEditorStore((s) => s.revision);
+  const [ids, idOps] = useStableIds(items, revision);
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const cards = useRef(new Map<string, HTMLElement>());
@@ -163,8 +164,8 @@ export function ItemListEditor<S extends ListSection>({
           <DialogHeader>
             <DialogTitle>Delete this {noun}?</DialogTitle>
             <DialogDescription>
-              {has(confirmTitle) ? `"${confirmTitle}" ` : "It "}and everything in it will be removed. This
-              can&apos;t be undone yet.
+              {has(confirmTitle) ? `"${confirmTitle}" ` : "It "}and everything in it will be removed. You
+              can bring it back with Undo.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">

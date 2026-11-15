@@ -29,6 +29,7 @@ import {
   presentSections,
   socialLinks,
 } from "@/lib/resume/view";
+import { renderBlocks } from "../blocks";
 
 const SOCIAL_ICONS = { github: Github, linkedin: Linkedin, email: Mail } as const;
 
@@ -341,297 +342,329 @@ export default function BentoTemplate({ data }: { data: Resume }) {
             </Tile>
           )}
 
-          {/* About */}
-          {show.about && (
-            <Tile className="bg-white md:col-span-2">
-              <Label>About</Label>
-              <p className="text-lg leading-relaxed text-neutral-500">
-                <RichText text={about ?? ""} strongClassName="font-medium text-neutral-900" />
-              </p>
-            </Tile>
-          )}
+          {renderBlocks(data, [
+            // About
+            show.about && {
+              id: "about",
+              sections: ["about"],
+              render: () => (
+                <Tile className="bg-white md:col-span-2">
+                  <Label>About</Label>
+                  <p className="text-lg leading-relaxed text-neutral-500">
+                    <RichText text={about ?? ""} strongClassName="font-medium text-neutral-900" />
+                  </p>
+                </Tile>
+              ),
+            },
 
-          {/* Skills */}
-          {show.skills && (
-            <Tile className="bg-[#ff5b2e] text-white md:col-span-2" delay={0.05}>
-              <Label className="text-white/70">
-                {skills.some((s) => workCount(s) > 0) ? "Skills — tap to see the work" : "Skills"}
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {skills.map((s, i) =>
-                  workCount(s) > 0 ? (
-                    <button
-                      key={i}
-                      onClick={() => setSkill(s)}
-                      className="group inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium backdrop-blur transition-all hover:bg-white hover:text-[#ff5b2e]"
-                    >
-                      <SkillIcon name={s.icon} className="h-4 w-4" />
-                      {s.name}
-                      <span className="rounded-full bg-white/20 px-1.5 text-[11px] group-hover:bg-[#ff5b2e]/10">
-                        {workCount(s)}
-                      </span>
-                    </button>
-                  ) : (
-                    <span
-                      key={i}
-                      className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium"
-                    >
-                      <SkillIcon name={s.icon} className="h-4 w-4" />
-                      {s.name}
-                    </span>
-                  )
-                )}
-              </div>
-            </Tile>
-          )}
-
-          {/* Experience */}
-          {show.experience && (
-            <Tile className="bg-white md:col-span-2 lg:row-span-2">
-              <Label>Experience</Label>
-              <ul className="divide-y divide-neutral-100">
-                {experience.map((exp, i) => {
-                  const open = openExp === i;
-                  const expandable = exp.responsibilities.length > 0 || exp.skills.length > 0;
-                  const where = joinParts([exp.company, exp.location]);
-                  return (
-                    <li key={i} className="py-4 first:pt-0">
-                      <button
-                        disabled={!expandable}
-                        onClick={() => setOpenExp(open ? null : i)}
-                        className="flex w-full items-start justify-between gap-4 text-left"
-                        aria-expanded={expandable ? open : undefined}
-                      >
-                        <span>
-                          <span className="block font-semibold tracking-tight">{exp.title}</span>
-                          {where && <span className="block text-sm text-neutral-500">{where}</span>}
-                        </span>
-                        <span className="flex flex-shrink-0 items-center gap-3">
-                          {has(exp.date) && (
-                            <span className="hidden text-xs text-neutral-400 sm:block">{exp.date}</span>
-                          )}
-                          {expandable && (
-                            <span
-                              className={`flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 transition-transform ${
-                                open ? "rotate-45 bg-neutral-900 text-white" : ""
-                              }`}
-                            >
-                              <Plus className="h-3.5 w-3.5" />
-                            </span>
-                          )}
-                        </span>
-                      </button>
-                      {has(exp.date) && (
-                        <p className="mt-1 text-xs text-neutral-400 sm:hidden">{exp.date}</p>
-                      )}
-                      <AnimatePresence initial={false}>
-                        {open && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25 }}
-                            className="overflow-hidden"
-                          >
-                            {exp.responsibilities.length > 0 && (
-                              <ul className="mt-3 space-y-1.5 text-sm text-neutral-600">
-                                {exp.responsibilities.map((r, j) => (
-                                  <li key={j} className="flex gap-2">
-                                    <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff5b2e]" />
-                                    <span>
-                                      <RichText text={r} strongClassName="font-medium text-neutral-900" />
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                            {exp.skills.length > 0 && (
-                              <div className="mt-3 flex flex-wrap gap-1.5">
-                                {exp.skills.map((s) => (
-                                  <span key={s} className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
-                                    {s}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Tile>
-          )}
-
-          {/* Projects */}
-          {projects.map((project, i) => {
-            const dark = i % 3 === 0;
-            return (
-              <Tile
-                key={i}
-                delay={(i % 2) * 0.05}
-                className={`group md:col-span-2 ${dark ? "bg-neutral-900 text-white" : "bg-white"}`}
-              >
-                <div className="flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-4">
-                    <span className={`text-sm font-medium ${dark ? "text-neutral-500" : "text-neutral-400"}`}>
-                      Project {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="flex gap-1.5">
-                      {has(project.github) && (
-                        <a
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Source code"
-                          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-                            dark ? "bg-white/10 hover:bg-white/20" : "bg-neutral-100 hover:bg-neutral-200"
-                          }`}
+            // Skills
+            show.skills && {
+              id: "skills",
+              sections: ["skills"],
+              render: () => (
+                <Tile className="bg-[#ff5b2e] text-white md:col-span-2" delay={0.05}>
+                  <Label className="text-white/70">
+                    {skills.some((s) => workCount(s) > 0) ? "Skills — tap to see the work" : "Skills"}
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map((s, i) =>
+                      workCount(s) > 0 ? (
+                        <button
+                          key={i}
+                          onClick={() => setSkill(s)}
+                          className="group inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium backdrop-blur transition-all hover:bg-white hover:text-[#ff5b2e]"
                         >
-                          <Github className="h-4 w-4" />
-                        </a>
-                      )}
-                      {has(project.demo) && (
-                        <a
-                          href={project.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Live demo"
-                          className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ff5b2e] text-white transition-transform hover:scale-110"
-                        >
-                          <ArrowUpRight className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  <h3 className="mt-6 text-2xl font-semibold tracking-tight">
-                    {project.name.replace(/^Project \w+ - /, "")}
-                  </h3>
-                  {has(project.description) && (
-                    <p className={`mt-2 ${dark ? "text-neutral-400" : "text-neutral-500"}`}>
-                      {project.description}
-                    </p>
-                  )}
-                  {project.technologies.length > 0 && (
-                    <div className="mt-auto flex flex-wrap gap-1.5 pt-6">
-                      {project.technologies.map((t) => (
+                          <SkillIcon name={s.icon} className="h-4 w-4" />
+                          {s.name}
+                          <span className="rounded-full bg-white/20 px-1.5 text-[11px] group-hover:bg-[#ff5b2e]/10">
+                            {workCount(s)}
+                          </span>
+                        </button>
+                      ) : (
                         <span
-                          key={t}
-                          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                            dark ? "bg-white/10 text-neutral-300" : "bg-neutral-100 text-neutral-600"
-                          }`}
+                          key={i}
+                          className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium"
                         >
-                          {t}
+                          <SkillIcon name={s.icon} className="h-4 w-4" />
+                          {s.name}
                         </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Tile>
-            );
-          })}
-
-          {/* Tools */}
-          {show.tools && (
-            <Tile className="bg-white md:col-span-2">
-              <Label>Toolbox</Label>
-              <div className="grid gap-5 sm:grid-cols-2">
-                {tools.map((cat, i) => (
-                  <div key={i}>
-                    <p className="mb-2 text-sm font-semibold">{cat.name}</p>
-                    {cat.skills.length > 0 && (
-                      <p className="text-sm leading-relaxed text-neutral-500">{cat.skills.join(" · ")}</p>
+                      )
                     )}
                   </div>
-                ))}
-              </div>
-            </Tile>
-          )}
+                </Tile>
+              ),
+            },
 
-          {/* Education */}
-          {show.education && (
-            <Tile className="bg-[#e6e2f5] md:col-span-2" delay={0.05}>
-              <Label className="text-[#5b4b9a]/70">Education</Label>
-              <div className="space-y-4">
-                {education.map((edu, i) => {
-                  const detail = joinParts([edu.degree, edu.location]);
-                  return (
-                    <div key={i} className="flex items-start gap-4">
-                      <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-[#5b4b9a] shadow-sm">
-                        <GraduationCap className="h-5 w-5" />
-                      </span>
-                      <div className="flex-1">
-                        <p className="font-semibold tracking-tight text-[#231a45]">{edu.institution}</p>
-                        {detail && <p className="text-sm text-[#231a45]/60">{detail}</p>}
-                      </div>
-                      {has(edu.period) && (
-                        <span className="hidden text-xs font-medium text-[#231a45]/50 sm:block">
-                          {edu.period}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Tile>
-          )}
-
-          {/* Certifications marquee */}
-          {show.certifications && (
-            <Tile className="bg-white px-0 sm:px-0 md:col-span-2 lg:col-span-4">
-              <div className="px-6 sm:px-7">
-                <Label>Certifications</Label>
-              </div>
-              <div className="group relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-                {[0, 1].map((copy) => (
-                  <ul
-                    key={copy}
-                    aria-hidden={copy === 1}
-                    className="flex flex-shrink-0 animate-marquee gap-3 pr-3 group-hover:[animation-play-state:paused]"
-                  >
-                    {certifications.map((cert, i) => {
-                      const meta = joinParts([cert.issuer, cert.date]);
-                      const className =
-                        "flex w-64 items-center gap-3 rounded-2xl bg-neutral-50 p-4 transition-colors hover:bg-neutral-100";
-                      const body = (
-                        <>
-                          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                            <SkillIcon name={cert.icon} className="h-5 w-5 text-[#ff5b2e]" />
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block truncate text-sm font-semibold">{cert.name}</span>
-                            {meta && <span className="block text-xs text-neutral-500">{meta}</span>}
-                          </span>
-                        </>
-                      );
+            // Experience
+            show.experience && {
+              id: "experience",
+              sections: ["experience"],
+              render: () => (
+                <Tile className="bg-white md:col-span-2 lg:row-span-2">
+                  <Label>Experience</Label>
+                  <ul className="divide-y divide-neutral-100">
+                    {experience.map((exp, i) => {
+                      const open = openExp === i;
+                      const expandable = exp.responsibilities.length > 0 || exp.skills.length > 0;
+                      const where = joinParts([exp.company, exp.location]);
                       return (
-                        <li key={i}>
-                          {has(cert.link) ? (
-                            <a
-                              href={cert.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              tabIndex={copy === 1 ? -1 : undefined}
-                              title={cert.description}
-                              className={className}
-                            >
-                              {body}
-                            </a>
-                          ) : (
-                            <div title={cert.description} className={className}>
-                              {body}
-                            </div>
+                        <li key={i} className="py-4 first:pt-0">
+                          <button
+                            disabled={!expandable}
+                            onClick={() => setOpenExp(open ? null : i)}
+                            className="flex w-full items-start justify-between gap-4 text-left"
+                            aria-expanded={expandable ? open : undefined}
+                          >
+                            <span>
+                              <span className="block font-semibold tracking-tight">{exp.title}</span>
+                              {where && <span className="block text-sm text-neutral-500">{where}</span>}
+                            </span>
+                            <span className="flex flex-shrink-0 items-center gap-3">
+                              {has(exp.date) && (
+                                <span className="hidden text-xs text-neutral-400 sm:block">{exp.date}</span>
+                              )}
+                              {expandable && (
+                                <span
+                                  className={`flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 transition-transform ${
+                                    open ? "rotate-45 bg-neutral-900 text-white" : ""
+                                  }`}
+                                >
+                                  <Plus className="h-3.5 w-3.5" />
+                                </span>
+                              )}
+                            </span>
+                          </button>
+                          {has(exp.date) && (
+                            <p className="mt-1 text-xs text-neutral-400 sm:hidden">{exp.date}</p>
                           )}
+                          <AnimatePresence initial={false}>
+                            {open && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                                className="overflow-hidden"
+                              >
+                                {exp.responsibilities.length > 0 && (
+                                  <ul className="mt-3 space-y-1.5 text-sm text-neutral-600">
+                                    {exp.responsibilities.map((r, j) => (
+                                      <li key={j} className="flex gap-2">
+                                        <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff5b2e]" />
+                                        <span>
+                                          <RichText text={r} strongClassName="font-medium text-neutral-900" />
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                                {exp.skills.length > 0 && (
+                                  <div className="mt-3 flex flex-wrap gap-1.5">
+                                    {exp.skills.map((s) => (
+                                      <span key={s} className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
+                                        {s}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </li>
                       );
                     })}
                   </ul>
-                ))}
-              </div>
-            </Tile>
-          )}
+                </Tile>
+              ),
+            },
 
+            // Projects
+            show.projects && {
+              id: "projects",
+              sections: ["projects"],
+              render: () => (
+                projects.map((project, i) => {
+                  const dark = i % 3 === 0;
+                  return (
+                    <Tile
+                      key={i}
+                      delay={(i % 2) * 0.05}
+                      className={`group md:col-span-2 ${dark ? "bg-neutral-900 text-white" : "bg-white"}`}
+                    >
+                      <div className="flex h-full flex-col">
+                        <div className="flex items-start justify-between gap-4">
+                          <span className={`text-sm font-medium ${dark ? "text-neutral-500" : "text-neutral-400"}`}>
+                            Project {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <div className="flex gap-1.5">
+                            {has(project.github) && (
+                              <a
+                                href={project.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Source code"
+                                className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                                  dark ? "bg-white/10 hover:bg-white/20" : "bg-neutral-100 hover:bg-neutral-200"
+                                }`}
+                              >
+                                <Github className="h-4 w-4" />
+                              </a>
+                            )}
+                            {has(project.demo) && (
+                              <a
+                                href={project.demo}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Live demo"
+                                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ff5b2e] text-white transition-transform hover:scale-110"
+                              >
+                                <ArrowUpRight className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <h3 className="mt-6 text-2xl font-semibold tracking-tight">
+                          {project.name.replace(/^Project \w+ - /, "")}
+                        </h3>
+                        {has(project.description) && (
+                          <p className={`mt-2 ${dark ? "text-neutral-400" : "text-neutral-500"}`}>
+                            {project.description}
+                          </p>
+                        )}
+                        {project.technologies.length > 0 && (
+                          <div className="mt-auto flex flex-wrap gap-1.5 pt-6">
+                            {project.technologies.map((t) => (
+                              <span
+                                key={t}
+                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                                  dark ? "bg-white/10 text-neutral-300" : "bg-neutral-100 text-neutral-600"
+                                }`}
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </Tile>
+                  );
+                })
+              ),
+            },
+
+            // Tools
+            show.tools && {
+              id: "tools",
+              sections: ["tools"],
+              render: () => (
+                <Tile className="bg-white md:col-span-2">
+                  <Label>Toolbox</Label>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    {tools.map((cat, i) => (
+                      <div key={i}>
+                        <p className="mb-2 text-sm font-semibold">{cat.name}</p>
+                        {cat.skills.length > 0 && (
+                          <p className="text-sm leading-relaxed text-neutral-500">{cat.skills.join(" · ")}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Tile>
+              ),
+            },
+
+            // Education
+            show.education && {
+              id: "education",
+              sections: ["education"],
+              render: () => (
+                <Tile className="bg-[#e6e2f5] md:col-span-2" delay={0.05}>
+                  <Label className="text-[#5b4b9a]/70">Education</Label>
+                  <div className="space-y-4">
+                    {education.map((edu, i) => {
+                      const detail = joinParts([edu.degree, edu.location]);
+                      return (
+                        <div key={i} className="flex items-start gap-4">
+                          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-[#5b4b9a] shadow-sm">
+                            <GraduationCap className="h-5 w-5" />
+                          </span>
+                          <div className="flex-1">
+                            <p className="font-semibold tracking-tight text-[#231a45]">{edu.institution}</p>
+                            {detail && <p className="text-sm text-[#231a45]/60">{detail}</p>}
+                          </div>
+                          {has(edu.period) && (
+                            <span className="hidden text-xs font-medium text-[#231a45]/50 sm:block">
+                              {edu.period}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Tile>
+              ),
+            },
+
+            // Certifications marquee
+            show.certifications && {
+              id: "certifications",
+              sections: ["certifications"],
+              render: () => (
+                <Tile className="bg-white px-0 sm:px-0 md:col-span-2 lg:col-span-4">
+                  <div className="px-6 sm:px-7">
+                    <Label>Certifications</Label>
+                  </div>
+                  <div className="group relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+                    {[0, 1].map((copy) => (
+                      <ul
+                        key={copy}
+                        aria-hidden={copy === 1}
+                        className="flex flex-shrink-0 animate-marquee gap-3 pr-3 group-hover:[animation-play-state:paused]"
+                      >
+                        {certifications.map((cert, i) => {
+                          const meta = joinParts([cert.issuer, cert.date]);
+                          const className =
+                            "flex w-64 items-center gap-3 rounded-2xl bg-neutral-50 p-4 transition-colors hover:bg-neutral-100";
+                          const body = (
+                            <>
+                              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+                                <SkillIcon name={cert.icon} className="h-5 w-5 text-[#ff5b2e]" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-semibold">{cert.name}</span>
+                                {meta && <span className="block text-xs text-neutral-500">{meta}</span>}
+                              </span>
+                            </>
+                          );
+                          return (
+                            <li key={i}>
+                              {has(cert.link) ? (
+                                <a
+                                  href={cert.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  tabIndex={copy === 1 ? -1 : undefined}
+                                  title={cert.description}
+                                  className={className}
+                                >
+                                  {body}
+                                </a>
+                              ) : (
+                                <div title={cert.description} className={className}>
+                                  {body}
+                                </div>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ))}
+                  </div>
+                </Tile>
+              ),
+            },
+
+          ])}
           {/* CTA */}
           {email && (
             <Tile className="bg-neutral-900 text-white md:col-span-2 lg:col-span-4">

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { migrateResume } from "./migrate";
 
 // ============================================================================
 // Resume schema: the single source of truth for resume data.
@@ -8,10 +9,11 @@ import { z } from "zod";
 // check and the compile-time types can never drift apart.
 //
 // Bump RESUME_SCHEMA_VERSION whenever the shape changes in a way that needs a
-// migration for previously saved/imported data.
+// migration for previously saved/imported data, and add the step to
+// `migrate.ts`. Parsing always migrates first, so old files keep loading.
 // ============================================================================
 
-export const RESUME_SCHEMA_VERSION = 1;
+export const RESUME_SCHEMA_VERSION = 2;
 
 export const iconKeySchema = z.enum([
   "code",
@@ -112,8 +114,46 @@ export const certificationSchema = z.object({
   description: optionalText,
 });
 
+// ----------------------------------------------------------------------------
+// Section layout (added in v2). The profile is always the header, so it can't
+// be moved or hidden; every other section can.
+// ----------------------------------------------------------------------------
+
+/** The sections a person can reorder or hide, in the default (editor) order. */
+export const DEFAULT_SECTION_ORDER = [
+  "about",
+  "experience",
+  "education",
+  "projects",
+  "skills",
+  "tools",
+  "certifications",
+] as const;
+
+export const sectionKeySchema = z.enum(DEFAULT_SECTION_ORDER);
+export type SectionKey = z.infer<typeof sectionKeySchema>;
+
+const unique = <T>(list: readonly T[]): T[] => [...new Set(list)];
+
+/**
+ * A full order, always: repeats are dropped and missing sections are added at
+ * the end in their default order. A hand-edited file or a resume saved by a
+ * version with fewer sections is repaired instead of rejected.
+ */
+export const completeSectionOrder = (order: readonly SectionKey[]): SectionKey[] => {
+  const seen = unique(order);
+  return [...seen, ...DEFAULT_SECTION_ORDER.filter((key) => !seen.includes(key))];
+};
+
 export const resumeSchema = z.object({
   schemaVersion: z.literal(RESUME_SCHEMA_VERSION),
+  /** The order sections appear in. Templates arrange their blocks by it. */
+  sectionOrder: z
+    .array(sectionKeySchema)
+    .default([...DEFAULT_SECTION_ORDER])
+    .transform(completeSectionOrder),
+  /** Sections kept in the draft but left off the resume. */
+  hiddenSections: z.array(sectionKeySchema).default([]).transform(unique),
   profile: profileSchema,
   about: optionalText,
   experience: list(experienceEntrySchema),
@@ -148,7 +188,7 @@ export type ResumeParseResult =
  * return either typed data or a flat list of human-readable issues.
  */
 export function parseResume(input: unknown): ResumeParseResult {
-  const result = resumeSchema.safeParse(input);
+  const result = resumeSchema.safeParse(migrateResume(input));
   if (result.success) return { success: true, data: result.data };
   return {
     success: false,

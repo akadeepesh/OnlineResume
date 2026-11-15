@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, Check, Eye, PencilLine } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, Eye, Loader2, PencilLine } from "lucide-react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
 import { useEditorHydration, useEditorStore } from "@/lib/store/editor";
 import type { SectionId } from "@/lib/editor/sections";
+import { savedLabel } from "@/lib/editor/saved-label";
+import { HistoryButtons, useHistoryShortcuts } from "./HistoryControls";
 import PreviewPane from "./PreviewPane";
 import SectionPanel from "./SectionPanel";
 import { SectionSelect, SectionSidebar } from "./SectionNav";
@@ -27,8 +29,28 @@ function useIsDesktop(): boolean | null {
   );
 }
 
+/** Re-render every 30 s, so "Saved 2 min ago" stays true. */
+function useNow(active: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    // No need to sync first: a `now` older than the save reads as "just now".
+    if (!active) return;
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, [active]);
+  return now;
+}
+
+/**
+ * What's actually happened to the draft: waiting to save while you type, saved
+ * (and when), or not saved because the browser refused.
+ */
 function SaveStatus() {
   const available = useEditorStore((s) => s.storageAvailable);
+  const pending = useEditorStore((s) => s.savePending);
+  const savedAt = useEditorStore((s) => s.lastSavedAt);
+  const now = useNow(savedAt !== null);
+
   if (!available) {
     return (
       <span
@@ -42,18 +64,29 @@ function SaveStatus() {
       </span>
     );
   }
+
+  const label = pending ? "Saving…" : savedAt !== null ? savedLabel(savedAt, now) : "Saved in this browser";
   return (
     <span
-      className="hidden items-center gap-1 text-xs text-neutral-500 md:flex"
-      title="Your resume is saved in this browser as you type. Sign-in to keep it everywhere is coming soon."
+      className="flex items-center gap-1 text-xs text-neutral-500"
+      title={
+        savedAt !== null
+          ? `Last saved in this browser at ${new Date(savedAt).toLocaleTimeString()}. Sign-in to keep it everywhere is coming soon.`
+          : "Your resume is saved in this browser as you type. Sign-in to keep it everywhere is coming soon."
+      }
     >
-      <Check className="h-3.5 w-3.5 text-emerald-600" />
-      Saved in this browser
+      {pending ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
+      ) : (
+        <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+      )}
+      {/* Phones show just the icon; the words are still read out. */}
+      <span className="sr-only md:not-sr-only">{label}</span>
     </span>
   );
 }
 
-function TopBar() {
+function TopBar({ onSelect, announce }: { onSelect: (id: SectionId) => void; announce: (m: string) => void }) {
   // Before hydration the store still holds the example, so don't flash its name.
   const name = useEditorStore((s) => (s.hasHydrated ? s.resume.profile.name.trim() : null));
   return (
@@ -69,6 +102,7 @@ function TopBar() {
         {name === null ? "" : name || "Untitled resume"}
       </p>
       <SaveStatus />
+      <HistoryButtons onSelect={onSelect} announce={announce} />
       <TemplatePicker />
       <StartFromMenu />
     </header>
@@ -175,10 +209,17 @@ export default function EditorShell() {
   const hydrated = useEditorHydration();
   const isDesktop = useIsDesktop();
   const [section, setSection] = useState<SectionId>("profile");
+  // Undo can change a section you can't see; screen readers hear what happened.
+  const [announcement, setAnnouncement] = useState("");
+  const announce = useCallback((message: string) => setAnnouncement(message), []);
+  useHistoryShortcuts(setSection, announce);
 
   return (
     <div className="flex h-dvh flex-col bg-neutral-50 font-sans text-neutral-900">
-      <TopBar />
+      <p className="sr-only" aria-live="polite">
+        {announcement}
+      </p>
+      <TopBar onSelect={setSection} announce={announce} />
       {!hydrated || isDesktop === null ? (
         <Loading />
       ) : isDesktop ? (
