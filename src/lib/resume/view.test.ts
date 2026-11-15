@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayUrl, firstName, has, initials, joinParts, socialLinks } from "./view";
+import { displayUrl, firstName, has, initials, joinParts, safeHref, socialLinks } from "./view";
 
 describe("has", () => {
   it("treats missing and blank strings as absent", () => {
@@ -54,5 +54,40 @@ describe("socialLinks", () => {
       ]).map((l) => l.kind)
     ).toEqual(["email", "github"]);
     expect(socialLinks(undefined)).toEqual([]);
+  });
+});
+
+describe("safeHref", () => {
+  it("keeps http(s), mailto and same-site links", () => {
+    expect(safeHref(" https://example.com/a ")).toBe("https://example.com/a");
+    expect(safeHref("HTTP://example.com")).toBe("HTTP://example.com");
+    expect(safeHref("mailto:a@example.com")).toBe("mailto:a@example.com");
+    expect(safeHref("/resume.pdf")).toBe("/resume.pdf");
+  });
+
+  it("adds https to bare domains and protocol-relative links", () => {
+    expect(safeHref("github.com/alex")).toBe("https://github.com/alex");
+    expect(safeHref("//example.com")).toBe("https://example.com");
+  });
+
+  it("drops dangerous schemes and blanks", () => {
+    expect(safeHref("javascript:alert(1)")).toBeUndefined();
+    expect(safeHref("  JavaScript:alert(1)")).toBeUndefined();
+    expect(safeHref("data:text/html,<script>")).toBeUndefined();
+    expect(safeHref("vbscript:x")).toBeUndefined();
+    expect(safeHref("   ")).toBeUndefined();
+    expect(safeHref(undefined)).toBeUndefined();
+  });
+});
+
+describe("socialLinks with typed input", () => {
+  it("fixes bare domains and skips unsafe links", () => {
+    expect(socialLinks({ github: "github.com/alex", linkedin: "javascript:alert(1)" })).toEqual([
+      { kind: "github", label: "GitHub", href: "https://github.com/alex", display: "github.com/alex" },
+    ]);
+  });
+
+  it("does not double the mailto prefix", () => {
+    expect(socialLinks({ email: "mailto:a@example.com" })[0].href).toBe("mailto:a@example.com");
   });
 });

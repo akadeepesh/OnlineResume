@@ -36,6 +36,24 @@ export const firstName = (name: string): string => name.trim().split(/\s+/)[0] ?
 export const displayUrl = (url: string): string =>
   url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
+/**
+ * A link that is safe to put in an `href`, or undefined.
+ *
+ * Resume links are typed by users and shown on public pages, so only
+ * http(s), mailto and same-site paths are allowed: `javascript:` and other
+ * schemes are dropped. A bare domain ("github.com/alex") gets `https://`,
+ * otherwise the browser would treat it as a relative path on our site.
+ */
+export function safeHref(value: string | null | undefined): string | undefined {
+  if (!has(value)) return undefined;
+  const link = value.trim();
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(link)?.[1]?.toLowerCase();
+  if (scheme) return ["http", "https", "mailto"].includes(scheme) ? link : undefined;
+  if (link.startsWith("//")) return `https:${link}`;
+  if (link.startsWith("/")) return link;
+  return `https://${link}`;
+}
+
 export type SocialKind = keyof Socials;
 
 export type SocialLink = {
@@ -64,11 +82,13 @@ export function socialLinks(
   for (const kind of order) {
     const value = socials[kind];
     if (!has(value)) continue;
-    const trimmed = value.trim();
+    const trimmed = value.trim().replace(/^mailto:/i, "");
+    const href = kind === "email" ? `mailto:${trimmed}` : safeHref(trimmed);
+    if (!href) continue;
     links.push({
       kind,
       label: SOCIAL_LABELS[kind],
-      href: kind === "email" ? `mailto:${trimmed}` : trimmed,
+      href,
       display: kind === "email" ? trimmed : displayUrl(trimmed),
     });
   }
