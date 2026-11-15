@@ -1,13 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useRef } from "react";
 import { Bold } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CharCount, Field } from "@/components/editor/fields/Field";
 import { RichText } from "@/components/shared/RichText";
 import { useEditorStore } from "@/lib/store/editor";
-import { toggleBold } from "@/lib/editor/bold";
+import { useBoldShortcut } from "@/components/editor/list/hooks";
 
 const ABOUT_SOFT_LIMIT = 600;
 
@@ -18,32 +18,7 @@ export default function AboutForm() {
   const about = useEditorStore((s) => s.resume.about ?? "");
   const setAbout = useEditorStore((s) => s.setAbout);
   const ref = useRef<HTMLTextAreaElement>(null);
-  // Where the selection should go once React has rendered the new text.
-  const pendingSelection = useRef<[number, number] | null>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    const sel = pendingSelection.current;
-    if (!el || !sel) return;
-    pendingSelection.current = null;
-    el.focus();
-    el.setSelectionRange(sel[0], sel[1]);
-  }, [about]);
-
-  const bold = () => {
-    const el = ref.current;
-    if (!el) return;
-    const edit = toggleBold(el.value, el.selectionStart, el.selectionEnd);
-    pendingSelection.current = [edit.selectionStart, edit.selectionEnd];
-    setAbout(edit.text);
-  };
-
-  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "b") {
-      e.preventDefault();
-      bold();
-    }
-  };
+  const { bold, handleBoldKey } = useBoldShortcut(ref, about, setAbout);
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,7 +55,7 @@ export default function AboutForm() {
               ref={ref}
               value={about}
               onChange={(e) => setAbout(e.target.value)}
-              onKeyDown={onKeyDown}
+              onKeyDown={handleBoldKey}
               rows={8}
               placeholder="What you do, what you're good at, and what you're looking for."
               className="resize-y border-0 focus-visible:ring-0 focus-visible:ring-offset-0"

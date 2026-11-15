@@ -113,3 +113,50 @@ export function presentSections(resume: Resume) {
 }
 
 export type PresentSections = ReturnType<typeof presentSections>;
+
+// ----------------------------------------------------------------------------
+// What a visitor should see of a draft.
+//
+// The editor adds empty items the moment someone clicks "Add", and leaves
+// blank bullets and tags while they type. None of that should reach a
+// template: an item with nothing in it would render an empty card or a
+// section heading with nothing under it. Items with *some* content stay, even
+// without their title yet, so half-written work doesn't vanish from the
+// preview.
+// ----------------------------------------------------------------------------
+
+const presentStrings = (list: string[]) => list.filter(has);
+
+/**
+ * True when any string field of the item has text, or any list has a
+ * non-blank entry. `icon` is ignored: it always has a default value.
+ */
+export const itemHasContent = (item: object): boolean =>
+  Object.entries(item).some(([key, value]) =>
+    key === "icon"
+      ? false
+      : typeof value === "string"
+        ? has(value)
+        : Array.isArray(value)
+          ? value.some((v) => (typeof v === "string" ? has(v) : v != null))
+          : false
+  );
+const hasContent = itemHasContent;
+
+export function visibleResume(resume: Resume): Resume {
+  return {
+    ...resume,
+    experience: resume.experience
+      .map((e) => ({ ...e, responsibilities: presentStrings(e.responsibilities), skills: presentStrings(e.skills) }))
+      .filter(hasContent),
+    projects: resume.projects
+      .map((p) => ({ ...p, details: presentStrings(p.details), technologies: presentStrings(p.technologies) }))
+      .filter(hasContent),
+    skills: resume.skills
+      .map((s) => ({ ...s, repos: presentStrings(s.repos) }))
+      .filter(hasContent),
+    tools: resume.tools.map((t) => ({ ...t, skills: presentStrings(t.skills) })).filter(hasContent),
+    education: resume.education.filter(hasContent),
+    certifications: resume.certifications.filter(hasContent),
+  };
+}

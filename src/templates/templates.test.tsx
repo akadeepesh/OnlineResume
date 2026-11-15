@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { sampleResume } from "@/lib/resume/sample";
 import { parseResume, RESUME_SCHEMA_VERSION, type Resume, type ResumeInput } from "@/lib/resume/schema";
+import { emptyItem } from "@/lib/store/editor";
 import { templates, type TemplateSlug } from "./index";
 
 // ============================================================================
@@ -49,6 +50,21 @@ const bareItems = parse({
   tools: [{ name: "Espresso Machines" }],
   education: [{ institution: "Riverside College" }],
   certifications: [{ name: "Food Safety Level 2" }],
+});
+
+/**
+ * What the editor holds right after clicking "Add" in every section, plus an
+ * empty bullet and tag: items exist, but nothing has been typed into them.
+ */
+const freshlyAdded = parse({
+  schemaVersion: RESUME_SCHEMA_VERSION,
+  profile: { name: "Sam Lee" },
+  experience: [{ ...emptyItem.experience(), responsibilities: [""], skills: [" "] }],
+  projects: [{ ...emptyItem.projects(), details: [""] }],
+  skills: [emptyItem.skills()],
+  tools: [{ ...emptyItem.tools(), skills: [""] }],
+  education: [emptyItem.education()],
+  certifications: [emptyItem.certifications()],
 });
 
 const slugs = Object.keys(templates) as TemplateSlug[];
@@ -117,6 +133,7 @@ describe.each(slugs)("%s template", (slug) => {
   for (const [label, data] of [
     ["a minimal resume (name only)", minimal],
     ["a resume with blank strings", blank],
+    ["freshly added, still empty items", freshlyAdded],
   ] as const) {
     it(`renders ${label} with no broken UI or empty sections`, () => {
       const html = render(slug, data);

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { displayUrl, firstName, has, initials, joinParts, safeHref, socialLinks } from "./view";
+import { displayUrl, firstName, has, initials, joinParts, safeHref, socialLinks, visibleResume } from "./view";
+import { sampleResume } from "./sample";
+import { blankResume } from "./draft";
 
 describe("has", () => {
   it("treats missing and blank strings as absent", () => {
@@ -89,5 +91,36 @@ describe("socialLinks with typed input", () => {
 
   it("does not double the mailto prefix", () => {
     expect(socialLinks({ email: "mailto:a@example.com" })[0].href).toBe("mailto:a@example.com");
+  });
+});
+
+describe("visibleResume", () => {
+  it("leaves a complete resume unchanged", () => {
+    expect(visibleResume(sampleResume)).toEqual(sampleResume);
+  });
+
+  it("drops items with nothing typed into them", () => {
+    const resume = {
+      ...blankResume(),
+      experience: [{ title: " ", company: "", responsibilities: [""], skills: [" "] }],
+      skills: [{ name: "", icon: "code" as const, repos: [] }],
+      certifications: [{ name: "", icon: "file" as const }],
+      education: [{ institution: "" }],
+    };
+    const visible = visibleResume(resume);
+    expect(visible.experience).toEqual([]);
+    expect(visible.skills).toEqual([]);
+    expect(visible.certifications).toEqual([]);
+    expect(visible.education).toEqual([]);
+  });
+
+  it("keeps half-written items but strips their blank bullets and tags", () => {
+    const resume = {
+      ...blankResume(),
+      experience: [{ title: "", company: "Acme", responsibilities: ["Did things", "  "], skills: ["", "Go"] }],
+    };
+    expect(visibleResume(resume).experience).toEqual([
+      { title: "", company: "Acme", responsibilities: ["Did things"], skills: ["Go"] },
+    ]);
   });
 });
