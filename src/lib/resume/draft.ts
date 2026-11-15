@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { migrateResume } from "./migrate";
 import {
+  DEFAULT_SECTION_ORDER,
   RESUME_SCHEMA_VERSION,
   profileSchema,
   resumeSchema,
@@ -23,9 +25,12 @@ export const resumeDraftSchema = resumeSchema.extend({
   profile: profileSchema.extend({ name: z.string() }),
 });
 
-/** Validate a draft (e.g. from localStorage). Same result shape as `parseResume`. */
+/**
+ * Validate a draft (e.g. from localStorage), migrating older versions first.
+ * Same result shape as `parseResume`.
+ */
 export function parseResumeDraft(input: unknown): ResumeParseResult {
-  const result = resumeDraftSchema.safeParse(input);
+  const result = resumeDraftSchema.safeParse(migrateResume(input));
   if (result.success) return { success: true, data: result.data };
   return {
     success: false,
@@ -40,6 +45,8 @@ export function parseResumeDraft(input: unknown): ResumeParseResult {
 export function blankResume(): Resume {
   return {
     schemaVersion: RESUME_SCHEMA_VERSION,
+    sectionOrder: [...DEFAULT_SECTION_ORDER],
+    hiddenSections: [],
     profile: { name: "", socials: {} },
     experience: [],
     projects: [],

@@ -1,5 +1,39 @@
 import { describe, expect, it } from "vitest";
-import { parseResume, RESUME_SCHEMA_VERSION, type ResumeInput } from "./schema";
+import { DEFAULT_SECTION_ORDER, parseResume, RESUME_SCHEMA_VERSION, type ResumeInput } from "./schema";
+
+describe("section order and hidden sections", () => {
+  const base = { schemaVersion: RESUME_SCHEMA_VERSION, profile: { name: "Test Person" } };
+  const order = (input: object) => {
+    const result = parseResume({ ...base, ...input });
+    if (!result.success) throw new Error(JSON.stringify(result.issues));
+    return result.data;
+  };
+
+  it("defaults to the editor's order with nothing hidden", () => {
+    const data = order({});
+    expect(data.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+    expect(data.hiddenSections).toEqual([]);
+  });
+
+  it("repairs a partial or repeated order instead of rejecting the resume", () => {
+    // A hand-edited file, or a version that knew fewer sections.
+    const data = order({ sectionOrder: ["projects", "about", "projects"] });
+    expect(data.sectionOrder).toEqual([
+      "projects",
+      "about",
+      ...DEFAULT_SECTION_ORDER.filter((k) => k !== "projects" && k !== "about"),
+    ]);
+  });
+
+  it("drops repeated hidden sections", () => {
+    expect(order({ hiddenSections: ["tools", "tools"] }).hiddenSections).toEqual(["tools"]);
+  });
+
+  it("rejects section names it doesn't know; profile can't be moved or hidden", () => {
+    expect(parseResume({ ...base, sectionOrder: ["hobbies"] }).success).toBe(false);
+    expect(parseResume({ ...base, hiddenSections: ["profile"] }).success).toBe(false);
+  });
+});
 
 // The smallest input the schema accepts: a version and a name.
 const minimal = {

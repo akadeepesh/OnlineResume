@@ -21,7 +21,14 @@ import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
 
 export const EDITOR_STORAGE_KEY = "onlineresume:editor-draft";
 export const EDITOR_BACKUP_KEY = `${EDITOR_STORAGE_KEY}:invalid`;
-const STORE_VERSION = 1;
+/**
+ * Version of what's saved in localStorage. v2: the resume gained a section
+ * order and hidden sections (resume schema v2). The resume itself is migrated
+ * by `parseResumeDraft` in `merge`; `migrate` below only has to accept the
+ * older envelope, because without a `migrate` function zustand throws an old
+ * draft away and the next edit overwrites it.
+ */
+const STORE_VERSION = 2;
 const DEFAULT_TEMPLATE: TemplateSlug = "classic";
 
 /** Resume sections that are lists of items. */
@@ -144,6 +151,16 @@ export function createEditorStore({
     removeItem: (key) => attempt(() => storage.removeItem(key), undefined),
   };
 
+  /** Keep a draft we can't use, so it can be recovered by hand. */
+  const backUp = (persisted: unknown, reason: string, details?: unknown) => {
+    try {
+      storage.setItem(EDITOR_BACKUP_KEY, JSON.stringify(persisted));
+    } catch {
+      // Storage full or unavailable: nothing more we can do.
+    }
+    console.warn(reason, ...(details === undefined ? [] : [details]));
+  };
+
   const store = createStore<EditorState>()(
     persist(
       (set) => {
@@ -221,6 +238,14 @@ export function createEditorStore({
         storage: createJSONStorage(() => guardedStorage),
         skipHydration,
         partialize: (state): EditorData => ({ resume: state.resume, template: state.template }),
+        migrate: (persisted, version) => {
+          // Older drafts have the same shape; `merge` migrates the resume.
+          if (version < STORE_VERSION) return persisted;
+          // Written by a newer version of the app (e.g. a stale tab after a
+          // rollback). Don't guess at its shape: keep it and start fresh.
+          backUp(persisted, `Saved resume draft is from a newer version (${version}), starting fresh.`);
+          return undefined;
+        },
         // zustand calls merge on every hydration, even when nothing was saved,
         // so this is where hydration is marked as finished.
         merge: (persisted, currentState) => {
@@ -230,13 +255,7 @@ export function createEditorStore({
           const saved = persisted as Partial<EditorData>;
           const parsed = parseResumeDraft(saved.resume);
           if (!parsed.success) {
-            // Keep the unreadable draft so it can be recovered by hand.
-            try {
-              storage.setItem(EDITOR_BACKUP_KEY, JSON.stringify(persisted));
-            } catch {
-              // Storage full or unavailable: nothing more we can do.
-            }
-            console.warn("Saved resume draft is invalid, starting fresh.", parsed.issues);
+            backUp(persisted, "Saved resume draft is invalid, starting fresh.", parsed.issues);
             return current;
           }
           return {

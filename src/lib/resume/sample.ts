@@ -1,4 +1,4 @@
-import { RESUME_SCHEMA_VERSION, type Resume } from "./schema";
+import { DEFAULT_SECTION_ORDER, RESUME_SCHEMA_VERSION, type Resume } from "./schema";
 
 // ============================================================================
 // Sample resume: a fictional person used for template previews, the landing
@@ -11,6 +11,8 @@ import { RESUME_SCHEMA_VERSION, type Resume } from "./schema";
 
 export const sampleResume: Resume = {
   schemaVersion: RESUME_SCHEMA_VERSION,
+  sectionOrder: [...DEFAULT_SECTION_ORDER],
+  hiddenSections: [],
 
   profile: {
     name: "Alex Morgan",

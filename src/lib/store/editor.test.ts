@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StateStorage } from "zustand/middleware";
 import { blankResume } from "@/lib/resume/draft";
 import { sampleResume } from "@/lib/resume/sample";
+import { DEFAULT_SECTION_ORDER, RESUME_SCHEMA_VERSION } from "@/lib/resume/schema";
 import {
   EDITOR_BACKUP_KEY,
   EDITOR_STORAGE_KEY,
@@ -20,7 +21,7 @@ const memoryStorage = (initial: Record<string, string> = {}) => {
   return { storage, data };
 };
 
-const saved = (state: unknown, version = 1) => ({
+const saved = (state: unknown, version = 2) => ({
   [EDITOR_STORAGE_KEY]: JSON.stringify({ state, version }),
 });
 
@@ -181,7 +182,7 @@ describe("persistence", () => {
   });
 
   it("fills in defaults the saved draft left out", async () => {
-    const { store } = newStore(saved({ resume: { schemaVersion: 1, profile: { name: "Old" } } }));
+    const { store } = newStore(saved({ resume: { schemaVersion: RESUME_SCHEMA_VERSION, profile: { name: "Old" } } }));
     await store.persist.rehydrate();
     expect(store.getState().resume.profile.name).toBe("Old");
     expect(store.getState().resume.experience).toEqual([]);
@@ -197,7 +198,7 @@ describe("persistence", () => {
 
   it("backs up an invalid draft instead of deleting it, and falls back to the example", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const bad = { resume: { schemaVersion: 1, profile: { name: 42 } }, template: "bento" };
+    const bad = { resume: { schemaVersion: RESUME_SCHEMA_VERSION, profile: { name: 42 } }, template: "bento" };
     const { store, data } = newStore(saved(bad));
     await store.persist.rehydrate();
 
@@ -205,6 +206,42 @@ describe("persistence", () => {
     expect(store.getState().hasHydrated).toBe(true);
     expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(bad);
     expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("upgrades a draft saved by the previous version instead of dropping it", async () => {
+    // What PR #45–#49 wrote: store version 1, resume schema version 1.
+    const old = { resume: { schemaVersion: 1, profile: { name: "Kept" }, about: "Old" }, template: "bento" };
+    const { store, data } = newStore(saved(old, 1));
+    await store.persist.rehydrate();
+
+    expect(store.getState().resume.profile.name).toBe("Kept");
+    expect(store.getState().resume.about).toBe("Old");
+    expect(store.getState().resume.sectionOrder).toEqual([...DEFAULT_SECTION_ORDER]);
+    expect(store.getState().template).toBe("bento");
+    // Written back in the new format straight away.
+    const raw = JSON.parse(data.get(EDITOR_STORAGE_KEY)!);
+    expect(raw.version).toBe(2);
+    expect(raw.state.resume.schemaVersion).toBe(RESUME_SCHEMA_VERSION);
+    expect(data.has(EDITOR_BACKUP_KEY)).toBe(false);
+  });
+
+  it("backs up a draft from an old version that can't be upgraded", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const old = { resume: { schemaVersion: 1, profile: { name: 42 } } };
+    const { store, data } = newStore(saved(old, 1));
+    await store.persist.rehydrate();
+    expect(store.getState().resume).toEqual(sampleResume);
+    expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(old);
+  });
+
+  it("backs up a draft written by a newer version rather than guessing at it", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const future = { resume: { schemaVersion: 9, profile: { name: "From the future" } }, template: "classic" };
+    const { store, data } = newStore(saved(future, 9));
+    await store.persist.rehydrate();
+    expect(store.getState().hasHydrated).toBe(true);
+    expect(store.getState().resume).toEqual(sampleResume);
+    expect(JSON.parse(data.get(EDITOR_BACKUP_KEY)!)).toEqual(future);
   });
 
   it("marks itself hydrated even when nothing was saved", async () => {
