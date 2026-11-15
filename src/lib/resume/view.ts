@@ -127,11 +127,21 @@ export type PresentSections = ReturnType<typeof presentSections>;
 
 const presentStrings = (list: string[]) => list.filter(has);
 
-/** True when any string field of the item has text or any list has items. */
-const hasContent = (item: Record<string, unknown>): boolean =>
-  Object.values(item).some((value) =>
-    typeof value === "string" ? has(value) : Array.isArray(value) ? value.length > 0 : false
+/**
+ * True when any string field of the item has text, or any list has a
+ * non-blank entry. `icon` is ignored: it always has a default value.
+ */
+export const itemHasContent = (item: object): boolean =>
+  Object.entries(item).some(([key, value]) =>
+    key === "icon"
+      ? false
+      : typeof value === "string"
+        ? has(value)
+        : Array.isArray(value)
+          ? value.some((v) => (typeof v === "string" ? has(v) : v != null))
+          : false
   );
+const hasContent = itemHasContent;
 
 export function visibleResume(resume: Resume): Resume {
   return {
@@ -142,12 +152,11 @@ export function visibleResume(resume: Resume): Resume {
     projects: resume.projects
       .map((p) => ({ ...p, details: presentStrings(p.details), technologies: presentStrings(p.technologies) }))
       .filter(hasContent),
-    // `icon` always has a default, so it doesn't count as content.
     skills: resume.skills
       .map((s) => ({ ...s, repos: presentStrings(s.repos) }))
-      .filter((s) => hasContent({ ...s, icon: undefined })),
+      .filter(hasContent),
     tools: resume.tools.map((t) => ({ ...t, skills: presentStrings(t.skills) })).filter(hasContent),
     education: resume.education.filter(hasContent),
-    certifications: resume.certifications.filter((c) => hasContent({ ...c, icon: undefined })),
+    certifications: resume.certifications.filter(hasContent),
   };
 }

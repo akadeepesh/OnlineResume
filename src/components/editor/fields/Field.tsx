@@ -31,9 +31,11 @@ export function Field({
   /** Shown at the right of the label row, e.g. a character count. */
   counter?: ReactNode;
   className?: string;
-  children: (control: FieldControlProps) => ReactNode;
+  /** `labelId` labels a group (e.g. a bullet list) that has no single input. */
+  children: (control: FieldControlProps, extra: { labelId: string }) => ReactNode;
 }) {
   const id = useId();
+  const labelId = `${id}-label`;
   const hintId = `${id}-hint`;
   const warningId = `${id}-warning`;
   // The warning replaces the hint, so only point at the one that's rendered.
@@ -42,13 +44,13 @@ export function Field({
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       <div className="flex items-baseline justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-neutral-800">
+        <label id={labelId} htmlFor={id} className="text-sm font-medium text-neutral-800">
           {label}
           {optional && <span className="ml-1.5 font-normal text-neutral-400">optional</span>}
         </label>
         {counter}
       </div>
-      {children({ id, "aria-describedby": describedBy, "aria-invalid": warning ? true : undefined })}
+      {children({ id, "aria-describedby": describedBy, "aria-invalid": warning ? true : undefined }, { labelId })}
       {warning ? (
         <p id={warningId} className="flex items-start gap-1.5 text-xs text-amber-700" role="status">
           <AlertCircle className="mt-px h-3.5 w-3.5 flex-shrink-0" aria-hidden />
