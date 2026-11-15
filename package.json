@@ -30,6 +30,7 @@
     "next": "16.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-resizable-panels": "^4.23.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.6.7",
