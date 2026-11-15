@@ -1,0 +1,95 @@
+import type { Resume } from "./schema";
+
+type Socials = Partial<Resume["profile"]["socials"]>;
+
+// ============================================================================
+// View helpers shared by every template.
+//
+// Resumes are often sparse (a fresh draft, an import that missed fields), so
+// templates must never print "undefined", a dangling "·", an empty link or an
+// empty section. These helpers give all five templates one definition of
+// "is this present?" so they stay consistent.
+// ============================================================================
+
+/** True when a value is a non-blank string. Missing and "   " are both absent. */
+export const has = (value: string | null | undefined): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+/** Join only the present parts, e.g. `joinParts(["Acme", undefined, "Remote"])` → "Acme · Remote". */
+export const joinParts = (parts: (string | null | undefined)[], separator = " · "): string =>
+  parts.filter(has).map((p) => p.trim()).join(separator);
+
+/** Up to two initials for an avatar fallback: "Alex Morgan" → "AM". */
+export const initials = (name: string): string => {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length > 1 ? [words[0], words[words.length - 1]] : words;
+  return letters
+    .map((w) => Array.from(w)[0] ?? "")
+    .join("")
+    .toUpperCase();
+};
+
+/** First word of the name, for greetings like "Hi, I'm Alex." */
+export const firstName = (name: string): string => name.trim().split(/\s+/)[0] ?? name;
+
+/** A link with the protocol and trailing slash removed, for display. */
+export const displayUrl = (url: string): string =>
+  url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+export type SocialKind = keyof Socials;
+
+export type SocialLink = {
+  kind: SocialKind;
+  label: string;
+  href: string;
+  /** Human-friendly text: the address for email, the URL without protocol otherwise. */
+  display: string;
+};
+
+const SOCIAL_LABELS: Record<SocialKind, string> = {
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  email: "Email",
+};
+
+const DEFAULT_SOCIAL_ORDER: SocialKind[] = ["github", "linkedin", "email"];
+
+/** The profile's social links that are actually filled in, in the given order. */
+export function socialLinks(
+  socials: Socials | undefined,
+  order: SocialKind[] = DEFAULT_SOCIAL_ORDER
+): SocialLink[] {
+  if (!socials) return [];
+  const links: SocialLink[] = [];
+  for (const kind of order) {
+    const value = socials[kind];
+    if (!has(value)) continue;
+    const trimmed = value.trim();
+    links.push({
+      kind,
+      label: SOCIAL_LABELS[kind],
+      href: kind === "email" ? `mailto:${trimmed}` : trimmed,
+      display: kind === "email" ? trimmed : displayUrl(trimmed),
+    });
+  }
+  return links;
+}
+
+/** The email address if one is set. */
+export const emailOf = (resume: Resume): string | undefined =>
+  has(resume.profile.socials.email) ? resume.profile.socials.email.trim() : undefined;
+
+/** Which sections have anything to show. Templates skip the rest entirely. */
+export function presentSections(resume: Resume) {
+  return {
+    about: has(resume.about),
+    experience: resume.experience.length > 0,
+    projects: resume.projects.length > 0,
+    skills: resume.skills.length > 0,
+    tools: resume.tools.length > 0,
+    education: resume.education.length > 0,
+    certifications: resume.certifications.length > 0,
+  };
+}
+
+export type PresentSections = ReturnType<typeof presentSections>;

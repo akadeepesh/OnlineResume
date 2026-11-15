@@ -27,92 +27,107 @@ export const iconKeySchema = z.enum([
 /** Plain text where **double asterisks** mark emphasis. */
 export const richTextSchema = z.string();
 
+// Sparse-data rules (imported and half-written resumes are the norm, not the
+// exception):
+// - Only the one field that identifies an item is required: the person's name,
+//   a job title, a project name, a school, ...
+// - Every other string is optional. Templates treat a missing value and a
+//   blank string the same way (see `src/lib/resume/view.ts`).
+// - Every list defaults to [], so a whole section can simply be left out.
+const optionalText = z.string().optional();
+const list = <T extends z.ZodType>(item: T) => z.array(item).default([]);
+
+export const socialsSchema = z.object({
+  github: optionalText,
+  linkedin: optionalText,
+  email: optionalText,
+});
+
 export const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  role: z.string(),
-  tagline: z.string(),
-  location: z.string(),
-  avatar: z.string(),
-  resumeUrl: z.string(),
+  role: optionalText,
+  tagline: optionalText,
+  location: optionalText,
+  /** Image URL or data URL. Templates show initials when it is missing. */
+  avatar: optionalText,
+  /** Link to a downloadable resume file. The download button hides without it. */
+  resumeUrl: optionalText,
   /** Short status line, e.g. "Open to full-time roles" */
-  availability: z.string().optional(),
-  socials: z.object({
-    github: z.string(),
-    linkedin: z.string(),
-    email: z.string(),
-  }),
+  availability: optionalText,
+  socials: socialsSchema.default({}),
 });
 
 export const experienceEntrySchema = z.object({
   title: z.string(),
-  company: z.string(),
-  date: z.string(),
-  location: z.string(),
-  responsibilities: z.array(z.string()),
-  skills: z.array(z.string()),
+  company: optionalText,
+  date: optionalText,
+  location: optionalText,
+  responsibilities: list(z.string()),
+  skills: list(z.string()),
 });
 
 export const projectSchema = z.object({
   name: z.string(),
-  description: z.string(),
-  github: z.string(),
-  demo: z.string().optional(),
-  details: z.array(z.string()),
-  technologies: z.array(z.string()),
+  description: optionalText,
+  github: optionalText,
+  demo: optionalText,
+  details: list(z.string()),
+  technologies: list(z.string()),
 });
 
 export const siteSchema = z.object({
   title: z.string(),
   url: z.string(),
-  description: z.string(),
-  tags: z.array(z.string()),
+  description: optionalText,
+  tags: list(z.string()),
 });
 
 export const skillSchema = z.object({
   name: z.string(),
-  icon: iconKeySchema,
+  icon: iconKeySchema.default("code"),
   /** GitHub repository names (under NEXT_PUBLIC_GH_OWNER) that use this skill */
-  repos: z.array(z.string()),
+  repos: list(z.string()),
   /** Live sites built with this skill, shown instead of / alongside repos */
   sites: z.array(siteSchema).optional(),
 });
 
 export const toolCategorySchema = z.object({
   name: z.string(),
-  skills: z.array(z.string()),
+  skills: list(z.string()),
 });
 
 export const educationEntrySchema = z.object({
   institution: z.string(),
-  degree: z.string(),
-  period: z.string(),
-  location: z.string(),
+  degree: optionalText,
+  period: optionalText,
+  location: optionalText,
 });
 
 export const certificationSchema = z.object({
   name: z.string(),
-  issuer: z.string(),
-  date: z.string(),
-  link: z.string(),
-  icon: iconKeySchema,
-  description: z.string(),
+  issuer: optionalText,
+  date: optionalText,
+  link: optionalText,
+  icon: iconKeySchema.default("file"),
+  description: optionalText,
 });
 
 export const resumeSchema = z.object({
   schemaVersion: z.literal(RESUME_SCHEMA_VERSION),
   profile: profileSchema,
-  about: richTextSchema,
-  experience: z.array(experienceEntrySchema),
-  projects: z.array(projectSchema),
-  skills: z.array(skillSchema),
-  tools: z.array(toolCategorySchema),
-  education: z.array(educationEntrySchema),
-  certifications: z.array(certificationSchema),
+  about: optionalText,
+  experience: list(experienceEntrySchema),
+  projects: list(projectSchema),
+  skills: list(skillSchema),
+  tools: list(toolCategorySchema),
+  education: list(educationEntrySchema),
+  certifications: list(certificationSchema),
 });
 
 export type IconKey = z.infer<typeof iconKeySchema>;
 export type RichText = z.infer<typeof richTextSchema>;
 export type Profile = z.infer<typeof profileSchema>;
+export type Socials = z.infer<typeof socialsSchema>;
 export type ExperienceEntry = z.infer<typeof experienceEntrySchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Site = z.infer<typeof siteSchema>;
@@ -121,6 +136,8 @@ export type ToolCategory = z.infer<typeof toolCategorySchema>;
 export type EducationEntry = z.infer<typeof educationEntrySchema>;
 export type Certification = z.infer<typeof certificationSchema>;
 export type Resume = z.infer<typeof resumeSchema>;
+/** What `parseResume` accepts: defaulted fields may be left out. */
+export type ResumeInput = z.input<typeof resumeSchema>;
 
 export type ResumeParseResult =
   | { success: true; data: Resume }

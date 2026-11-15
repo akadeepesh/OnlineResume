@@ -21,7 +21,7 @@ describe("sample resume", () => {
         `unexpected host ${host}`,
       ).toBe(true);
     }
-    expect(sampleResume.profile.socials.email.endsWith("@example.com")).toBe(true);
+    expect(sampleResume.profile.socials.email).toMatch(/@example\.com$/);
     expect(sampleResume.profile.socials.github).toBe("https://github.com/example");
   });
 
