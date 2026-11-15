@@ -53,6 +53,12 @@ export interface EditorData {
 export interface EditorState extends EditorData {
   /** False until the saved draft has been read from storage. */
   hasHydrated: boolean;
+  /**
+   * False when the browser refused to read or save the draft (site data
+   * blocked, private mode, storage full). Editing still works in memory, but
+   * the UI must not claim the work is saved.
+   */
+  storageAvailable: boolean;
 
   updateProfile: (patch: Partial<Omit<Profile, "socials">>) => void;
   updateSocials: (patch: Partial<Socials>) => void;
@@ -84,8 +90,18 @@ const noopStorage: StateStorage = {
   removeItem: () => {},
 };
 
+/**
+ * localStorage, looked up on every call: even reading `window.localStorage`
+ * can throw when site data is blocked, and that must not break the module.
+ */
 const browserStorage = (): StateStorage =>
-  typeof window === "undefined" ? noopStorage : window.localStorage;
+  typeof window === "undefined"
+    ? noopStorage
+    : {
+        getItem: (key) => window.localStorage.getItem(key),
+        setItem: (key, value) => window.localStorage.setItem(key, value),
+        removeItem: (key) => window.localStorage.removeItem(key),
+      };
 
 export interface CreateEditorStoreOptions {
   /** Where the draft is kept. Defaults to localStorage in the browser. */
@@ -98,17 +114,37 @@ export function createEditorStore({
   storage = browserStorage(),
   skipHydration = false,
 }: CreateEditorStoreOptions = {}) {
+  // Storage can throw at any time: blocked site data, private modes, or a
+  // full quota (photos are stored as data URLs). An unhandled throw inside
+  // zustand's hydration is swallowed and leaves `hasHydrated` false forever,
+  // so every call is caught here and reported through `storageAvailable`.
+  let failedBeforeStoreExisted = false;
+  let reportFailure = () => {
+    failedBeforeStoreExisted = true;
+  };
+  const attempt = <T>(fn: () => T, fallback: T): T => {
+    try {
+      return fn();
+    } catch (error) {
+      console.warn("Couldn't access browser storage for the resume draft.", error);
+      reportFailure();
+      return fallback;
+    }
+  };
+
   // zustand saves on every change, even before the saved draft has been read.
   // One early edit would then overwrite the draft before anyone saw it, so
   // writes are dropped until hydration has finished.
   let hydrated = false;
   const guardedStorage: StateStorage = {
-    getItem: (key) => storage.getItem(key),
-    setItem: (key, value) => (hydrated ? storage.setItem(key, value) : undefined),
-    removeItem: (key) => storage.removeItem(key),
+    getItem: (key) => attempt(() => storage.getItem(key), null),
+    setItem: (key, value) => {
+      if (hydrated) attempt(() => storage.setItem(key, value), undefined);
+    },
+    removeItem: (key) => attempt(() => storage.removeItem(key), undefined),
   };
 
-  return createStore<EditorState>()(
+  const store = createStore<EditorState>()(
     persist(
       (set) => {
         const updateResume = (fn: (resume: Resume) => Resume) =>
@@ -127,6 +163,7 @@ export function createEditorStore({
           resume: exampleResume(),
           template: DEFAULT_TEMPLATE,
           hasHydrated: false,
+          storageAvailable: true,
 
           updateProfile: (patch) =>
             updateResume((r) => ({ ...r, profile: { ...r.profile, ...patch } })),
@@ -214,6 +251,13 @@ export function createEditorStore({
       },
     ),
   );
+
+  reportFailure = () => {
+    // Only flip once: the setState below triggers a save, which fails again.
+    if (store.getState().storageAvailable) store.setState({ storageAvailable: false });
+  };
+  if (failedBeforeStoreExisted) reportFailure();
+  return store;
 }
 
 export type EditorStore = ReturnType<typeof createEditorStore>;

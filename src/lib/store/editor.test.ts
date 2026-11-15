@@ -211,6 +211,7 @@ describe("persistence", () => {
     const { store } = newStore();
     await store.persist.rehydrate();
     expect(store.getState().hasHydrated).toBe(true);
+    expect(store.getState().storageAvailable).toBe(true);
     expect(store.getState().resume).toEqual(sampleResume);
   });
 
@@ -229,6 +230,47 @@ describe("persistence", () => {
 
     await store.persist.rehydrate();
     expect(store.getState().resume).toEqual(draft);
+  });
+
+  it("still finishes loading when storage throws (blocked site data, private modes)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const blocked: StateStorage = {
+      getItem: () => {
+        throw new DOMException("The operation is insecure.", "SecurityError");
+      },
+      setItem: () => {
+        throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+      },
+      removeItem: () => {},
+    };
+    const store = createEditorStore({ storage: blocked, skipHydration: true });
+    await store.persist.rehydrate();
+    expect(store.getState().hasHydrated).toBe(true);
+    expect(store.getState().storageAvailable).toBe(false);
+    expect(store.getState().resume).toEqual(sampleResume);
+    // Editing still works in memory; failed saves don't throw into the UI.
+    expect(() => store.getState().updateProfile({ name: "Still editing" })).not.toThrow();
+    expect(store.getState().resume.profile.name).toBe("Still editing");
+  });
+
+  it("reports a full quota when saving fails after loading", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    let full = false;
+    const { storage } = memoryStorage();
+    const flaky: StateStorage = {
+      ...storage,
+      setItem: (key, value) => {
+        if (full) throw new DOMException("Quota exceeded", "QuotaExceededError");
+        storage.setItem(key, value);
+      },
+    };
+    const store = createEditorStore({ storage: flaky, skipHydration: true });
+    await store.persist.rehydrate();
+    expect(store.getState().storageAvailable).toBe(true);
+    full = true;
+    store.getState().updateProfile({ avatar: "data:image/jpeg;base64,..." });
+    expect(store.getState().storageAvailable).toBe(false);
+    expect(store.getState().resume.profile.avatar).toBe("data:image/jpeg;base64,...");
   });
 
   it("works without any storage on the server", () => {
