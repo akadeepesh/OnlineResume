@@ -22,18 +22,19 @@ export default function SectionPanel({ active, onSelect }: Props) {
   const Form = forms[section.id];
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Moving to another section starts at its top, not at the old scroll position.
-  const isFirstRender = useRef(true);
+  // Moving to another section starts at the top of the form. Compare with the
+  // previous section rather than skipping the first render: React's dev Strict
+  // Mode runs effects twice, which would make a "first render" flag misfire.
+  const previous = useRef(section.id);
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    rootRef.current?.scrollIntoView({ block: "start" });
+    if (previous.current === section.id) return;
+    previous.current = section.id;
+    const scroller = rootRef.current?.closest("[data-editor-scroll]");
+    if (scroller) scroller.scrollTop = 0;
   }, [section.id]);
 
   return (
-    <div ref={rootRef} className="mx-auto flex w-full max-w-xl scroll-mt-4 flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8">
+    <div ref={rootRef} className="mx-auto flex w-full max-w-xl flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8">
       <header>
         <h1 className="text-xl font-semibold text-neutral-900">{section.label}</h1>
         <p className="mt-1 text-sm text-neutral-500">{section.description}</p>
