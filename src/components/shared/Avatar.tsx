@@ -29,6 +29,10 @@ export function Avatar({
         width={size}
         height={size}
         priority={priority}
+        // Only our own /public images go through the optimizer. Uploaded
+        // photos are data URLs and imported ones may be on any host, which
+        // the optimizer would reject.
+        unoptimized={!src.startsWith("/")}
         className={className}
       />
     );

@@ -54,6 +54,20 @@ export function safeHref(value: string | null | undefined): string | undefined {
   return `https://${link}`;
 }
 
+/**
+ * An image source that is safe to render, or undefined: our own uploaded
+ * photos (data:image/... base64), same-site paths and http(s) URLs.
+ * `safeHref` can't be used here because it rejects every data: URL.
+ */
+export function safeImageSrc(value: string | null | undefined): string | undefined {
+  if (!has(value)) return undefined;
+  const src = value.trim();
+  if (/^data:image\/(png|jpe?g|webp|gif|avif);base64,/i.test(src)) return src;
+  if (src.startsWith("/") && !src.startsWith("//")) return src;
+  if (/^https?:\/\//i.test(src)) return src;
+  return undefined;
+}
+
 export type SocialKind = keyof Socials;
 
 export type SocialLink = {
@@ -146,17 +160,42 @@ const hasContent = itemHasContent;
 export function visibleResume(resume: Resume): Resume {
   return {
     ...resume,
+    // Links are typed by users and end up on public pages. Clean them once
+    // here, so no template can forget: unsafe schemes are dropped and bare
+    // domains get https:// (see safeHref).
+    profile: {
+      ...resume.profile,
+      avatar: safeImageSrc(resume.profile.avatar),
+      resumeUrl: safeHref(resume.profile.resumeUrl),
+    },
     experience: resume.experience
       .map((e) => ({ ...e, responsibilities: presentStrings(e.responsibilities), skills: presentStrings(e.skills) }))
       .filter(hasContent),
     projects: resume.projects
-      .map((p) => ({ ...p, details: presentStrings(p.details), technologies: presentStrings(p.technologies) }))
+      .map((p) => ({
+        ...p,
+        github: safeHref(p.github),
+        demo: safeHref(p.demo),
+        details: presentStrings(p.details),
+        technologies: presentStrings(p.technologies),
+      }))
       .filter(hasContent),
     skills: resume.skills
-      .map((s) => ({ ...s, repos: presentStrings(s.repos) }))
+      .map((s) => ({
+        ...s,
+        repos: presentStrings(s.repos),
+        ...(s.sites && {
+          sites: s.sites.flatMap((site) => {
+            const url = safeHref(site.url);
+            return url ? [{ ...site, url }] : [];
+          }),
+        }),
+      }))
       .filter(hasContent),
     tools: resume.tools.map((t) => ({ ...t, skills: presentStrings(t.skills) })).filter(hasContent),
     education: resume.education.filter(hasContent),
-    certifications: resume.certifications.filter(hasContent),
+    certifications: resume.certifications
+      .map((c) => ({ ...c, link: safeHref(c.link) }))
+      .filter(hasContent),
   };
 }
