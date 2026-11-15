@@ -3,7 +3,7 @@
 import { useId, useRef, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
 import { SkillIcon } from "@/components/shared/SkillIcon";
-import { iconKeySchema, type IconKey } from "@/lib/resume/schema";
+import type { IconKey } from "@/lib/resume/schema";
 
 const LABELS: Record<IconKey, string> = {
   code: "Code",
@@ -16,7 +16,12 @@ const LABELS: Record<IconKey, string> = {
   trophy: "Award",
 };
 
-const ICONS = iconKeySchema.options;
+/**
+ * Shown in LABELS order, so related icons sit together (the schema's order is
+ * arbitrary). LABELS is a Record<IconKey, …>, so TypeScript guarantees every
+ * icon the schema allows is listed.
+ */
+const ICONS = Object.keys(LABELS) as IconKey[];
 
 /**
  * A row of icons to choose from. It's a radio group: Tab moves into it once,
