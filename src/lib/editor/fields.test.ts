@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { looksLikeEmail, looksLikeLink, normalizeSocial } from "./fields";
+import { looksLikeEmail, looksLikeLink, normalizeLink, normalizeSocial } from "./fields";
 
 describe("normalizeSocial", () => {
   it("turns usernames into profile links", () => {
@@ -39,5 +39,15 @@ describe("looksLikeLink", () => {
     expect(looksLikeLink("")).toBe(true);
     expect(looksLikeLink("not a link")).toBe(false);
     expect(looksLikeLink("javascript:alert(1)")).toBe(false);
+  });
+});
+
+describe("normalizeLink", () => {
+  it("adds https to bare domains and keeps full links and site paths", () => {
+    expect(normalizeLink(" trailmark.app ")).toBe("https://trailmark.app");
+    expect(normalizeLink("//cdn.example.com/x")).toBe("https://cdn.example.com/x");
+    expect(normalizeLink("http://old.example.com")).toBe("http://old.example.com");
+    expect(normalizeLink("/resume.pdf")).toBe("/resume.pdf");
+    expect(normalizeLink("   ")).toBe("");
   });
 });

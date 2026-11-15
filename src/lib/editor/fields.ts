@@ -8,6 +8,14 @@ import type { SocialKind } from "@/lib/resume/view";
 
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
+/** Tidy a typed link: trim, and add https:// to a bare domain. */
+export function normalizeLink(value: string): string {
+  const v = value.trim();
+  if (!v) return "";
+  if (HAS_SCHEME.test(v) || (v.startsWith("/") && !v.startsWith("//"))) return v;
+  return `https://${v.replace(/^\/\//, "")}`;
+}
+
 /** Accept a username or a link and turn it into a full link. */
 export function normalizeSocial(kind: SocialKind, value: string): string {
   const v = value.trim();
@@ -21,8 +29,7 @@ export function normalizeSocial(kind: SocialKind, value: string): string {
   if (kind === "linkedin" && /^[a-z0-9][a-z0-9_-]{1,99}$/i.test(handle)) {
     return `https://www.linkedin.com/in/${handle}`;
   }
-  if (HAS_SCHEME.test(v) || v.startsWith("/")) return v;
-  return `https://${v.replace(/^\/\//, "")}`;
+  return normalizeLink(v);
 }
 
 /** Loose check: something@something.tld, no spaces. Only used for a hint. */

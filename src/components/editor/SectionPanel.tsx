@@ -5,16 +5,24 @@ import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { neighbours, sections, type SectionId } from "@/lib/editor/sections";
 import AboutForm from "./forms/AboutForm";
+import CertificationsForm from "./forms/CertificationsForm";
 import EducationForm from "./forms/EducationForm";
 import ExperienceForm from "./forms/ExperienceForm";
 import ProfileForm from "./forms/ProfileForm";
+import ProjectsForm from "./forms/ProjectsForm";
+import SkillsForm from "./forms/SkillsForm";
+import ToolsForm from "./forms/ToolsForm";
 
-/** The form for each section. Sections without one yet show a placeholder. */
-const forms: Partial<Record<SectionId, ComponentType>> = {
+/** The form for each section. */
+const forms: Record<SectionId, ComponentType> = {
   profile: ProfileForm,
   about: AboutForm,
   experience: ExperienceForm,
   education: EducationForm,
+  projects: ProjectsForm,
+  skills: SkillsForm,
+  tools: ToolsForm,
+  certifications: CertificationsForm,
 };
 
 type Props = { active: SectionId; onSelect: (id: SectionId) => void };
@@ -49,13 +57,7 @@ export default function SectionPanel({ active, onSelect }: Props) {
         <span>{section.tip}</span>
       </p>
 
-      {Form ? (
-        <Form />
-      ) : (
-        <div className="rounded-lg border border-dashed border-neutral-300 px-4 py-10 text-center text-sm text-neutral-500">
-          {`The ${section.label.toLowerCase()} form is coming soon. For now, try the templates and “Start over”. The preview updates live.`}
-        </div>
-      )}
+      <Form />
 
       <footer className="flex items-center justify-between border-t border-neutral-100 pt-4">
         {prev ? (

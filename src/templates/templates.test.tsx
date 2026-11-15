@@ -203,3 +203,40 @@ describe("rich text in every template", () => {
     expect(renderToStaticMarkup(<Template data={sampleResume} />)).not.toContain("**");
   });
 });
+
+describe("links typed by users", () => {
+  // Every link field a user can fill in, with values that must never reach an href.
+  const hostile = parse({
+    schemaVersion: RESUME_SCHEMA_VERSION,
+    profile: {
+      name: "Sam Lee",
+      resumeUrl: "javascript:alert('resume')",
+      avatar: "javascript:alert('avatar')",
+      socials: { github: "javascript:alert('gh')", linkedin: "data:text/html,<script>alert(1)</script>" },
+    },
+    projects: [{ name: "Tool", github: "JavaScript:alert('src')", demo: "vbscript:msgbox", details: [] }],
+    skills: [{ name: "Go", repos: [], sites: [{ title: "Site", url: "javascript:alert('site')" }] }],
+    certifications: [{ name: "Cert", link: " javascript:alert('cert')" }],
+  });
+
+  const bare = parse({
+    schemaVersion: RESUME_SCHEMA_VERSION,
+    profile: { name: "Sam Lee", resumeUrl: "example.com/cv.pdf" },
+    projects: [{ name: "Tool", github: "github.com/sam/tool", demo: "tool.example.com" }],
+    certifications: [{ name: "Cert", link: "certs.example.com/123" }],
+  });
+
+  it.each(slugs)("%s never renders a dangerous link", (slug) => {
+    const html = render(slug, hostile);
+    expect(html.toLowerCase()).not.toMatch(/(href|src)="\s*(javascript|vbscript|data:text)/);
+    expect(textOf(html)).toMatch(/tool/i); // the item still shows (Terminal lowercases names)
+  });
+
+  it.each(slugs)("%s turns bare domains into https links", (slug) => {
+    const html = render(slug, bare);
+    expect(html).not.toMatch(/href="(github\.com|tool\.example|certs\.example|example\.com)/);
+    for (const href of html.match(/href="[^"#]+"/g) ?? []) {
+      expect(href, href).toMatch(/^href="(https:\/\/|mailto:|\/)/);
+    }
+  });
+});

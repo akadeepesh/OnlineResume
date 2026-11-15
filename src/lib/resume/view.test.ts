@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayUrl, firstName, has, initials, joinParts, safeHref, socialLinks, visibleResume } from "./view";
+import { displayUrl, firstName, has, initials, joinParts, safeHref, safeImageSrc, socialLinks, visibleResume } from "./view";
 import { sampleResume } from "./sample";
 import { blankResume } from "./draft";
 
@@ -122,5 +122,21 @@ describe("visibleResume", () => {
     expect(visibleResume(resume).experience).toEqual([
       { title: "", company: "Acme", responsibilities: ["Did things"], skills: ["Go"] },
     ]);
+  });
+});
+
+describe("safeImageSrc", () => {
+  it("keeps uploaded photos, site paths and http(s) images", () => {
+    expect(safeImageSrc("data:image/jpeg;base64,/9j/4AAQ")).toBe("data:image/jpeg;base64,/9j/4AAQ");
+    expect(safeImageSrc("/avatar.png")).toBe("/avatar.png");
+    expect(safeImageSrc("https://example.com/me.png")).toBe("https://example.com/me.png");
+  });
+
+  it("drops scripts, SVG data URLs and protocol-relative links", () => {
+    expect(safeImageSrc("javascript:alert(1)")).toBeUndefined();
+    expect(safeImageSrc("data:image/svg+xml;base64,PHN2Zz4=")).toBeUndefined();
+    expect(safeImageSrc("data:text/html,<script>")).toBeUndefined();
+    expect(safeImageSrc("//evil.example/x.png")).toBeUndefined();
+    expect(safeImageSrc("  ")).toBeUndefined();
   });
 });
