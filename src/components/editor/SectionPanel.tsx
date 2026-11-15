@@ -1,21 +1,39 @@
 "use client";
 
+import { useEffect, useRef, type ComponentType } from "react";
 import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { neighbours, sections, type SectionId } from "@/lib/editor/sections";
+import AboutForm from "./forms/AboutForm";
+import ProfileForm from "./forms/ProfileForm";
+
+/** The form for each section. Sections without one yet show a placeholder. */
+const forms: Partial<Record<SectionId, ComponentType>> = {
+  profile: ProfileForm,
+  about: AboutForm,
+};
 
 type Props = { active: SectionId; onSelect: (id: SectionId) => void };
 
-/**
- * One section of the form, with a tip and Back/Next buttons. The actual
- * fields arrive section by section in the next PRs.
- */
+/** One section of the editor: heading, tip, its form, and Back/Next buttons. */
 export default function SectionPanel({ active, onSelect }: Props) {
   const section = sections.find((s) => s.id === active) ?? sections[0];
   const { prev, next } = neighbours(section.id);
+  const Form = forms[section.id];
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Moving to another section starts at its top, not at the old scroll position.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    rootRef.current?.scrollIntoView({ block: "start" });
+  }, [section.id]);
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8">
+    <div ref={rootRef} className="mx-auto flex w-full max-w-xl scroll-mt-4 flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8">
       <header>
         <h1 className="text-xl font-semibold text-neutral-900">{section.label}</h1>
         <p className="mt-1 text-sm text-neutral-500">{section.description}</p>
@@ -26,9 +44,13 @@ export default function SectionPanel({ active, onSelect }: Props) {
         <span>{section.tip}</span>
       </p>
 
-      <div className="rounded-lg border border-dashed border-neutral-300 px-4 py-10 text-center text-sm text-neutral-500">
-        {`The ${section.label.toLowerCase()} form is coming soon. For now, try the templates and “Start over”. The preview updates live.`}
-      </div>
+      {Form ? (
+        <Form />
+      ) : (
+        <div className="rounded-lg border border-dashed border-neutral-300 px-4 py-10 text-center text-sm text-neutral-500">
+          {`The ${section.label.toLowerCase()} form is coming soon. For now, try the templates and “Start over”. The preview updates live.`}
+        </div>
+      )}
 
       <footer className="flex items-center justify-between border-t border-neutral-100 pt-4">
         {prev ? (
