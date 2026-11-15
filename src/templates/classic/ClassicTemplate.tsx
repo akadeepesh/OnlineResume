@@ -43,6 +43,7 @@ import {
 } from "@/lib/github";
 import type { Resume, Skill, Site } from "@/lib/resume/schema";
 import { has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { renderBlocks } from "../blocks";
 
 // ---------------------------------------------------------------------------
 // Building blocks
@@ -353,252 +354,284 @@ export default function ClassicTemplate({ data }: { data: Resume }) {
           </div>
 
           <main className="space-y-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:space-y-8">
-            {show.about && (
-              <Section title="About" icon={User}>
-                <p className="leading-relaxed text-slate-600">
-                  <RichText text={about ?? ""} strongClassName="font-semibold text-slate-900" />
-                </p>
-              </Section>
-            )}
+            {renderBlocks(data, [
+              show.about && {
+                id: "about",
+                sections: ["about"],
+                render: () => (
+                  <Section title="About" icon={User}>
+                    <p className="leading-relaxed text-slate-600">
+                      <RichText text={about ?? ""} strongClassName="font-semibold text-slate-900" />
+                    </p>
+                  </Section>
+                ),
+              },
 
-            {show.experience && (
-              <Section title="Experience" icon={Briefcase}>
-                <ol className="relative space-y-8 border-l border-slate-200 pl-6">
-                  {experience.map((exp, i) => (
-                    <li key={i} className="relative">
-                      <span className="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-indigo-500 ring-4 ring-indigo-50" />
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                        <h3 className="font-semibold text-slate-900">{exp.title}</h3>
-                        {has(exp.date) && (
-                          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            {exp.date}
-                          </span>
-                        )}
-                      </div>
-                      {(has(exp.company) || has(exp.location)) && (
-                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-slate-500">
-                          {has(exp.company) && (
-                            <span className="font-medium text-indigo-600">{exp.company}</span>
-                          )}
-                          {has(exp.company) && has(exp.location) && (
-                            <span className="text-slate-300">•</span>
-                          )}
-                          {has(exp.location) && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5" />
-                              {exp.location}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                      {exp.responsibilities.length > 0 && (
-                        <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-600">
-                          {exp.responsibilities.map((r, j) => (
-                            <li key={j} className="flex gap-2">
-                              <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-400" />
-                              <span>
-                                <RichText text={r} strongClassName="font-semibold text-slate-900" />
+              show.experience && {
+                id: "experience",
+                sections: ["experience"],
+                render: () => (
+                  <Section title="Experience" icon={Briefcase}>
+                    <ol className="relative space-y-8 border-l border-slate-200 pl-6">
+                      {experience.map((exp, i) => (
+                        <li key={i} className="relative">
+                          <span className="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-indigo-500 ring-4 ring-indigo-50" />
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                            <h3 className="font-semibold text-slate-900">{exp.title}</h3>
+                            {has(exp.date) && (
+                              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                {exp.date}
                               </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {exp.skills.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {exp.skills.map((s) => (
-                            <Chip key={s}>{s}</Chip>
-                          ))}
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              </Section>
-            )}
-
-            {show.projects && (
-              <Section title="Projects" icon={FolderGit2}>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {projects.map((project, i) => (
-                    <article
-                      key={i}
-                      className="group flex flex-col rounded-xl border border-slate-200 p-5 transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-semibold leading-snug text-slate-900">
-                          {project.name}
-                        </h3>
-                        <div className="flex flex-shrink-0 gap-1">
-                          {has(project.github) && (
-                            <a
-                              href={project.github}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label="GitHub Repository"
-                              className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                            >
-                              <Github className="h-4 w-4" />
-                            </a>
-                          )}
-                          {has(project.demo) && (
-                            <a
-                              href={project.demo}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label="Live Demo"
-                              className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                      {has(project.description) && (
-                        <p className="mt-2 text-sm text-slate-600">{project.description}</p>
-                      )}
-                      {project.details.length > 0 && (
-                        <ul className="mt-3 flex-1 space-y-1.5 text-sm text-slate-500">
-                          {project.details.map((d, j) => (
-                            <li key={j} className="flex gap-2">
-                              <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-300" />
-                              <RichText text={d} strongClassName="font-semibold text-slate-900" />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {project.technologies.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {project.technologies.map((t) => (
-                            <Chip key={t}>{t}</Chip>
-                          ))}
-                        </div>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {show.certifications && (
-              <Section title="Certifications" icon={Award}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {certifications.map((cert, i) => {
-                    const meta = joinParts([cert.issuer, cert.date]);
-                    return (
-                      <Dialog key={i}>
-                        <DialogTrigger asChild>
-                          <button className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all hover:border-indigo-200 hover:bg-indigo-50/40">
-                            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                              <SkillIcon name={cert.icon} className="h-5 w-5" />
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block truncate text-sm font-medium text-slate-900">
-                                {cert.name}
-                              </span>
-                              {meta && <span className="block text-xs text-slate-500">{meta}</span>}
-                            </span>
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent className="w-[92%] border-slate-200 bg-white sm:max-w-md sm:rounded-2xl">
-                          <DialogHeader>
-                            <span className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                              <SkillIcon name={cert.icon} className="h-5 w-5" />
-                            </span>
-                            <DialogTitle className="text-left text-lg text-slate-900">
-                              {cert.name}
-                            </DialogTitle>
-                            {meta && <p className="text-left text-sm text-slate-500">{meta}</p>}
-                          </DialogHeader>
-                          {has(cert.description) && (
-                            <p className="text-sm leading-relaxed text-slate-600">
-                              {cert.description}
+                            )}
+                          </div>
+                          {(has(exp.company) || has(exp.location)) && (
+                            <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-slate-500">
+                              {has(exp.company) && (
+                                <span className="font-medium text-indigo-600">{exp.company}</span>
+                              )}
+                              {has(exp.company) && has(exp.location) && (
+                                <span className="text-slate-300">•</span>
+                              )}
+                              {has(exp.location) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5" />
+                                  {exp.location}
+                                </span>
+                              )}
                             </p>
                           )}
-                          {has(cert.link) && (
-                            <a
-                              href={cert.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-                            >
-                              View Certificate
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
+                          {exp.responsibilities.length > 0 && (
+                            <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-600">
+                              {exp.responsibilities.map((r, j) => (
+                                <li key={j} className="flex gap-2">
+                                  <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-400" />
+                                  <span>
+                                    <RichText text={r} strongClassName="font-semibold text-slate-900" />
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
                           )}
-                        </DialogContent>
-                      </Dialog>
-                    );
-                  })}
-                </div>
-              </Section>
-            )}
+                          {exp.skills.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {exp.skills.map((s) => (
+                                <Chip key={s}>{s}</Chip>
+                              ))}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </Section>
+                ),
+              },
+
+              show.projects && {
+                id: "projects",
+                sections: ["projects"],
+                render: () => (
+                  <Section title="Projects" icon={FolderGit2}>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {projects.map((project, i) => (
+                        <article
+                          key={i}
+                          className="group flex flex-col rounded-xl border border-slate-200 p-5 transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="font-semibold leading-snug text-slate-900">
+                              {project.name}
+                            </h3>
+                            <div className="flex flex-shrink-0 gap-1">
+                              {has(project.github) && (
+                                <a
+                                  href={project.github}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="GitHub Repository"
+                                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                                >
+                                  <Github className="h-4 w-4" />
+                                </a>
+                              )}
+                              {has(project.demo) && (
+                                <a
+                                  href={project.demo}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="Live Demo"
+                                  className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          {has(project.description) && (
+                            <p className="mt-2 text-sm text-slate-600">{project.description}</p>
+                          )}
+                          {project.details.length > 0 && (
+                            <ul className="mt-3 flex-1 space-y-1.5 text-sm text-slate-500">
+                              {project.details.map((d, j) => (
+                                <li key={j} className="flex gap-2">
+                                  <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-slate-300" />
+                                  <RichText text={d} strongClassName="font-semibold text-slate-900" />
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {project.technologies.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-1.5">
+                              {project.technologies.map((t) => (
+                                <Chip key={t}>{t}</Chip>
+                              ))}
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  </Section>
+                ),
+              },
+
+              show.certifications && {
+                id: "certifications",
+                sections: ["certifications"],
+                render: () => (
+                  <Section title="Certifications" icon={Award}>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {certifications.map((cert, i) => {
+                        const meta = joinParts([cert.issuer, cert.date]);
+                        return (
+                          <Dialog key={i}>
+                            <DialogTrigger asChild>
+                              <button className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all hover:border-indigo-200 hover:bg-indigo-50/40">
+                                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                                  <SkillIcon name={cert.icon} className="h-5 w-5" />
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block truncate text-sm font-medium text-slate-900">
+                                    {cert.name}
+                                  </span>
+                                  {meta && <span className="block text-xs text-slate-500">{meta}</span>}
+                                </span>
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent className="w-[92%] border-slate-200 bg-white sm:max-w-md sm:rounded-2xl">
+                              <DialogHeader>
+                                <span className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                  <SkillIcon name={cert.icon} className="h-5 w-5" />
+                                </span>
+                                <DialogTitle className="text-left text-lg text-slate-900">
+                                  {cert.name}
+                                </DialogTitle>
+                                {meta && <p className="text-left text-sm text-slate-500">{meta}</p>}
+                              </DialogHeader>
+                              {has(cert.description) && (
+                                <p className="text-sm leading-relaxed text-slate-600">
+                                  {cert.description}
+                                </p>
+                              )}
+                              {has(cert.link) && (
+                                <a
+                                  href={cert.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+                                >
+                                  View Certificate
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        );
+                      })}
+                    </div>
+                  </Section>
+                ),
+              },
+            ])}
           </main>
 
           <aside className="space-y-6 self-start lg:col-start-1 lg:row-start-2">
-            {show.skills && (
-              <Section title="Skills & Projects" icon={Layers}>
-                {skills.some((s) => s.repos.length + (s.sites?.length ?? 0) > 0) && (
-                  <p className="-mt-3 mb-4 text-sm text-slate-500">
-                    Select a skill to explore related work.
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, i) => (
-                    <SkillDialog key={i} skill={skill} />
-                  ))}
-                </div>
-              </Section>
-            )}
+            {renderBlocks(data, [
+              show.skills && {
+                id: "skills",
+                sections: ["skills"],
+                render: () => (
+                  <Section title="Skills & Projects" icon={Layers}>
+                    {skills.some((s) => s.repos.length + (s.sites?.length ?? 0) > 0) && (
+                      <p className="-mt-3 mb-4 text-sm text-slate-500">
+                        Select a skill to explore related work.
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((skill, i) => (
+                        <SkillDialog key={i} skill={skill} />
+                      ))}
+                    </div>
+                  </Section>
+                ),
+              },
 
-            {show.tools && (
-              <Section title="Tools" icon={Wrench}>
-                <div className="space-y-4">
-                  {tools.map((cat, i) => (
-                    <div key={i}>
-                      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        {cat.name}
-                      </h3>
-                      {cat.skills.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {cat.skills.map((s) => (
-                            <Chip key={s}>{s}</Chip>
-                          ))}
+              show.tools && {
+                id: "tools",
+                sections: ["tools"],
+                render: () => (
+                  <Section title="Tools" icon={Wrench}>
+                    <div className="space-y-4">
+                      {tools.map((cat, i) => (
+                        <div key={i}>
+                          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            {cat.name}
+                          </h3>
+                          {cat.skills.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {cat.skills.map((s) => (
+                                <Chip key={s}>{s}</Chip>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </Section>
-            )}
+                  </Section>
+                ),
+              },
 
-            {show.education && (
-              <Section title="Education" icon={GraduationCap}>
-                <div className="space-y-5">
-                  {education.map((edu, i) => (
-                    <div key={i}>
-                      <h3 className="font-semibold text-slate-900">{edu.institution}</h3>
-                      {has(edu.degree) && <p className="text-sm text-slate-600">{edu.degree}</p>}
-                      {(has(edu.period) || has(edu.location)) && (
-                        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
-                          {has(edu.period) && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {edu.period}
-                            </span>
+              show.education && {
+                id: "education",
+                sections: ["education"],
+                render: () => (
+                  <Section title="Education" icon={GraduationCap}>
+                    <div className="space-y-5">
+                      {education.map((edu, i) => (
+                        <div key={i}>
+                          <h3 className="font-semibold text-slate-900">{edu.institution}</h3>
+                          {has(edu.degree) && <p className="text-sm text-slate-600">{edu.degree}</p>}
+                          {(has(edu.period) || has(edu.location)) && (
+                            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                              {has(edu.period) && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3.5 w-3.5" />
+                                  {edu.period}
+                                </span>
+                              )}
+                              {has(edu.location) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5" />
+                                  {edu.location}
+                                </span>
+                              )}
+                            </p>
                           )}
-                          {has(edu.location) && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5" />
-                              {edu.location}
-                            </span>
-                          )}
-                        </p>
-                      )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </Section>
-            )}
+                  </Section>
+                ),
+              },
+            ])}
           </aside>
         </div>
 

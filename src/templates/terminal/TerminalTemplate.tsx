@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } fro
 import { plainText } from "@/components/shared/RichText";
 import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume } from "@/lib/resume/schema";
-import { firstName, has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { arrangeBlocks, firstName, has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
 
 // GitHub-dark inspired palette
 const c = {
@@ -446,22 +446,27 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
     );
   };
 
+  // The commands "typed" on load: who this is, then each section in the
+  // person's order, then how to reach them. Tools wait for `tools`.
   const boot = useMemo<Entry[]>(
     () =>
-      (
-        [
-          ["whoami", true],
-          ["cat about.md", show.about],
-          ["experience", show.experience],
-          ["projects", show.projects],
-          ["skills", show.skills],
-          ["cat education.json", show.education],
-          ["certs", show.certifications],
-          ["contact", socials.length > 0],
-        ] as const
-      )
-        .filter(([, present]) => present)
-        .map(([cmd], i) => ({ id: -i - 1, cmd, output: commands.table[cmd]() })),
+      [
+        "whoami",
+        ...arrangeBlocks(
+          data,
+          (
+            [
+              { cmd: "cat about.md", sections: ["about"], present: show.about },
+              { cmd: "experience", sections: ["experience"], present: show.experience },
+              { cmd: "projects", sections: ["projects"], present: show.projects },
+              { cmd: "skills", sections: ["skills"], present: show.skills },
+              { cmd: "cat education.json", sections: ["education"], present: show.education },
+              { cmd: "certs", sections: ["certifications"], present: show.certifications },
+            ] as const
+          ).filter((b) => b.present)
+        ).map((b) => b.cmd),
+        ...(socials.length > 0 ? ["contact"] : []),
+      ].map((cmd, i) => ({ id: -i - 1, cmd, output: commands.table[cmd]() })),
     // `show` and `socials` are derived from `data`, which `commands` already tracks.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [commands]

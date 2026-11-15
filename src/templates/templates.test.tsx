@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { sampleResume } from "@/lib/resume/sample";
-import { parseResume, RESUME_SCHEMA_VERSION, type Resume, type ResumeInput } from "@/lib/resume/schema";
+import {
+  DEFAULT_SECTION_ORDER,
+  parseResume,
+  RESUME_SCHEMA_VERSION,
+  type Resume,
+  type ResumeInput,
+  type SectionKey,
+} from "@/lib/resume/schema";
 import { emptyItem } from "@/lib/store/editor";
 import { templates, type TemplateSlug } from "./index";
 
@@ -238,5 +245,96 @@ describe("links typed by users", () => {
     for (const href of html.match(/href="[^"#]+"/g) ?? []) {
       expect(href, href).toMatch(/^href="(https:\/\/|mailto:|\/)/);
     }
+  });
+});
+
+describe("section order and hidden sections", () => {
+  // One unmistakable marker per section, so its position in the HTML can be found.
+  const MARK = (key: SectionKey) => `Mark${key[0].toUpperCase()}${key.slice(1)}`;
+  const marked = parse({
+    schemaVersion: RESUME_SCHEMA_VERSION,
+    profile: { name: "Sam Lee", availability: "Open to work" },
+    about: MARK("about"),
+    experience: [{ title: MARK("experience") }],
+    education: [{ institution: MARK("education") }],
+    projects: [{ name: MARK("projects") }],
+    skills: [{ name: MARK("skills") }],
+    tools: [{ name: MARK("tools"), skills: ["Figma"] }],
+    certifications: [{ name: MARK("certifications") }],
+  });
+
+  /**
+   * Layout a template keeps no matter the order:
+   * - columns: Classic always puts skills, tools and education in its sidebar.
+   * - groups: sections shown under one heading (Editorial's "Expertise" is
+   *   skills + tools). A group sits where its first section is, and its
+   *   sections follow the person's order inside it.
+   */
+  const LAYOUT: Partial<Record<TemplateSlug, { columns?: SectionKey[][]; groups?: SectionKey[][] }>> = {
+    classic: {
+      columns: [
+        ["about", "experience", "projects", "certifications"],
+        ["skills", "tools", "education"],
+      ],
+    },
+    editorial: { groups: [["skills", "tools"]] },
+    spotlight: { groups: [["skills", "tools"], ["education", "certifications"]] },
+  };
+
+  const expectedOrder = (slug: TemplateSlug, order: SectionKey[]) => {
+    const { columns = [[...DEFAULT_SECTION_ORDER]], groups = [] } = LAYOUT[slug] ?? {};
+    const groupOf = (key: SectionKey) => groups.find((g) => g.includes(key)) ?? [key];
+    return columns.flatMap((column) => {
+      const inColumn = order.filter((key) => column.includes(key));
+      const seen = new Set<SectionKey>();
+      return inColumn.flatMap((key) => {
+        if (seen.has(key)) return [];
+        const members = inColumn.filter((k) => groupOf(key).includes(k));
+        members.forEach((k) => seen.add(k));
+        return members;
+      });
+    });
+  };
+
+  // Case-insensitive: Terminal shows project names as lowercase directories.
+  const at = (html: string, key: SectionKey) => html.toLowerCase().indexOf(MARK(key).toLowerCase());
+  const shows = (html: string, key: SectionKey) => at(html, key) >= 0;
+
+  /** Sections in the order their markers first appear in the HTML. */
+  const renderedOrder = (html: string) =>
+    DEFAULT_SECTION_ORDER.filter((key) => shows(html, key)).sort((a, b) => at(html, a) - at(html, b));
+
+  const orders: SectionKey[][] = [
+    [...DEFAULT_SECTION_ORDER],
+    [...DEFAULT_SECTION_ORDER].reverse(),
+    ["projects", "about", "certifications", "skills", "experience", "tools", "education"],
+    ["tools", "education", "about", "certifications", "projects", "experience", "skills"],
+  ];
+
+  it.each(slugs)("%s follows the person's section order", (slug) => {
+    for (const sectionOrder of orders) {
+      const rendered = renderedOrder(render(slug, { ...marked, sectionOrder }));
+      // Terminal only shows tools when a visitor runs `tools`.
+      expect(rendered.length, sectionOrder.join(",")).toBeGreaterThanOrEqual(slug === "terminal" ? 6 : 7);
+      const expected = expectedOrder(slug, sectionOrder).filter((key) => rendered.includes(key));
+      expect(rendered, `order ${sectionOrder.join(",")}`).toEqual(expected);
+    }
+  });
+
+  it.each(slugs)("%s leaves hidden sections out completely", (slug) => {
+    const hiddenSections: SectionKey[] = ["about", "experience", "tools", "certifications"];
+    const html = render(slug, { ...marked, hiddenSections });
+    expectNoBrokenMarkup(html);
+    for (const key of hiddenSections) expect(shows(html, key), key).toBe(false);
+    for (const key of ["education", "projects", "skills"] as const) expect(shows(html, key), key).toBe(true);
+    // Spotlight's About block also shows availability; hiding About hides it all.
+    expect(html).not.toContain('id="about"');
+  });
+
+  it.each(slugs)("%s shows only the profile when every section is hidden", (slug) => {
+    const html = render(slug, { ...marked, hiddenSections: [...DEFAULT_SECTION_ORDER] });
+    expectNoBrokenMarkup(html);
+    expect(renderedOrder(html)).toEqual([]);
+    expect(textOf(html)).toContain("Sam Lee");
   });
 });
