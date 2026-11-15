@@ -479,3 +479,99 @@ describe("undo and redo", () => {
     expect(Object.keys(JSON.parse(data.get(EDITOR_STORAGE_KEY)!).state)).toEqual(["resume", "template"]);
   });
 });
+
+describe("autosave", () => {
+  /** A store that waits `saveDelayMs` before writing, with a counting storage. */
+  const delayed = (initial?: Record<string, string>) => {
+    const { storage, data } = memoryStorage(initial);
+    let writes = 0;
+    let failing = false;
+    const counting: StateStorage = {
+      ...storage,
+      setItem: (key, value) => {
+        if (failing) throw new DOMException("Quota exceeded", "QuotaExceededError");
+        if (key === EDITOR_STORAGE_KEY) writes++;
+        storage.setItem(key, value);
+      },
+    };
+    let time = 5_000;
+    const store = createEditorStore({ storage: counting, skipHydration: true, saveDelayMs: 500, now: () => time });
+    return {
+      store,
+      data,
+      writes: () => writes,
+      fail: (on: boolean) => (failing = on),
+      setTime: (t: number) => (time = t),
+    };
+  };
+  const savedName = (data: Map<string, string>) =>
+    JSON.parse(data.get(EDITOR_STORAGE_KEY) ?? "null")?.state.resume.profile.name;
+
+  afterEach(() => vi.useRealTimers());
+
+  it("waits for a pause in typing, then writes once", async () => {
+    vi.useFakeTimers();
+    const { store, data, writes } = delayed();
+    await store.persist.rehydrate();
+    const before = writes();
+    for (const name of ["S", "Sa", "Sam"]) {
+      store.getState().updateProfile({ name });
+      vi.advanceTimersByTime(200);
+    }
+    expect(store.getState().savePending).toBe(true);
+    expect(savedName(data)).not.toBe("Sam");
+
+    vi.advanceTimersByTime(500);
+    expect(savedName(data)).toBe("Sam");
+    expect(writes() - before).toBe(1);
+    expect(store.getState().savePending).toBe(false);
+  });
+
+  it("records when it last saved, and only when something was written", async () => {
+    vi.useFakeTimers();
+    const { store, writes, setTime } = delayed();
+    await store.persist.rehydrate();
+    expect(store.getState().lastSavedAt).toBeNull();
+
+    setTime(42_000);
+    store.getState().setAbout("Hello");
+    vi.advanceTimersByTime(500);
+    expect(store.getState().lastSavedAt).toBe(42_000);
+
+    // Undo then redo lands on the resume already written: nothing to write.
+    const count = writes();
+    store.getState().undo();
+    store.getState().redo();
+    vi.advanceTimersByTime(500);
+    expect(writes()).toBe(count); // same resume as last written: nothing to do
+  });
+
+  it("writes straight away when the page is being left", async () => {
+    vi.useFakeTimers();
+    const { store, data } = delayed();
+    await store.persist.rehydrate();
+    store.getState().updateProfile({ name: "Leaving" });
+    store.flushSave();
+    expect(savedName(data)).toBe("Leaving");
+    expect(store.getState().savePending).toBe(false);
+  });
+
+  it("reports a failed save, then recovers once a save works again", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { store, data, fail } = delayed();
+    await store.persist.rehydrate();
+
+    fail(true);
+    store.getState().updateProfile({ avatar: "data:image/jpeg;base64,big" });
+    vi.advanceTimersByTime(500);
+    expect(store.getState().storageAvailable).toBe(false);
+    expect(store.getState().savePending).toBe(false);
+
+    fail(false);
+    store.getState().updateProfile({ avatar: undefined });
+    vi.advanceTimersByTime(500);
+    expect(store.getState().storageAvailable).toBe(true);
+    expect(savedName(data)).toBe("Alex Morgan");
+  });
+});

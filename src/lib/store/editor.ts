@@ -85,6 +85,10 @@ export interface EditorState extends EditorData {
    * the UI must not claim the work is saved.
    */
   storageAvailable: boolean;
+  /** A change is waiting to be written (saving is debounced while typing). */
+  savePending: boolean;
+  /** When the draft was last written, or null if not during this visit. */
+  lastSavedAt: number | null;
 
   /** Undo steps, oldest first. */
   past: HistoryEntry[];
@@ -165,31 +169,73 @@ export interface CreateEditorStoreOptions {
   storage?: StateStorage;
   /** Wait for an explicit `persist.rehydrate()` (avoids SSR hydration mismatches). */
   skipHydration?: boolean;
-  /** Clock for grouping undo steps. Tests pass their own. */
+  /** Clock for grouping undo steps and save times. Tests pass their own. */
   now?: () => number;
+  /**
+   * Wait this long after the last change before writing. Typing then costs
+   * one write per pause instead of one per key (a photo makes the draft big).
+   * 0 writes on every change.
+   */
+  saveDelayMs?: number;
 }
+
+type SaveStatus = Pick<EditorState, "storageAvailable" | "savePending" | "lastSavedAt">;
 
 export function createEditorStore({
   storage = browserStorage(),
   skipHydration = false,
   now = Date.now,
+  saveDelayMs = 0,
 }: CreateEditorStoreOptions = {}) {
   // Storage can throw at any time: blocked site data, private modes, or a
   // full quota (photos are stored as data URLs). An unhandled throw inside
   // zustand's hydration is swallowed and leaves `hasHydrated` false forever,
   // so every call is caught here and reported through `storageAvailable`.
-  let failedBeforeStoreExisted = false;
-  let reportFailure = () => {
-    failedBeforeStoreExisted = true;
+  //
+  // Status changes can happen before the store exists (the first read fails),
+  // so they are collected until it does.
+  let earlyStatus: Partial<SaveStatus> = {};
+  let setStatus = (patch: Partial<SaveStatus>) => {
+    earlyStatus = { ...earlyStatus, ...patch };
   };
   const attempt = <T>(fn: () => T, fallback: T): T => {
     try {
       return fn();
     } catch (error) {
       console.warn("Couldn't access browser storage for the resume draft.", error);
-      reportFailure();
+      setStatus({ storageAvailable: false });
       return fallback;
     }
+  };
+
+  // Saving. zustand calls setItem after every change, status updates
+  // included, always with the whole draft as a string. `written` is the last
+  // string handed to storage, so a change that lands back on it (undo then
+  // redo, a status update) writes nothing and can't loop.
+  let written: string | null = null;
+  let queued: { key: string; value: string } | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const write = (key: string, value: string) => {
+    written = value; // set first: the status update below re-enters setItem
+    try {
+      storage.setItem(key, value);
+      setStatus({ storageAvailable: true, savePending: false, lastSavedAt: now() });
+    } catch (error) {
+      // Not retried until the draft changes again (removing a photo can fix a full quota).
+      console.warn("Couldn't save the resume draft.", error);
+      setStatus({ storageAvailable: false, savePending: false });
+    }
+  };
+
+  /** Write a waiting change now, e.g. when the page is being left. */
+  const flushSave = () => {
+    clearTimeout(timer);
+    timer = undefined;
+    if (!queued) return;
+    const { key, value } = queued;
+    queued = null;
+    write(key, value);
   };
 
   // zustand saves on every change, even before the saved draft has been read.
@@ -199,7 +245,22 @@ export function createEditorStore({
   const guardedStorage: StateStorage = {
     getItem: (key) => attempt(() => storage.getItem(key), null),
     setItem: (key, value) => {
-      if (hydrated) attempt(() => storage.setItem(key, value), undefined);
+      if (!hydrated) return;
+      if (value === written) {
+        // Back to what's already saved: drop the waiting write.
+        if (queued) {
+          queued = null;
+          clearTimeout(timer);
+          setStatus({ savePending: false });
+        }
+        return;
+      }
+      if (value === queued?.value) return;
+      if (saveDelayMs <= 0) return write(key, value);
+      queued = { key, value };
+      setStatus({ savePending: true });
+      clearTimeout(timer);
+      timer = setTimeout(flushSave, saveDelayMs);
     },
     removeItem: (key) => attempt(() => storage.removeItem(key), undefined),
   };
@@ -293,6 +354,8 @@ export function createEditorStore({
           template: DEFAULT_TEMPLATE,
           hasHydrated: false,
           storageAvailable: true,
+          savePending: false,
+          lastSavedAt: null,
           past: [],
           future: [],
           revision: 0,
@@ -417,12 +480,25 @@ export function createEditorStore({
     ),
   );
 
-  reportFailure = () => {
-    // Only flip once: the setState below triggers a save, which fails again.
-    if (store.getState().storageAvailable) store.setState({ storageAvailable: false });
+  setStatus = (patch) => {
+    // Only real changes: every setState triggers another setItem call.
+    const state = store.getState();
+    if ((Object.keys(patch) as (keyof SaveStatus)[]).some((key) => state[key] !== patch[key])) {
+      store.setState(patch);
+    }
   };
-  if (failedBeforeStoreExisted) reportFailure();
-  return store;
+  setStatus(earlyStatus);
+
+  if (typeof window !== "undefined" && saveDelayMs > 0) {
+    // A waiting change must not be lost when the tab is closed or hidden
+    // (phones often kill hidden tabs without a pagehide).
+    window.addEventListener("pagehide", flushSave);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushSave();
+    });
+  }
+
+  return Object.assign(store, { flushSave });
 }
 
 export type EditorStore = ReturnType<typeof createEditorStore>;
@@ -431,7 +507,7 @@ export type EditorStore = ReturnType<typeof createEditorStore>;
  * The app-wide editor store. Hydration is manual so the server render and the
  * first client render match; call `useEditorHydration()` once in the editor.
  */
-export const editorStore = createEditorStore({ skipHydration: true });
+export const editorStore = createEditorStore({ skipHydration: true, saveDelayMs: 600 });
 
 export function useEditorStore<T>(selector: (state: EditorState) => T): T {
   return useStore(editorStore, selector);
