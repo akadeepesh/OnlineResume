@@ -16,5 +16,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*"],
+  // Saved resumes in the editor; /editor itself (guest) and its preview frame stay public.
+  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/editor/((?!preview(?:/|$)).+)"],
 };
