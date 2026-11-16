@@ -81,6 +81,7 @@ export async function PublicResume({ username, slug }: { username: string; slug:
 
   const { row, resume, isOwner } = visible;
   const Template = templates[isTemplateSlug(row.template) ? row.template : "classic"];
+  const printHref = `/print${new URL(visible.url).pathname}?auto=1`;
 
   return (
     <>
@@ -100,8 +101,19 @@ export async function PublicResume({ username, slug }: { username: string; slug:
             <Link href={`/editor/${row.id}`} className="font-medium text-neutral-900 underline underline-offset-4">
               Edit
             </Link>
+            <a href={printHref} className="font-medium text-neutral-900 underline underline-offset-4">
+              PDF
+            </a>
           </div>
         </div>
+      )}
+      {!isOwner && (
+        <a
+          href={printHref}
+          className="fixed bottom-4 right-4 z-50 rounded-full border border-neutral-200 bg-white/95 px-4 py-2 text-sm font-medium text-neutral-800 shadow-lg backdrop-blur hover:bg-white print:hidden"
+        >
+          Download PDF
+        </a>
       )}
     </>
   );
