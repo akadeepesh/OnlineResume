@@ -44,6 +44,13 @@ describe("client env", () => {
 });
 
 describe("server env", () => {
+  it("accepts a Postgres URL and rejects anything else", () => {
+    expect(parseEnv(serverEnvSchema, {}).DATABASE_URL).toBeUndefined();
+    const url = "postgresql://user:pw@ep-x.eu-central-1.aws.neon.tech/neondb?sslmode=require";
+    expect(parseEnv(serverEnvSchema, { DATABASE_URL: url }).DATABASE_URL).toBe(url);
+    expect(() => parseEnv(serverEnvSchema, { DATABASE_URL: "mysql://nope" })).toThrow(/DATABASE_URL/);
+  });
+
   it("keeps the GitHub token optional", () => {
     expect(parseEnv(serverEnvSchema, {}).GITHUB_TOKEN).toBeUndefined();
     expect(parseEnv(serverEnvSchema, { GITHUB_TOKEN: "abc" }).GITHUB_TOKEN).toBe("abc");
