@@ -31,9 +31,25 @@ export const templateMeta = [
     description: "Modern tile grid, dashboard style",
     swatch: ["#efeeea", "#ffffff", "#ff5b2e"],
   },
+  {
+    slug: "plain",
+    name: "Plain",
+    description: "Single column, ATS-friendly, prints cleanly",
+    swatch: ["#ffffff", "#171717", "#525252"],
+  },
 ] as const;
 
 export type TemplateSlug = (typeof templateMeta)[number]["slug"];
+
+/**
+ * Templates that look right on paper. "Download PDF" uses the resume's own
+ * template when it's here, and Plain otherwise (screen designs with dark
+ * backgrounds, animations or interactive parts don't print well).
+ */
+export const PRINTABLE_TEMPLATES: readonly TemplateSlug[] = ["plain"];
+
+export const printTemplateFor = (slug: TemplateSlug): TemplateSlug =>
+  PRINTABLE_TEMPLATES.includes(slug) ? slug : "plain";
 
 export const isTemplateSlug = (value: string): value is TemplateSlug =>
   templateMeta.some((t) => t.slug === value);
