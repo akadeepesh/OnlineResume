@@ -172,6 +172,20 @@ export default function AuthForm({ mode, next, providers, initialError }: AuthFo
         </Button>
       </form>
 
+      {mode === "sign-up" && (
+        <p className="mt-4 text-center text-xs text-neutral-500">
+          By creating an account you agree to the{" "}
+          <Link href="/terms" className="underline underline-offset-2">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline underline-offset-2">
+            Privacy policy
+          </Link>
+          .
+        </p>
+      )}
+
       <p className="mt-6 text-center text-sm text-neutral-500">
         {copy.switchText}{" "}
         <Link
