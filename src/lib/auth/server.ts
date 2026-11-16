@@ -15,15 +15,15 @@ import { socialProviders } from "./providers";
 //   without DATABASE_URL, and the build never needs secrets.
 // - Account linking: signing in with Google or GitHub joins an existing
 //   account with the same email only when both sides have a verified email.
-//   Email + password accounts stay unverified until we send emails (later
-//   PR), so they don't get linked. That blocks a takeover where someone signs
+//   Email + password accounts stay unverified until we send emails, so
+//   they don't get linked. That blocks a takeover where someone signs
 //   up with another person's email and waits for them to use Google.
 // ============================================================================
 
 function createAuth() {
   const env = serverEnv();
   if (!env.BETTER_AUTH_SECRET && process.env.NODE_ENV === "production") {
-    throw new Error("BETTER_AUTH_SECRET is not set. See docs/SETUP.md (Accounts).");
+    throw new Error("BETTER_AUTH_SECRET is not set. See .env.example.");
   }
 
   return betterAuth({

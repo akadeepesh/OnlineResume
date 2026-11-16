@@ -27,7 +27,7 @@ import { bytea } from "./bytea";
 //   other input: read them through `parseResume` (which also migrates old
 //   schema versions) before use.
 // - Limits per plan (number of resumes, AI imports a day) live in
-//   `lib/limits.ts` (PR 14), not in constraints, so plans can change freely.
+//   code, not in constraints, so plans can change freely.
 // ============================================================================
 
 /** Plans are plain text so adding a paid plan needs no migration. */
@@ -51,7 +51,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
-  /** Chosen during onboarding (PR 13), stored lowercase. Null until then. */
+  /** Chosen during onboarding, stored lowercase. Null until then. */
   username: text("username").unique(),
   plan: text("plan").$type<Plan>().notNull().default("free"),
   ...timestamps,
@@ -158,7 +158,7 @@ export const resumeFiles = pgTable(
     mimeType: text("mime_type").notNull(),
     sizeBytes: integer("size_bytes").notNull(),
     content: bytea("content").notNull(),
-    /** Field → position in the original (PR 22), for edited-original export. */
+    /** Field → position in the original, for exporting an edited original. */
     sourceMap: jsonb("source_map"),
     /** Owner allows visitors to download the original from the public page. */
     allowDownload: boolean("allow_download").notNull().default(false),
@@ -170,7 +170,7 @@ export const resumeFiles = pgTable(
   ],
 );
 
-/** AI imports per user per day, for the daily cap (PR 23). */
+/** AI imports per user per day, for the daily cap. */
 export const aiUsage = pgTable(
   "ai_usage",
   {

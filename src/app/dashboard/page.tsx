@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Placeholder until the real dashboard (PR 14): proves the session works end to end.
+// Placeholder until the resume dashboard lands: proves the session works end to end.
 export default async function DashboardPage() {
   const { user } = await requireSession("/dashboard");
 

@@ -10,7 +10,7 @@ import { z } from "zod";
 //   the browser, so a secret can't end up in client code by accident.
 // - Blank values count as unset: Vercel and .env files often hold "".
 //
-// Every variable is documented in .env.example and docs/SETUP.md.
+// Every variable is documented in .env.example.
 // ============================================================================
 
 /** "" → undefined, so defaults and optional() treat blank values as unset. */
