@@ -3,7 +3,10 @@ import { clientEnvSchema, parseEnv, serverEnvSchema } from "./env";
 
 describe("client env", () => {
   it("defaults the site URL for local development", () => {
-    expect(parseEnv(clientEnvSchema, {})).toEqual({ NEXT_PUBLIC_SITE_URL: "http://localhost:3000" });
+    expect(parseEnv(clientEnvSchema, {})).toEqual({
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
+      NEXT_PUBLIC_SENTRY_DSN: undefined,
+    });
   });
 
   it("treats blank values as unset (Vercel and .env files often hold \"\")", () => {

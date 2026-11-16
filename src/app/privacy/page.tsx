@@ -71,8 +71,12 @@ export default function PrivacyPage() {
           <strong>An AI provider</strong>, only when you use AI-assisted import: the text of the resume you import is
           sent to it to be structured, and nothing else.
         </li>
+        <li>
+          <strong>Sentry</strong>, for error reports: when something breaks, the error and where it happened in our
+          code, without your name, email or resume content.
+        </li>
       </ul>
-      <p>We don&apos;t sell your data, show ads, or use third-party tracking or analytics cookies.</p>
+      <p>We don&apos;t sell your data, show ads, or use tracking or analytics cookies.</p>
 
       <h2>Your control</h2>
       <ul>
