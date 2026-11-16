@@ -55,7 +55,7 @@ export function suggestUsername(name: string, email: string): string {
   const slug = (value: string) =>
     value
       .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "") // accents
+      .replace(/[\u0300-\u036f]/g, "") // accents
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
