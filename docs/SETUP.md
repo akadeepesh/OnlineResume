@@ -23,6 +23,10 @@ All variables are listed in [`.env.example`](../.env.example) and validated in [
 | `NEXT_PUBLIC_GH_OWNER` | public | none | GitHub account for those stats (to be removed) |
 | `GITHUB_TOKEN` | server | none | Higher GitHub API rate limit |
 | `DATABASE_URL` | server | none | Neon Postgres connection string. Accounts and saved resumes need it; the guest editor doesn't |
+| `BETTER_AUTH_SECRET` | server | dev secret | Signs sessions. Required in production; at least 32 characters |
+| `BETTER_AUTH_URL` | server | `NEXT_PUBLIC_SITE_URL` | Base URL for OAuth callbacks |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | server | none | Google sign-in (button hidden unless both are set) |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | server | none | GitHub sign-in (button hidden unless both are set) |
 
 Rules for adding one:
 - `NEXT_PUBLIC_*` values end up in the browser bundle. Never put a secret in one.
@@ -42,9 +46,30 @@ Changing the schema (`src/lib/db/schema.ts`):
 2. `npm run db:generate` writes a new SQL migration to `drizzle/`. Read it, then commit it with the schema change.
 3. `npm run db:migrate` applies it. Run it against production before (or right after) deploying code that needs it.
 
-Tables: `users` (Better Auth's user shape + `username`, `plan`), `resumes` (resume JSON as jsonb, slug unique per user, one primary per user), `resume_files` (original upload, max 5 MB), `ai_usage` (AI imports per user per day). Better Auth's session tables arrive with auth.
+Tables: `users` (Better Auth's user shape + `username`, `plan`), `resumes` (resume JSON as jsonb, slug unique per user, one primary per user), `resume_files` (original upload, max 5 MB), `ai_usage` (AI imports per user per day). `sessions`, `accounts`, `verifications` (Better Auth).
 
 On Vercel, add `DATABASE_URL` for Production (and Preview, ideally pointing at a Neon branch so previews never touch production data).
+
+## Accounts (Better Auth)
+
+Email + password works as soon as the database is set. Google and GitHub buttons appear once their id and secret are both set.
+
+**Secret.** Generate one per environment (`openssl rand -base64 32`, or any 32+ random characters) and set `BETTER_AUTH_SECRET`. Changing it signs everyone out.
+
+**Callback URLs.** Each provider redirects back to `<base URL>/api/auth/callback/<provider>`:
+
+| Environment | Google | GitHub |
+|---|---|---|
+| Local | `http://localhost:3000/api/auth/callback/google` | `http://localhost:3000/api/auth/callback/github` |
+| Production | `https://resume.akadeepesh.com/api/auth/callback/google` | `https://resume.akadeepesh.com/api/auth/callback/github` |
+
+**Google.** [Google Cloud console](https://console.cloud.google.com/) → new project → **APIs & Services → OAuth consent screen**: External, app name, support email, scopes `email`, `profile`, `openid`; publish it (these scopes need no review). Then **Credentials → Create credentials → OAuth client ID** → Web application. Authorized JavaScript origins: `http://localhost:3000` and `https://resume.akadeepesh.com`. Authorized redirect URIs: both Google URLs above. Copy the id and secret.
+
+**GitHub.** A GitHub OAuth App allows one callback URL, so make two: [Settings → Developer settings → OAuth Apps → New](https://github.com/settings/applications/new). Dev app: homepage `http://localhost:3000`, callback the local GitHub URL. Production app: homepage `https://resume.akadeepesh.com`, callback the production GitHub URL. Generate a client secret for each.
+
+Put the dev values in `.env.local` and the production values in Vercel (Production). Preview deployments have changing URLs, so OAuth doesn't work there; email + password does.
+
+**Account linking.** Google or GitHub joins an existing account with the same email only when both emails are verified. Email + password accounts stay unverified until we send verification emails, so someone who signed up with a password keeps using it. Password reset also needs email and comes later.
 
 ## Vercel
 
@@ -69,4 +94,4 @@ Hobby is for non-commercial use. Move to Pro (or another host) before charging m
 
 ## Coming later
 
-Database (Neon, PR 11), auth with Google / GitHub / email (Better Auth, PR 12) and AI import (Groq, PR 23) each add their variables here and to `.env.example` when they land.
+Email sending (verification and password reset) and AI import (Groq, PR 23) add their variables here and to `.env.example` when they land.
