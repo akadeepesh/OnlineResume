@@ -20,7 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { downloadText } from "@/lib/formats/download";
-import { exportFileName, readResumeJson, toJsonResumeText, toResumeJson } from "@/lib/formats/files";
+import { exportFileName, toJsonResumeText, toResumeJson } from "@/lib/formats/files";
+import { IMPORT_ACCEPT, readImportFile } from "@/lib/formats/read-file";
 import type { Resume } from "@/lib/resume/schema";
 import { useEditorStoreApi } from "@/lib/store/editor";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,7 @@ export default function FileMenu() {
     const file = event.target.files?.[0];
     event.target.value = ""; // picking the same file again should work
     if (!file) return;
-    const result = readResumeJson(await file.text());
+    const result = await readImportFile(file);
     if (result.ok) setIncoming(result.resume);
     else setError(result.error);
   }
@@ -45,7 +46,7 @@ export default function FileMenu() {
 
   return (
     <>
-      <input ref={input} type="file" accept="application/json,.json" className="hidden" onChange={onFile} />
+      <input ref={input} type="file" accept={IMPORT_ACCEPT} className="hidden" onChange={onFile} />
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1")}>
           <FileJson className="h-4 w-4 sm:hidden" aria-hidden />
@@ -55,7 +56,7 @@ export default function FileMenu() {
         <DropdownMenuContent align="end" className="w-60">
           <DropdownMenuItem onSelect={() => input.current?.click()} className="gap-2">
             <Upload className="h-4 w-4 text-neutral-500" aria-hidden />
-            Import JSON…
+            Import file…
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuLabel className="text-xs font-normal text-neutral-500">Export</DropdownMenuLabel>
