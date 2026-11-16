@@ -71,7 +71,7 @@ export async function publicMetadata(username: string, slug: string | null): Pro
     alternates: { canonical: visible.url },
     robots: hidden ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: { title, description, url: visible.url, type: "profile" },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
