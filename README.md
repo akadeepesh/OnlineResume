@@ -46,7 +46,7 @@ To add a template, create `src/templates/<name>/` with a component that takes `{
 | State & validation | zustand, zod |
 | Data | Neon Postgres, Drizzle ORM |
 | Auth | Better Auth |
-| Tests | Vitest, Testing Library |
+| Tests | Vitest |
 
 ## Getting started
 
