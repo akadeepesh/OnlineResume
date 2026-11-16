@@ -15,6 +15,7 @@ import { HistoryButtons, useHistoryShortcuts } from "./HistoryControls";
 import PreviewPane from "./PreviewPane";
 import SectionPanel from "./SectionPanel";
 import { SectionSelect, SectionSidebar } from "./SectionNav";
+import FileMenu from "./FileMenu";
 import StartFromMenu from "./StartFromMenu";
 import TemplatePicker from "./TemplatePicker";
 
@@ -165,6 +166,7 @@ function TopBar({
       {cloud ? <CloudSaveStatus save={cloud.save} /> : <SaveStatus />}
       <HistoryButtons onSelect={onSelect} announce={announce} />
       <TemplatePicker />
+      <FileMenu />
       <StartFromMenu />
       {cloud && <ShareDialog resumeId={cloud.resumeId} initial={cloud.share} />}
     </header>
