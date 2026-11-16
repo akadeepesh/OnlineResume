@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { authErrorMessage, GENERIC_AUTH_ERROR } from "./messages";
 import { enabledProviders, socialProviders } from "./providers";
-import { authPageHref, DEFAULT_AFTER_SIGN_IN, safeNext } from "./redirect";
+import { authPageHref, DEFAULT_AFTER_SIGN_IN, onboardingHref, safeNext } from "./redirect";
 
 describe("social providers", () => {
   it("turns on a provider only when both id and secret are set", () => {
@@ -49,12 +49,15 @@ describe("safeNext", () => {
   it("never sends people back to the auth pages", () => {
     expect(safeNext("/sign-in")).toBe(DEFAULT_AFTER_SIGN_IN);
     expect(safeNext("/sign-up?next=/x")).toBe(DEFAULT_AFTER_SIGN_IN);
+    expect(safeNext("/onboarding?next=/x")).toBe(DEFAULT_AFTER_SIGN_IN);
     expect(safeNext("/sign-inside")).toBe("/sign-inside");
   });
 
   it("builds auth page links without the default destination", () => {
     expect(authPageHref("sign-in", DEFAULT_AFTER_SIGN_IN)).toBe("/sign-in");
     expect(authPageHref("sign-up", "/editor?a=1")).toBe("/sign-up?next=%2Feditor%3Fa%3D1");
+    expect(onboardingHref(DEFAULT_AFTER_SIGN_IN)).toBe("/onboarding");
+    expect(onboardingHref("/editor")).toBe("/onboarding?next=%2Feditor");
   });
 });
 
