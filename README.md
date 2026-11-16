@@ -1,91 +1,115 @@
-![DeCoder](https://github.com/user-attachments/assets/8e07beea-7e50-4383-810f-b54d6e090b4e)
+![OnlineResume](https://github.com/user-attachments/assets/8e07beea-7e50-4383-810f-b54d6e090b4e)
 
 # OnlineResume
 
-**OnlineResume** is a modern, responsive portfolio and resume website built with **Next.js 14**, designed to showcase your professional experience, skills, and projects in an elegant and interactive format. With a focus on performance, aesthetics, and user engagement, this project is perfect for making a lasting impression on potential employers or clients. **OnlineResume** ensures seamless user experience across various devices and screen sizes, offering dynamic and customizable content.
+**Your resume, as a link.** Write it or import it, pick a design, and share one URL that always shows the latest version. Export a PDF whenever someone asks for a file.
+
+Built for everyone who needs a resume, not just developers: sign in with email, Google or GitHub.
 
 ## Features
 
-- **Responsive Design**: Adaptable and optimized for desktop, tablet, and mobile devices.
-- **Dynamic Content**: Easily update your information using simple array-based data.
-- **GitHub Project Integration**: Automatically fetch and display project data directly from GitHub repositories (stars, forks, issues, descriptions, and topics).
-- **Performance Focused**: Fast loading times and smooth interactions using Framer Motion for animation.
-- **Customizable**: Tailor the design, color scheme, and content to match your personal brand.
-- **Interactive Skills Showcase**: Explore projects by clicking on specific skills to view all related work.
+**Available now**
+- **Section-by-section editor** with a live preview, undo/redo, autosave, and sections you can reorder or hide.
+- **Five templates** rendered from one validated schema, so your content works in every design.
+- **Guest mode:** start writing without an account. Your draft is kept in the browser.
+- **Accounts** with email + password, Google or GitHub.
+- **Your own username**, which becomes your public link.
+
+**In progress**
+- Dashboard with several resumes per account, saved to the database.
+- Public pages at `/<username>`, with publish and search-engine visibility controls.
+- PDF and JSON export.
+- Import from PDF, DOCX, JSON Resume and LinkedIn, keeping the original file for download.
 
 ## Templates
 
-Resume data follows one validated schema — [`src/lib/resume/schema.ts`](src/lib/resume/schema.ts) — and every template renders from it, so the same content works in any design. Template previews use the fictional sample in [`src/lib/resume/sample.ts`](src/lib/resume/sample.ts).
+Every template takes the same data ([`src/lib/resume/schema.ts`](src/lib/resume/schema.ts)). Previews use the fictional sample in [`src/lib/resume/sample.ts`](src/lib/resume/sample.ts).
 
 | Template    | Style                                                                 |
 | ----------- | --------------------------------------------------------------------- |
 | `classic`   | Light sidebar profile with clean content cards and a timeline         |
 | `editorial` | Print-inspired serif CV on paper, numbered sections, inline expansion |
 | `spotlight` | Dark split-screen, sticky nav that tracks the section, cursor glow    |
-| `terminal`  | Interactive shell — visitors can type `help`, `skills python`, …      |
+| `terminal`  | Interactive shell: visitors can type `help`, `skills python`, …       |
 | `bento`     | Modern tile grid with stats, accordion experience and skill drawer    |
 
-- Preview any template at `/templates/<name>` (e.g. `/templates/bento`).
-- Choose the one served at `/` with `NEXT_PUBLIC_TEMPLATE=bento` (defaults to `classic`).
-- A floating template picker is shown by default; hide it with `NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER=false`.
+Preview any of them at `/templates/<name>`, e.g. `/templates/bento`.
 
-To add your own, create `src/templates/<name>/` with a component that takes `{ data: Resume }`, then register it in [`src/templates/meta.ts`](src/templates/meta.ts) and [`src/templates/index.ts`](src/templates/index.ts).
+To add a template, create `src/templates/<name>/` with a component that takes `{ data: Resume }`, then register it in [`src/templates/meta.ts`](src/templates/meta.ts) and [`src/templates/index.ts`](src/templates/index.ts).
 
-## Tech Stack
+## Tech stack
 
-- **Next.js 14**: A powerful React framework for production-grade websites.
-- **TypeScript**: Strongly-typed JavaScript to reduce bugs and improve development efficiency.
-- **Tailwind CSS**: Utility-first CSS framework for custom, responsive designs.
-- **shadcn/ui**: Pre-built components for streamlined development.
-- **Framer Motion**: Smooth and sophisticated animations to enhance user interactions.
+| Area | Tools |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React, TypeScript |
+| UI | Tailwind CSS, shadcn/ui (Radix), Framer Motion, dnd-kit |
+| State & validation | zustand, zod |
+| Data | Neon Postgres, Drizzle ORM |
+| Auth | Better Auth |
+| Tests | Vitest, Testing Library |
 
-## GitHub Project Data Integration
+## Getting started
 
-**OnlineResume** integrates directly with GitHub to dynamically fetch and showcase your projects. This includes real-time data such as:
+Requires Node.js 20 or newer.
 
-- Star count
-- Fork count
-- Open issues
-- Project description
-- Topics/tags
+```bash
+git clone https://github.com/akadeepesh/OnlineResume.git
+cd OnlineResume
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-This allows your resume to stay updated with the latest information from your GitHub repositories, providing an accurate reflection of your work and contributions. Projects are automatically fetched via the GitHub API, making the setup and maintenance seamless.
+Open [http://localhost:3000](http://localhost:3000). The editor and templates work with no configuration.
 
-## Skills-Project Integration
+**Accounts and saved resumes** need a Postgres database (a free [Neon](https://neon.tech) project works):
 
-One of the standout features is the integration between your skills and projects. Visitors can click on specific skills within the portfolio, which dynamically filters and displays projects that are relevant to that skill. For example, clicking "Python" will reveal all Python-related projects, giving potential employers or clients a focused view of your expertise and real-world applications.
+1. Set `DATABASE_URL` in `.env.local`.
+2. Run `npm run db:migrate`.
+3. Optional: set `GOOGLE_*` / `GITHUB_*` to show those sign-in buttons. Email + password works without them.
 
-## Getting Started
+Every variable is described in [`.env.example`](.env.example) and validated at startup in [`src/lib/env.ts`](src/lib/env.ts).
 
-To get started with **OnlineResume**, follow these steps:
+## Scripts
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/akadeepesh/OnlineResume.git
-   ```
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-4. **Open your browser** at [http://localhost:3000](http://localhost:3000).
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript, no emit |
+| `npm test` | Unit tests (Vitest) |
+| `npm run db:generate` | Create a SQL migration from schema changes |
+| `npm run db:migrate` | Apply migrations |
+| `npm run db:studio` | Browse the database |
 
-Refer to the respective platform’s documentation for detailed deployment instructions.
+## Project structure
+
+```
+src/
+  app/            routes: editor, templates, sign-in/up, onboarding, dashboard, API
+  components/     editor, auth and shared UI
+  lib/resume/     resume schema, migrations, sample data
+  lib/store/      editor state, undo/redo, local draft
+  lib/db/         database schema and client
+  lib/auth/       auth config, session helpers
+  templates/      the five resume designs
+drizzle/          SQL migrations
+```
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 ## License
 
-This project is licensed under the **[MIT License](LICENSE)**. You are free to use, modify, and distribute this project as you see fit.
+[MIT](LICENSE)
 
 ## Contributors
 
-<center>
-  <a href="https://github.com/akadeepesh/OnlineResume/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" />
-  </a>
-</center>
+<a href="https://github.com/akadeepesh/OnlineResume/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=akadeepesh/OnlineResume" alt="Contributors" />
+</a>
 
 ---
 
