@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Loader2, X } from "lucide-react";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { claimUsername, checkUsername, type ClaimState } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -32,8 +32,9 @@ export default function UsernameForm({ next, suggestion, suggestionAvailable, li
   );
   // The value that was last submitted: a claim error only applies to it.
   const [submitted, setSubmitted] = useState("");
-  const [state, formAction, submitting] = useActionState<ClaimState, FormData>(claimUsername, {});
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [state, setState] = useState<ClaimState>({});
+  const [submitting, setSubmitting] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // Only the newest request may update the status; slower old ones are ignored.
   const latest = useRef(0);
 
@@ -59,6 +60,21 @@ export default function UsernameForm({ next, suggestion, suggestionAvailable, li
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setSubmitted(value);
+    setSubmitting(true);
+    try {
+      // On success the action redirects, and this component goes away.
+      const result = await claimUsername(form);
+      setState(result ?? {});
+    } catch {
+      setState({ error: "Couldn't save right now. Try again." });
+    }
+    setSubmitting(false);
+  }
+
   const claimError = state.error && value === submitted ? state.error : "";
   const message = claimError || (status.kind === "problem" ? status.message : "");
 
@@ -67,7 +83,7 @@ export default function UsernameForm({ next, suggestion, suggestionAvailable, li
       <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Pick your username</h1>
       <p className="mt-1 text-sm text-neutral-500">It becomes the link to your resume.</p>
 
-      <form action={formAction} onSubmit={() => setSubmitted(value)} className="mt-6 grid gap-4">
+      <form onSubmit={onSubmit} className="mt-6 grid gap-4">
         <input type="hidden" name="next" value={next} />
         <div className="grid gap-1.5">
           <Label htmlFor="username">Username</Label>

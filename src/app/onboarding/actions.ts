@@ -38,7 +38,7 @@ export interface ClaimState {
  * The unique index decides races: two people submitting the same name at once
  * get one success and one "taken".
  */
-export async function claimUsername(_prev: ClaimState, form: FormData): Promise<ClaimState> {
+export async function claimUsername(form: FormData): Promise<ClaimState> {
   const session = await getSession();
   if (!session) return { error: "Sign in again to continue." };
 
