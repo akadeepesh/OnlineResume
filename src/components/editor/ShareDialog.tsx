@@ -219,7 +219,7 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
             <p className="text-xs text-neutral-500">A clean, ATS-friendly version for applications.</p>
           </div>
           <Button size="sm" variant="outline" asChild>
-            <a href={`/print${new URL(settings.url).pathname}?auto=1`} target="_blank" rel="noopener">
+            <a href={`/api/pdf${new URL(settings.url).pathname}`} target="_blank" rel="noopener">
               <Download className="mr-2 h-4 w-4" aria-hidden />
               Download
             </a>
