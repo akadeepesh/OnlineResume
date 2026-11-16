@@ -6,20 +6,17 @@ import {
   ArrowRight,
   ArrowUpRight,
   Download,
-  GitFork,
   Github,
   GraduationCap,
   Linkedin,
   Mail,
   MapPin,
   Plus,
-  Star,
   X,
 } from "lucide-react";
 import { Avatar } from "@/components/shared/Avatar";
 import { RichText } from "@/components/shared/RichText";
 import { SkillIcon } from "@/components/shared/SkillIcon";
-import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume, Skill } from "@/lib/resume/schema";
 import {
   emailOf,
@@ -28,12 +25,12 @@ import {
   joinParts,
   presentSections,
   socialLinks,
+  workForSkill,
+  type LinkedWork,
 } from "@/lib/resume/view";
 import { renderBlocks } from "../blocks";
 
 const SOCIAL_ICONS = { github: Github, linkedin: Linkedin, email: Mail } as const;
-
-const workCount = (skill: Skill) => skill.repos.length + (skill.sites?.length ?? 0);
 
 const Tile: React.FC<{
   children: React.ReactNode;
@@ -57,46 +54,9 @@ const Label: React.FC<{ children: React.ReactNode; className?: string }> = ({
   </p>
 );
 
-const DrawerRepo: React.FC<{ name: string }> = ({ name }) => {
-  const { data, loading } = useRepoData(name);
-  return (
-    <a
-      href={repoUrl(name)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-start gap-4 rounded-2xl bg-neutral-50 p-4 transition-colors hover:bg-neutral-100"
-    >
-      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-        <Github className="h-5 w-5 text-neutral-700" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center justify-between gap-2">
-          <span className="truncate font-semibold text-neutral-900">{name}</span>
-          <ArrowUpRight className="h-4 w-4 flex-shrink-0 text-neutral-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-        </span>
-        {loading && <span className="mt-2 block h-3 w-1/2 animate-pulse rounded bg-neutral-200" />}
-        {data?.description && (
-          <span className="mt-1 line-clamp-2 block text-sm text-neutral-500">
-            {data.description}
-          </span>
-        )}
-        {data && (
-          <span className="mt-2 flex gap-3 text-xs font-medium text-neutral-500">
-            <span className="flex items-center gap-1">
-              <Star className="h-3.5 w-3.5" /> {data.stargazers_count}
-            </span>
-            <span className="flex items-center gap-1">
-              <GitFork className="h-3.5 w-3.5" /> {data.forks_count}
-            </span>
-          </span>
-        )}
-      </span>
-    </a>
-  );
-};
-
-const SkillDrawer: React.FC<{ skill: Skill | null; onClose: () => void }> = ({
+const SkillDrawer: React.FC<{ skill: Skill | null; work: LinkedWork[]; onClose: () => void }> = ({
   skill,
+  work,
   onClose,
 }) => {
   useEffect(() => {
@@ -153,35 +113,40 @@ const SkillDrawer: React.FC<{ skill: Skill | null; onClose: () => void }> = ({
               </button>
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
-              {skill.sites?.map((site, i) => (
-                <a
-                  key={i}
-                  href={site.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block rounded-2xl bg-neutral-900 p-5 text-white"
-                >
-                  <span className="flex items-center justify-between text-lg font-semibold">
-                    {site.title}
-                    <ArrowUpRight className="h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                  </span>
-                  {has(site.description) && (
-                    <span className="mt-1 block text-sm text-neutral-400">{site.description}</span>
-                  )}
-                  {site.tags.length > 0 && (
-                    <span className="mt-3 flex flex-wrap gap-1.5">
-                      {site.tags.map((t) => (
-                        <span key={t} className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs">
-                          {t}
-                        </span>
-                      ))}
+              {work.map((item, i) => {
+                const body = (
+                  <>
+                    <span className="flex items-center justify-between text-lg font-semibold">
+                      {item.title}
+                      {item.href && (
+                        <ArrowUpRight className="h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                      )}
                     </span>
-                  )}
-                </a>
-              ))}
-              {skill.repos.map((repo) => (
-                <DrawerRepo key={repo} name={repo} />
-              ))}
+                    {has(item.description) && (
+                      <span className="mt-1 block text-sm text-neutral-400">{item.description}</span>
+                    )}
+                    {item.tags.length > 0 && (
+                      <span className="mt-3 flex flex-wrap gap-1.5">
+                        {item.tags.map((t) => (
+                          <span key={t} className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs">
+                            {t}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </>
+                );
+                const className = "group block rounded-2xl bg-neutral-900 p-5 text-white";
+                return item.href ? (
+                  <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
+                    {body}
+                  </a>
+                ) : (
+                  <div key={i} className={className}>
+                    {body}
+                  </div>
+                );
+              })}
             </div>
           </motion.aside>
         </>
@@ -202,11 +167,12 @@ export default function BentoTemplate({ data }: { data: Resume }) {
   const greetingName = firstName(profile.name);
   const email = emailOf(data);
   const socials = socialLinks(profile.socials);
+  const workCount = (s: Skill) => workForSkill(data, s).length;
 
   // Only show counters that have something to count.
   const stats = [
     { value: experience.length, label: "Roles" },
-    { value: projects.length + skills.reduce((n, s) => n + s.repos.length, 0), label: "Projects" },
+    { value: projects.length, label: "Projects" },
     { value: skills.length, label: "Core skills" },
     { value: certifications.length, label: "Certificates" },
   ].filter((s) => s.value > 0);
@@ -688,7 +654,7 @@ export default function BentoTemplate({ data }: { data: Resume }) {
         </p>
       </div>
 
-      <SkillDrawer skill={skill} onClose={closeDrawer} />
+      <SkillDrawer skill={skill} work={skill ? workForSkill(data, skill) : []} onClose={closeDrawer} />
     </div>
   );
 }

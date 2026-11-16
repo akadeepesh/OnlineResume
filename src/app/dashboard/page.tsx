@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import SignOutButton from "@/components/auth/SignOutButton";
+import AppHeader from "@/components/AppHeader";
 import GuestDraftImport from "@/components/dashboard/GuestDraftImport";
 import ResumeList, { type ResumeCard } from "@/components/dashboard/ResumeList";
 import { requireOnboarded } from "@/lib/auth/session";
@@ -34,17 +33,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-6">
-          <Link href="/" className="text-sm font-semibold text-neutral-900">
-            OnlineResume
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-neutral-500 sm:inline">{user.email}</span>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
+      <AppHeader email={user.email} current="dashboard" />
 
       <main className="mx-auto max-w-3xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Hi, {user.name}</h1>

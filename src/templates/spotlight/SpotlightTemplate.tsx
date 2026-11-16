@@ -5,18 +5,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
   Download,
-  GitFork,
   Github,
   Linkedin,
   Mail,
-  Star,
 } from "lucide-react";
 import { Avatar } from "@/components/shared/Avatar";
 import { RichText } from "@/components/shared/RichText";
 import { SkillIcon } from "@/components/shared/SkillIcon";
-import { formatRepoDate, repoUrl, useRepoData } from "@/lib/github";
 import type { Resume, SectionKey, Skill } from "@/lib/resume/schema";
-import { arrangeBlocks, has, initials, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { arrangeBlocks, has, initials, joinParts, presentSections, socialLinks, workForSkill } from "@/lib/resume/view";
 import { renderBlocks } from "../blocks";
 
 /** In-page nav: one link per block, ordered like the blocks themselves. */
@@ -59,40 +56,6 @@ const HoverCard: React.FC<{ children: React.ReactNode; href?: string }> = ({
     </a>
   ) : (
     body
-  );
-};
-
-const RepoTile: React.FC<{ name: string }> = ({ name }) => {
-  const { data, loading } = useRepoData(name);
-  return (
-    <a
-      href={repoUrl(name)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-lg border border-slate-800 bg-slate-900/40 p-4 transition-colors hover:border-teal-400/40 hover:bg-slate-800/40"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span className="truncate font-medium text-slate-200 group-hover:text-teal-300">
-          {name}
-        </span>
-        <ArrowUpRight className="h-4 w-4 flex-shrink-0 text-slate-500 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-teal-300" />
-      </div>
-      {loading && <div className="mt-3 h-3 w-2/3 animate-pulse rounded bg-slate-800" />}
-      {data?.description && (
-        <p className="mt-2 line-clamp-2 text-sm text-slate-400">{data.description}</p>
-      )}
-      {data && (
-        <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
-          <span className="flex items-center gap-1">
-            <Star className="h-3.5 w-3.5" /> {data.stargazers_count}
-          </span>
-          <span className="flex items-center gap-1">
-            <GitFork className="h-3.5 w-3.5" /> {data.forks_count}
-          </span>
-          <span>Updated {formatRepoDate(data.updated_at)}</span>
-        </div>
-      )}
-    </a>
   );
 };
 
@@ -152,7 +115,7 @@ export default function SpotlightTemplate({ data }: { data: Resume }) {
   }, [navKey]);
 
   const socials = socialLinks(profile.socials);
-  const skillWork = skill ? skill.repos.length + (skill.sites?.length ?? 0) : 0;
+  const work = skill ? workForSkill(data, skill) : [];
 
   return (
     <div
@@ -438,7 +401,7 @@ export default function SpotlightTemplate({ data }: { data: Resume }) {
                                 })}
                               </div>
                             <AnimatePresence mode="wait">
-                              {skill && skillWork > 0 && (
+                              {skill && work.length > 0 && (
                                 <motion.div
                                   key={skill.name}
                                   initial={{ opacity: 0, y: 8 }}
@@ -447,24 +410,28 @@ export default function SpotlightTemplate({ data }: { data: Resume }) {
                                   transition={{ duration: 0.2 }}
                                   className="mt-6 grid gap-3 sm:grid-cols-2"
                                 >
-                                  {skill.sites?.map((site, i) => (
-                                    <a
-                                      key={i}
-                                      href={site.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="group block rounded-lg border border-slate-800 bg-slate-900/40 p-4 transition-colors hover:border-teal-400/40"
-                                    >
-                                      <span className="flex items-center justify-between font-medium text-slate-200 group-hover:text-teal-300">
-                                        {site.title}
-                                        <ArrowUpRight className="h-4 w-4" />
-                                      </span>
-                                      {has(site.description) && <p className="mt-2 text-sm">{site.description}</p>}
-                                    </a>
-                                  ))}
-                                  {skill.repos.map((repo) => (
-                                    <RepoTile key={repo} name={repo} />
-                                  ))}
+                                  {work.map((item, i) => {
+                                    const body = (
+                                      <>
+                                        <span className="flex items-center justify-between font-medium text-slate-200 group-hover:text-teal-300">
+                                          {item.title}
+                                          {item.href && <ArrowUpRight className="h-4 w-4" />}
+                                        </span>
+                                        {has(item.description) && <p className="mt-2 text-sm">{item.description}</p>}
+                                      </>
+                                    );
+                                    const className =
+                                      "group block rounded-lg border border-slate-800 bg-slate-900/40 p-4 transition-colors hover:border-teal-400/40";
+                                    return item.href ? (
+                                      <a key={i} href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
+                                        {body}
+                                      </a>
+                                    ) : (
+                                      <div key={i} className={className}>
+                                        {body}
+                                      </div>
+                                    );
+                                  })}
                                 </motion.div>
                               )}
                             </AnimatePresence>

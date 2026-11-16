@@ -21,6 +21,45 @@ describe("migrateResume", () => {
     });
   });
 
+  it("turns v2 repo and site links into project links (v3)", () => {
+    const v2 = {
+      schemaVersion: 2,
+      sectionOrder: [...DEFAULT_SECTION_ORDER],
+      hiddenSections: [],
+      profile: { name: "Dev" },
+      projects: [{ name: "Ledgerly", technologies: ["React"] }],
+      skills: [
+        { name: "TypeScript", icon: "code", repos: ["ledgerly", "unknown-repo"] },
+        { name: "React", icon: "globe", repos: ["Ledgerly"] },
+        {
+          name: "WordPress",
+          icon: "file",
+          repos: [],
+          sites: [{ title: "Harbor Coffee", url: "https://harbor.example.com", description: "Shop", tags: ["WooCommerce"] }],
+        },
+      ],
+    };
+    const result = migrateResume(v2) as typeof v2;
+    expect(result.schemaVersion).toBe(3);
+    expect(result.skills).toEqual([
+      { name: "TypeScript", icon: "code" },
+      { name: "React", icon: "globe" },
+      { name: "WordPress", icon: "file" },
+    ]);
+    expect(result.projects).toEqual([
+      { name: "Ledgerly", technologies: ["React", "TypeScript"] },
+      {
+        name: "Harbor Coffee",
+        description: "Shop",
+        demo: "https://harbor.example.com",
+        details: [],
+        technologies: ["WordPress", "WooCommerce"],
+      },
+    ]);
+    expect(v2.skills[0]!.repos).toEqual(["ledgerly", "unknown-repo"]); // input untouched
+    expect(parseResume(v2).success).toBe(true);
+  });
+
   it("does not mutate its input", () => {
     const input = structuredClone(v1);
     migrateResume(input);

@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RichText } from "@/components/shared/RichText";
-import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume, Skill } from "@/lib/resume/schema";
-import { has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { has, joinParts, presentSections, socialLinks, workForSkill, type LinkedWork } from "@/lib/resume/view";
 import { renderBlocks } from "../blocks";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -40,35 +39,30 @@ const ArrowLink: React.FC<{ href: string; children: React.ReactNode }> = ({
   </a>
 );
 
-/** One repository rendered as a line with a dotted leader to its star count. */
-const RepoLine: React.FC<{ name: string }> = ({ name }) => {
-  const { data, loading } = useRepoData(name);
+/** One project as a line with a dotted leader, linked when it has a URL. */
+const WorkLine: React.FC<{ work: LinkedWork }> = ({ work }) => {
+  const line = (
+    <>
+      <span className="font-serif text-lg text-stone-900 group-hover:text-[#8b2c24]">{work.title}</span>
+      <span className="flex-1 translate-y-[-3px] border-b border-dotted border-stone-400" />
+      <span className="font-sans text-xs text-stone-500">{work.href ? "↗︎" : "project"}</span>
+    </>
+  );
   return (
-    <li>
-      <a
-        href={repoUrl(name)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group flex items-baseline gap-2 py-1.5"
-      >
-        <span className="font-serif text-lg text-stone-900 group-hover:text-[#8b2c24]">
-          {name}
-        </span>
-        <span className="flex-1 translate-y-[-3px] border-b border-dotted border-stone-400" />
-        <span className="font-sans text-xs tabular-nums text-stone-500">
-          {loading ? "…" : data ? `★ ${data.stargazers_count}` : "↗︎"}
-        </span>
-      </a>
-      {data?.description && (
-        <p className="-mt-0.5 mb-1 text-sm italic text-stone-500">
-          {data.description}
-        </p>
+    <li className="py-1.5">
+      {work.href ? (
+        <a href={work.href} target="_blank" rel="noopener noreferrer" className="group flex items-baseline gap-2">
+          {line}
+        </a>
+      ) : (
+        <div className="flex items-baseline gap-2">{line}</div>
       )}
+      {has(work.description) && <p className="text-sm italic text-stone-500">{work.description}</p>}
     </li>
   );
 };
 
-const SkillPanel: React.FC<{ skill: Skill }> = ({ skill }) => (
+const SkillPanel: React.FC<{ skill: Skill; work: LinkedWork[] }> = ({ skill, work }) => (
   <motion.div
     key={skill.name}
     initial={{ opacity: 0, height: 0 }}
@@ -81,41 +75,15 @@ const SkillPanel: React.FC<{ skill: Skill }> = ({ skill }) => (
       <p className="mb-2 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
         Work in {skill.name}
       </p>
-      {skill.sites && skill.sites.length > 0 && (
-        <ul className="mb-2">
-          {skill.sites.map((site, i) => (
-            <li key={i} className="py-1.5">
-              <a
-                href={site.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-baseline gap-2"
-              >
-                <span className="font-serif text-lg text-stone-900 group-hover:text-[#8b2c24]">
-                  {site.title}
-                </span>
-                <span className="flex-1 translate-y-[-3px] border-b border-dotted border-stone-400" />
-                <span className="font-sans text-xs text-stone-500">site ↗︎</span>
-              </a>
-              {has(site.description) && (
-                <p className="text-sm italic text-stone-500">{site.description}</p>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {skill.repos.length > 0 && (
-        <ul>
-          {skill.repos.map((repo) => (
-            <RepoLine key={repo} name={repo} />
-          ))}
-        </ul>
-      )}
+      <ul>
+        {work.map((item, i) => (
+          <WorkLine key={i} work={item} />
+        ))}
+      </ul>
     </div>
   </motion.div>
 );
 
-const workCount = (skill: Skill) => skill.repos.length + (skill.sites?.length ?? 0);
 
 export default function EditorialTemplate({ data }: { data: Resume }) {
   const { profile, about, experience, projects, skills, tools, education, certifications } =
@@ -125,6 +93,7 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
   const year = new Date().getFullYear();
   const socials = socialLinks(profile.socials, ["email", "github", "linkedin"]);
   const headline = joinParts([profile.role, profile.tagline], " — ");
+  const workCount = (skill: Skill) => workForSkill(data, skill).length;
   const anySkillWork = skills.some((s) => workCount(s) > 0);
 
   return (
@@ -338,7 +307,9 @@ export default function EditorialTemplate({ data }: { data: Resume }) {
                           })}
                         </div>
                         <AnimatePresence mode="wait">
-                          {activeSkill && <SkillPanel key={activeSkill.name} skill={activeSkill} />}
+                          {activeSkill && (
+                            <SkillPanel key={activeSkill.name} skill={activeSkill} work={workForSkill(data, activeSkill)} />
+                          )}
                         </AnimatePresence>
                       </div>
                     ),

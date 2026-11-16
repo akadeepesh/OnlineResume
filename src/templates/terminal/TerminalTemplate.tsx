@@ -2,9 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { plainText } from "@/components/shared/RichText";
-import { repoUrl, useRepoData } from "@/lib/github";
 import type { Resume } from "@/lib/resume/schema";
-import { arrangeBlocks, firstName, has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import { arrangeBlocks, firstName, has, joinParts, presentSections, socialLinks, workForSkill } from "@/lib/resume/view";
 
 // GitHub-dark inspired palette
 const c = {
@@ -39,19 +38,6 @@ const Link: React.FC<{ href: string; children: React.ReactNode; className?: stri
 const Nothing: React.FC<{ what: string }> = ({ what }) => (
   <p className={c.muted}># no {what} listed yet</p>
 );
-
-const RepoRow: React.FC<{ name: string }> = ({ name }) => {
-  const { data, loading } = useRepoData(name);
-  return (
-    <div className="flex flex-wrap gap-x-3">
-      <span className={`w-20 flex-shrink-0 ${c.orange}`}>
-        {loading ? "  …" : data ? `★${String(data.stargazers_count).padStart(3)} ⑂${data.forks_count}` : "  --"}
-      </span>
-      <Link href={repoUrl(name)}>{name}</Link>
-      {data?.description && <span className={c.muted}># {data.description}</span>}
-    </div>
-  );
-};
 
 /** JSON-ish pretty printer with syntax colours. */
 const Json: React.FC<{ value: unknown; indent?: number }> = ({ value, indent = 0 }) => {
@@ -145,7 +131,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
             ["about", "short bio"],
             ["experience", "work history"],
             ["projects", "selected projects"],
-            ["skills [name]", "list skills, or show repos for one"],
+            ["skills [name]", "list skills, or show projects for one"],
             ["tools", "tooling & platforms"],
             ["education", "degrees"],
             ["certs", "certifications"],
@@ -274,20 +260,17 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
               skills: no such skill: {arg}. Try one of: {skillNames.join(", ")}
             </p>
           );
-        if (skill.repos.length + (skill.sites?.length ?? 0) === 0)
-          return <Nothing what={`repositories or sites for ${skill.name}`} />;
+        const work = workForSkill(data, skill);
+        if (work.length === 0) return <Nothing what={`projects using ${skill.name}`} />;
         return (
           <div>
-            <p className={c.muted}># repositories tagged {skill.name}</p>
-            {skill.sites?.map((site, i) => (
+            <p className={c.muted}># projects using {skill.name}</p>
+            {work.map((item, i) => (
               <div key={i} className="flex flex-wrap gap-x-3">
-                <span className={`w-20 ${c.orange}`}>  site</span>
-                <Link href={site.url}>{site.title}</Link>
-                {has(site.description) && <span className={c.muted}># {site.description}</span>}
+                <span className={`w-20 ${c.orange}`}>  proj</span>
+                {item.href ? <Link href={item.href}>{item.title}</Link> : <span className={c.fg}>{item.title}</span>}
+                {has(item.description) && <span className={c.muted}># {item.description}</span>}
               </div>
-            ))}
-            {skill.repos.map((r) => (
-              <RepoRow key={r} name={r} />
             ))}
           </div>
         );
@@ -296,7 +279,7 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
         <div>
           <div className="flex flex-wrap gap-x-5 gap-y-1">
             {skills.map((s, i) => {
-              const count = s.repos.length + (s.sites?.length ?? 0);
+              const count = workForSkill(data, s).length;
               return count > 0 ? (
                 <button
                   key={i}
@@ -313,9 +296,9 @@ export default function TerminalTemplate({ data }: { data: Resume }) {
               );
             })}
           </div>
-          {skills.some((s) => s.repos.length + (s.sites?.length ?? 0) > 0) && (
+          {skills.some((s) => workForSkill(data, s).length > 0) && (
             <p className={`mt-2 ${c.muted}`}>
-              Click a skill or run <span className={c.fg}>skills &lt;name&gt;</span> to list its repos.
+              Click a skill or run <span className={c.fg}>skills &lt;name&gt;</span> to list its projects.
             </p>
           )}
         </div>

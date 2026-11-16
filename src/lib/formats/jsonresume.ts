@@ -132,7 +132,7 @@ export function fromJsonResume(input: JsonResume): Resume {
     const name = text(skill.name);
     const keywords = strings(skill.keywords);
     if (keywords.length > 0) resume.tools.push({ name: name ?? "Skills", skills: keywords });
-    else if (name) resume.skills.push({ name, icon: "code", repos: [] });
+    else if (name) resume.skills.push({ name, icon: "code" });
   }
 
   resume.certifications = records<NonNullable<JsonResume["certificates"]>[number]>(input.certificates).map(

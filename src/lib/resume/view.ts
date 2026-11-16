@@ -199,18 +199,7 @@ function visibleContent(resume: Resume): Resume {
         technologies: presentStrings(p.technologies),
       }))
       .filter(hasContent),
-    skills: resume.skills
-      .map((s) => ({
-        ...s,
-        repos: presentStrings(s.repos),
-        ...(s.sites && {
-          sites: s.sites.flatMap((site) => {
-            const url = safeHref(site.url);
-            return url ? [{ ...site, url }] : [];
-          }),
-        }),
-      }))
-      .filter(hasContent),
+    skills: resume.skills.filter(hasContent),
     tools: resume.tools.map((t) => ({ ...t, skills: presentStrings(t.skills) })).filter(hasContent),
     education: resume.education.filter(hasContent),
     certifications: resume.certifications
@@ -252,4 +241,33 @@ export function arrangeBlocks<B extends { sections: readonly SectionKey[] }>(
     .filter(({ at }) => at >= 0)
     .sort((a, b) => a.at - b.at)
     .map(({ block }) => block);
+}
+
+// ----------------------------------------------------------------------------
+// Skill → work. A skill's work is every project that lists it in its
+// technologies (case and spacing ignored), so it never goes stale.
+// ----------------------------------------------------------------------------
+
+export interface LinkedWork {
+  title: string;
+  /** Demo link if there is one, else the source link. Already made safe. */
+  href?: string;
+  description?: string;
+  tags: string[];
+}
+
+const skillKey = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
+
+/** Projects that use this skill, as cards templates can show. */
+export function workForSkill(resume: Pick<Resume, "projects">, skill: { name: string }): LinkedWork[] {
+  const key = skillKey(skill.name);
+  if (!key) return [];
+  return resume.projects
+    .filter((project) => has(project.name) && project.technologies.some((tech) => skillKey(tech) === key))
+    .map((project) => ({
+      title: project.name.trim(),
+      href: safeHref(project.demo) ?? safeHref(project.github),
+      description: has(project.description) ? project.description : undefined,
+      tags: project.technologies.filter(has),
+    }));
 }
