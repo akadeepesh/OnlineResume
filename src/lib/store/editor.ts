@@ -59,7 +59,7 @@ export type ItemOf<S extends ListSection> = Resume[S][number];
 export const emptyItem: { [S in ListSection]: () => ItemOf<S> } = {
   experience: () => ({ title: "", responsibilities: [], skills: [] }),
   projects: () => ({ name: "", details: [], technologies: [] }),
-  skills: () => ({ name: "", icon: "code", repos: [] }),
+  skills: () => ({ name: "", icon: "code" }),
   tools: () => ({ name: "", skills: [] }),
   education: () => ({ institution: "" }),
   certifications: () => ({ name: "", icon: "file" }),

@@ -13,7 +13,7 @@ import { migrateResume } from "./migrate";
 // `migrate.ts`. Parsing always migrates first, so old files keep loading.
 // ============================================================================
 
-export const RESUME_SCHEMA_VERSION = 2;
+export const RESUME_SCHEMA_VERSION = 3;
 
 export const iconKeySchema = z.enum([
   "code",
@@ -77,20 +77,10 @@ export const projectSchema = z.object({
   technologies: list(z.string()),
 });
 
-export const siteSchema = z.object({
-  title: z.string(),
-  url: z.string(),
-  description: optionalText,
-  tags: list(z.string()),
-});
-
 export const skillSchema = z.object({
   name: z.string(),
   icon: iconKeySchema.default("code"),
-  /** GitHub repository names (under NEXT_PUBLIC_GH_OWNER) that use this skill */
-  repos: list(z.string()),
-  /** Live sites built with this skill, shown instead of / alongside repos */
-  sites: z.array(siteSchema).optional(),
+  // Linked work is derived: projects that list this skill in `technologies`.
 });
 
 export const toolCategorySchema = z.object({
@@ -170,7 +160,6 @@ export type Profile = z.infer<typeof profileSchema>;
 export type Socials = z.infer<typeof socialsSchema>;
 export type ExperienceEntry = z.infer<typeof experienceEntrySchema>;
 export type Project = z.infer<typeof projectSchema>;
-export type Site = z.infer<typeof siteSchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type ToolCategory = z.infer<typeof toolCategorySchema>;
 export type EducationEntry = z.infer<typeof educationEntrySchema>;

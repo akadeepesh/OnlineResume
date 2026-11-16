@@ -104,7 +104,7 @@ describe("visibleResume", () => {
     const resume = {
       ...blankResume(),
       experience: [{ title: " ", company: "", responsibilities: [""], skills: [" "] }],
-      skills: [{ name: "", icon: "code" as const, repos: [] }],
+      skills: [{ name: "", icon: "code" as const }],
       certifications: [{ name: "", icon: "file" as const }],
       education: [{ institution: "" }],
     };

@@ -222,7 +222,7 @@ describe("links typed by users", () => {
       socials: { github: "javascript:alert('gh')", linkedin: "data:text/html,<script>alert(1)</script>" },
     },
     projects: [{ name: "Tool", github: "JavaScript:alert('src')", demo: "vbscript:msgbox", details: [] }],
-    skills: [{ name: "Go", repos: [], sites: [{ title: "Site", url: "javascript:alert('site')" }] }],
+    skills: [{ name: "Go" }],
     certifications: [{ name: "Cert", link: " javascript:alert('cert')" }],
   });
 

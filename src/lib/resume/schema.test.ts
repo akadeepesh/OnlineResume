@@ -62,7 +62,7 @@ describe("parseResume", () => {
     const result = parseResume({
       ...minimal,
       profile: { ...minimal.profile, name: "" },
-      skills: [{ name: "Go", icon: "not-an-icon", repos: [] }],
+      skills: [{ name: "Go", icon: "not-an-icon" }],
     });
     expect(result.success).toBe(false);
     if (result.success) return;
