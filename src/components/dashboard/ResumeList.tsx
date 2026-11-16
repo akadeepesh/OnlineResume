@@ -1,0 +1,340 @@
+"use client";
+
+import { Copy, FileText, Loader2, MoreHorizontal, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import {
+  createResume,
+  deleteResume,
+  duplicateResume,
+  renameResume,
+  setPrimaryResume,
+  type ActionResult,
+} from "@/app/dashboard/actions";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RESUME_TITLE_MAX } from "@/lib/resumes/slug";
+
+export interface ResumeCard {
+  id: string;
+  title: string;
+  slug: string;
+  templateName: string;
+  isPrimary: boolean;
+  isPublished: boolean;
+  /** Already formatted on the server, e.g. "5 min ago". */
+  edited: string;
+}
+
+interface ResumeListProps {
+  resumes: ResumeCard[];
+  quota: { used: number; limit: number };
+  /** "resume.example.com/jane" */
+  baseLink: string;
+}
+
+type DialogState =
+  | { kind: "closed" }
+  | { kind: "create" }
+  | { kind: "rename"; resume: ResumeCard }
+  | { kind: "delete"; resume: ResumeCard };
+
+const UNEXPECTED = "Something went wrong. Please try again.";
+
+/** Runs a server action, turning thrown errors into a message. */
+async function run(action: () => Promise<ActionResult>): Promise<ActionResult> {
+  try {
+    return await action();
+  } catch {
+    return { ok: false, error: UNEXPECTED };
+  }
+}
+
+export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps) {
+  const [dialog, setDialog] = useState<DialogState>({ kind: "closed" });
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const full = quota.used >= quota.limit;
+
+  async function quickAction(id: string, action: () => Promise<ActionResult>) {
+    setError("");
+    setBusyId(id);
+    const result = await run(action);
+    setBusyId(null);
+    if (!result.ok) setError(result.error);
+  }
+
+  const close = () => setDialog({ kind: "closed" });
+
+  return (
+    <section>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-neutral-900">Your resumes</h2>
+          <p className="text-sm text-neutral-500">
+            {quota.used} of {quota.limit} used
+          </p>
+        </div>
+        <Button
+          onClick={() => setDialog({ kind: "create" })}
+          disabled={full}
+          title={full ? `You can keep up to ${quota.limit} resumes.` : undefined}
+        >
+          <Plus className="mr-2 h-4 w-4" aria-hidden />
+          New resume
+        </Button>
+      </div>
+
+      {error && (
+        <p role="alert" className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {error}
+        </p>
+      )}
+
+      {resumes.length === 0 ? (
+        <div className="mt-6 rounded-xl border border-dashed border-neutral-300 px-6 py-12 text-center">
+          <FileText className="mx-auto h-8 w-8 text-neutral-400" aria-hidden />
+          <p className="mt-3 font-medium text-neutral-900">No resumes yet</p>
+          <p className="mt-1 text-sm text-neutral-500">Create one to get your link.</p>
+          <Button className="mt-4" onClick={() => setDialog({ kind: "create" })}>
+            Create your first resume
+          </Button>
+        </div>
+      ) : (
+        <ul className="mt-6 grid gap-3">
+          {resumes.map((resume) => (
+            <li
+              key={resume.id}
+              className="flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4"
+              aria-busy={busyId === resume.id}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate font-medium text-neutral-900">{resume.title}</p>
+                  {resume.isPrimary && (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      Primary
+                    </span>
+                  )}
+                  {!resume.isPublished && (
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
+                      Private
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 truncate text-sm text-neutral-500">
+                  {resume.isPrimary ? baseLink : `${baseLink}/${resume.slug}`}
+                </p>
+                <p className="mt-0.5 text-xs text-neutral-400">
+                  {resume.templateName} · Edited {resume.edited}
+                </p>
+              </div>
+
+              {busyId === resume.id ? (
+                <Loader2 className="h-4 w-4 animate-spin text-neutral-400 motion-reduce:animate-none" aria-label="Working" />
+              ) : (
+                // Non-modal: a modal menu that opens a dialog can leave the page unclickable (Radix).
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label={`Actions for ${resume.title}`} disabled={busyId !== null}>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => setDialog({ kind: "rename", resume })}>
+                      <Pencil className="mr-2 h-4 w-4" aria-hidden /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={full}
+                      onSelect={() => quickAction(resume.id, () => duplicateResume(resume.id))}
+                    >
+                      <Copy className="mr-2 h-4 w-4" aria-hidden /> Duplicate
+                    </DropdownMenuItem>
+                    {!resume.isPrimary && (
+                      <DropdownMenuItem onSelect={() => quickAction(resume.id, () => setPrimaryResume(resume.id))}>
+                        <Star className="mr-2 h-4 w-4" aria-hidden /> Make primary
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-700"
+                      onSelect={() => setDialog({ kind: "delete", resume })}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" aria-hidden /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {dialog.kind === "create" && (
+        <TitleDialog
+          heading="New resume"
+          description="You can change the title any time. Only you see it."
+          submitLabel="Create"
+          initialTitle=""
+          onClose={close}
+          onSubmit={(title) => run(() => createResume(title))}
+        />
+      )}
+      {dialog.kind === "rename" && (
+        <TitleDialog
+          heading="Rename resume"
+          description="Only the title changes. The link stays the same."
+          submitLabel="Save"
+          initialTitle={dialog.resume.title}
+          onClose={close}
+          onSubmit={(title) => run(() => renameResume(dialog.resume.id, title))}
+        />
+      )}
+      {dialog.kind === "delete" && (
+        <DeleteDialog
+          resume={dialog.resume}
+          onClose={close}
+          onConfirm={() => run(() => deleteResume(dialog.resume.id))}
+        />
+      )}
+    </section>
+  );
+}
+
+function TitleDialog({
+  heading,
+  description,
+  submitLabel,
+  initialTitle,
+  onClose,
+  onSubmit,
+}: {
+  heading: string;
+  description: string;
+  submitLabel: string;
+  initialTitle: string;
+  onClose: () => void;
+  onSubmit: (title: string) => Promise<ActionResult>;
+}) {
+  const [title, setTitle] = useState(initialTitle);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError("");
+    const result = await onSubmit(title);
+    setPending(false);
+    if (result.ok) onClose();
+    else setError(result.error);
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
+      <DialogContent className="max-w-md">
+        <form onSubmit={submit} className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>{heading}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-1.5">
+            <Label htmlFor="resume-title">Title</Label>
+            <Input
+              id="resume-title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="e.g. Software engineer"
+              maxLength={RESUME_TITLE_MAX}
+              required
+              autoFocus
+              disabled={pending}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "resume-title-error" : undefined}
+            />
+            {error && (
+              <p id="resume-title-error" role="alert" className="text-xs text-amber-700">
+                {error}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={pending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending || title.trim() === ""}>
+              {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />}
+              {submitLabel}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteDialog({
+  resume,
+  onClose,
+  onConfirm,
+}: {
+  resume: ResumeCard;
+  onClose: () => void;
+  onConfirm: () => Promise<ActionResult>;
+}) {
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function confirm() {
+    setPending(true);
+    setError("");
+    const result = await onConfirm();
+    setPending(false);
+    if (result.ok) onClose();
+    else setError(result.error);
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete “{resume.title}”?</DialogTitle>
+          <DialogDescription>
+            This can&apos;t be undone.
+            {resume.isPublished && " Its public link will stop working."}
+            {resume.isPrimary && " Your most recently edited resume becomes the primary one."}
+          </DialogDescription>
+        </DialogHeader>
+        {error && (
+          <p role="alert" className="text-sm text-amber-700">
+            {error}
+          </p>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={pending}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={confirm} disabled={pending}>
+            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />}
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
