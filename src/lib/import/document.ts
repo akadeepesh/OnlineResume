@@ -5,11 +5,13 @@ import { serverEnv } from "@/lib/env";
 import { limitsFor } from "@/lib/limits";
 import { allow, TOO_MANY } from "@/lib/rate-limit";
 import type { Resume } from "@/lib/resume/schema";
-import { DOCX_MIME, saveOriginal } from "@/lib/resumes/originals";
+import { DOCX_MIME, PDF_MIME, saveOriginal } from "@/lib/resumes/originals";
 import { deleteResume, insertResume, resumeQuota, userPlan } from "@/lib/resumes/queries";
 import { RESUME_TITLE_MAX, slugify } from "@/lib/resumes/slug";
 import { looksLikeZip } from "@/lib/zip/zip";
 import { DocxError, docxToText } from "./docx";
+import { PdfError, pdfToText, type PdfLine } from "./pdf";
+import type { SourceMap } from "./source-map";
 import { resumeFromText } from "./text-parser";
 
 // ============================================================================
@@ -68,28 +70,37 @@ export async function importDocument(userId: string, file: File): Promise<Docume
   const bytes = new Uint8Array(await file.arrayBuffer());
 
   // Trust the bytes, not the name or the browser's type.
-  if (!looksLikeZip(bytes)) {
-    const isPdf = new TextDecoder().decode(bytes.subarray(0, 5)) === "%PDF-";
-    return fail(isPdf ? "PDF import isn't available yet. Use a Word file, or paste the text instead." : "Upload a Word document (.docx).", 415);
-  }
+  const isPdf = new TextDecoder().decode(bytes.subarray(0, 5)) === "%PDF-";
+  if (!isPdf && !looksLikeZip(bytes)) return fail("Upload a PDF or a Word document (.docx).", 415);
   let text: string;
+  let lines: PdfLine[] = [];
   try {
-    text = await docxToText(bytes);
+    if (isPdf) ({ text, lines } = await pdfToText(bytes));
+    else text = await docxToText(bytes);
   } catch (error) {
-    return fail(error instanceof DocxError ? error.message : "That file couldn't be read.", 415);
+    const known = error instanceof DocxError || error instanceof PdfError;
+    if (!known) console.error("Document import failed", error);
+    return fail(known ? error.message : "That file couldn't be read.", 415);
   }
   if (text.trim().length < 20) return fail("That document has almost no text to import.");
 
   const { resume, usedAi } = await structure(text, userId);
   if (!resume) return fail("We couldn't find a resume in that document.", 422);
 
-  const title = (resume.profile.name.trim() || cleanFileName(file.name, "docx").replace(/\.docx$/, "")).slice(
-    0,
-    RESUME_TITLE_MAX,
-  );
+  const extension = isPdf ? "pdf" : "docx";
+  const fileName = cleanFileName(file.name, extension);
+  const title = (resume.profile.name.trim() || fileName.replace(/\.(pdf|docx)$/, "")).slice(0, RESUME_TITLE_MAX);
+  const sourceMap: SourceMap = isPdf
+    ? { version: 1, kind: "pdf", imported: resume, lines }
+    : { version: 1, kind: "docx", imported: resume };
   const id = await insertResume(userId, { title, data: resume, isPrimary: used === 0 }, slugify(title));
   try {
-    await saveOriginal(userId, id, { fileName: cleanFileName(file.name, "docx"), mimeType: DOCX_MIME, content: bytes });
+    await saveOriginal(userId, id, {
+      fileName,
+      mimeType: isPdf ? PDF_MIME : DOCX_MIME,
+      content: bytes,
+      sourceMap,
+    });
   } catch (error) {
     await deleteResume(userId, id); // no half-imported resume without its file
     throw error;
