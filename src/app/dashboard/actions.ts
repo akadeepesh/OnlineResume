@@ -8,6 +8,7 @@ import { AI_TEXT_MAX, AI_TEXT_MIN, resumeFromExtraction } from "@/lib/ai/extract
 import { DEFAULT_GROQ_MODEL, ExtractionError, groqExtractor } from "@/lib/ai/groq";
 import { consumeAiImport } from "@/lib/ai/usage";
 import { serverEnv } from "@/lib/env";
+import { buildEditedOriginal } from "@/lib/export/original";
 import { limitsFor } from "@/lib/limits";
 import * as queries from "@/lib/resumes/queries";
 import { allow, TOO_MANY } from "@/lib/rate-limit";
@@ -189,4 +190,24 @@ export async function importFromText(rawText: unknown): Promise<ActionResult> {
     slugify(title),
   );
   return done(id);
+}
+
+export type EditedOriginalReport =
+  | { ok: true; applied: number; unapplied: { label: string; to: string }[] }
+  | { ok: false; error: string };
+
+/** What "Download edited original" will change, and what it can't place. */
+export async function editedOriginalReport(rawId: unknown): Promise<EditedOriginalReport> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "Your session ended. Sign in again." };
+  if (!(await allow("sharing", user.id))) return { ok: false, error: TOO_MANY };
+  const id = idSchema.safeParse(rawId);
+  if (!id.success) return { ok: false, error: "That resume doesn't exist anymore." };
+  const result = await buildEditedOriginal(user.id, id.data);
+  if (!result.ok) return { ok: false, error: result.error };
+  return {
+    ok: true,
+    applied: result.plan.applied.length,
+    unapplied: result.plan.unapplied.map((change) => ({ label: change.label, to: change.to })),
+  };
 }

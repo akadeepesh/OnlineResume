@@ -89,3 +89,20 @@ export async function publicOriginal(resumeId: string): Promise<{ fileName: stri
     .limit(1);
   return row ?? null;
 }
+
+/** The owner's original with its source map, for "edited original" export. */
+export async function originalWithSourceMap(userId: string, resumeId: string) {
+  const [row] = await db()
+    .select({
+      fileName: resumeFiles.fileName,
+      mimeType: resumeFiles.mimeType,
+      content: resumeFiles.content,
+      sourceMap: resumeFiles.sourceMap,
+      data: resumes.data,
+    })
+    .from(resumeFiles)
+    .innerJoin(resumes, eq(resumes.id, resumeFiles.resumeId))
+    .where(and(eq(resumeFiles.userId, userId), eq(resumeFiles.resumeId, resumeId), eq(resumes.userId, userId)))
+    .limit(1);
+  return row ?? null;
+}

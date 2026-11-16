@@ -5,6 +5,7 @@ import {
   ClipboardPaste,
   Copy,
   ExternalLink,
+  FileDown,
   FileJson,
   FileText,
   Loader2,
@@ -18,16 +19,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   createResume,
   deleteResume,
   duplicateResume,
+  editedOriginalReport,
   importFromText,
   importResume,
   renameResume,
   setPrimaryResume,
   type ActionResult,
+  type EditedOriginalReport,
 } from "@/app/dashboard/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,7 +83,8 @@ type DialogState =
   | { kind: "create" }
   | { kind: "rename"; resume: ResumeCard }
   | { kind: "delete"; resume: ResumeCard }
-  | { kind: "paste" };
+  | { kind: "paste" }
+  | { kind: "edited"; resume: ResumeCard };
 
 const UNEXPECTED = "Something went wrong. Please try again.";
 
@@ -308,6 +312,11 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
                     >
                       <ExternalLink className="mr-2 h-4 w-4" aria-hidden /> {resume.isPublished ? "View page" : "Preview page"}
                     </DropdownMenuItem>
+                    {resume.originalName && (
+                      <DropdownMenuItem onSelect={() => setDialog({ kind: "edited", resume })}>
+                        <FileDown className="mr-2 h-4 w-4" aria-hidden /> Edited original
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onSelect={() => setDialog({ kind: "rename", resume })}>
                       <Pencil className="mr-2 h-4 w-4" aria-hidden /> Rename
                     </DropdownMenuItem>
@@ -371,6 +380,7 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
           }}
         />
       )}
+      {dialog.kind === "edited" && <EditedOriginalDialog resume={dialog.resume} onClose={close} />}
       {dialog.kind === "delete" && (
         <DeleteDialog
           resume={dialog.resume}
@@ -566,6 +576,90 @@ function PasteDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (te
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Shows what will be applied to the original file before downloading it. */
+function EditedOriginalDialog({ resume, onClose }: { resume: ResumeCard; onClose: () => void }) {
+  const [report, setReport] = useState<EditedOriginalReport | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    editedOriginalReport(resume.id)
+      .catch((): EditedOriginalReport => ({ ok: false, error: UNEXPECTED }))
+      .then((result) => {
+        if (!cancelled) setReport(result);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resume.id]);
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Download your edited original</DialogTitle>
+          <DialogDescription>
+            Your changes from the editor, written into {resume.originalName}. Its layout stays the same.
+          </DialogDescription>
+        </DialogHeader>
+        {!report ? (
+          <p className="flex items-center gap-2 text-sm text-neutral-500" role="status">
+            <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> Checking your changes…
+          </p>
+        ) : !report.ok ? (
+          <p role="alert" className="text-sm text-amber-700">
+            {report.error}
+          </p>
+        ) : (
+          <div className="grid gap-3 text-sm">
+            <p className="text-neutral-700">
+              {report.applied === 0
+                ? "No changes to apply yet: the file matches what you imported."
+                : `${report.applied} ${report.applied === 1 ? "change" : "changes"} will be applied.`}
+            </p>
+            {report.unapplied.length > 0 && (
+              <div className="rounded-md bg-amber-50 p-3">
+                <p className="font-medium text-amber-900">
+                  {report.unapplied.length} {report.unapplied.length === 1 ? "change" : "changes"} can&apos;t be placed in
+                  the original
+                </p>
+                <p className="mt-0.5 text-xs text-amber-800">
+                  New items and texts we couldn&apos;t find in the file. They&apos;re in your resume, just not in this file.
+                </p>
+                <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-amber-900">
+                  {report.unapplied.map((change, i) => (
+                    <li key={i}>
+                      <span className="font-medium">{change.label}</span>
+                      {change.to ? `: ${change.to.slice(0, 80)}` : " (removed)"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {resume.originalName?.toLowerCase().endsWith(".pdf") && (
+              <p className="text-xs text-neutral-500">
+                PDFs are experimental: changed lines are redrawn in a standard font. Check the result before sending it.
+              </p>
+            )}
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          {report?.ok && (
+            <Button asChild>
+              <a href={`/api/resumes/${resume.id}/original/edited`}>
+                <FileDown className="mr-2 h-4 w-4" aria-hidden />
+                Download
+              </a>
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
