@@ -40,15 +40,15 @@ async function loadPdfJs() {
 
 export async function pdfToText(bytes: Uint8Array): Promise<{ text: string; lines: PdfLine[] }> {
   const pdfjs = await loadPdfJs();
+  const task = pdfjs.getDocument({
+    data: bytes.slice(), // pdf.js takes ownership of the buffer
+    disableFontFace: true,
+    useSystemFonts: false,
+    stopAtErrors: false,
+  });
   let doc;
   try {
-    doc = await pdfjs.getDocument({
-      data: bytes.slice(), // pdf.js takes ownership of the buffer
-      isEvalSupported: false,
-      disableFontFace: true,
-      useSystemFonts: false,
-      stopAtErrors: false,
-    }).promise;
+    doc = await task.promise;
   } catch (error) {
     const name = (error as { name?: string } | null)?.name;
     throw new PdfError(name === "PasswordException" ? "That PDF is password-protected." : "That PDF couldn't be opened.");
@@ -96,6 +96,6 @@ export async function pdfToText(bytes: Uint8Array): Promise<{ text: string; line
     }
     return { text, lines: cleaned };
   } finally {
-    await doc.destroy();
+    await task.destroy();
   }
 }
