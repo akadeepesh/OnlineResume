@@ -42,6 +42,12 @@ export async function getOwnedResume(userId: string, id: string) {
   return row ?? null;
 }
 
+/** The user's plan name (for limits). */
+export async function userPlan(userId: string): Promise<string | null> {
+  const [row] = await db().select({ plan: users.plan }).from(users).where(eq(users.id, userId)).limit(1);
+  return row?.plan ?? null;
+}
+
 /** How many resumes the user has and how many their plan allows. */
 export async function resumeQuota(userId: string): Promise<{ used: number; limit: number }> {
   const [[usage], [user]] = await Promise.all([

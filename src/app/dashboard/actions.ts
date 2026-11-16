@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
 import { blankResume, parseResumeDraft } from "@/lib/resume/draft";
+import { AI_TEXT_MAX, AI_TEXT_MIN, resumeFromExtraction } from "@/lib/ai/extracted";
+import { DEFAULT_GROQ_MODEL, ExtractionError, groqExtractor } from "@/lib/ai/groq";
+import { consumeAiImport } from "@/lib/ai/usage";
+import { serverEnv } from "@/lib/env";
+import { limitsFor } from "@/lib/limits";
 import * as queries from "@/lib/resumes/queries";
 import { allow, TOO_MANY } from "@/lib/rate-limit";
 import { RESUME_TITLE_MAX as TITLE_MAX, slugify } from "@/lib/resumes/slug";
@@ -142,6 +147,46 @@ export async function importResume(rawResume: unknown, rawTemplate: unknown, raw
     user.id,
     { title: finalTitle, data: parsed.data, template, isPrimary: quota.used === 0 },
     slugify(finalTitle),
+  );
+  return done(id);
+}
+
+/**
+ * AI-assisted import: pasted resume text → structured resume → new resume.
+ * Counts against the plan's daily AI limit before calling the model.
+ */
+export async function importFromText(rawText: unknown): Promise<ActionResult> {
+  const user = await currentUser();
+  if (!user) return SIGNED_OUT;
+  const { GROQ_API_KEY, GROQ_MODEL } = serverEnv();
+  if (!GROQ_API_KEY) return { ok: false, error: "AI import isn't available here." };
+
+  const text = typeof rawText === "string" ? rawText.trim() : "";
+  if (text.length < AI_TEXT_MIN) return { ok: false, error: "Paste a bit more of your resume first." };
+  if (text.length > AI_TEXT_MAX) return { ok: false, error: `That's too long. Paste up to ${AI_TEXT_MAX.toLocaleString("en")} characters.` };
+
+  const quota = await checkQuota(user.id);
+  if (quota.error) return quota.error;
+
+  const daily = limitsFor(await queries.userPlan(user.id)).aiImportsPerDay;
+  const usage = await consumeAiImport(user.id, daily);
+  if (!usage.allowed) return { ok: false, error: `You've used today's ${daily} AI imports. Try again tomorrow.` };
+
+  let extracted: unknown;
+  try {
+    extracted = await groqExtractor(GROQ_API_KEY, GROQ_MODEL ?? DEFAULT_GROQ_MODEL).extract(text);
+  } catch (error) {
+    console.error("AI import failed", error instanceof ExtractionError ? error.message : error);
+    return { ok: false, error: "The AI couldn't read that right now. Try again, or fill in the editor yourself." };
+  }
+  const resume = resumeFromExtraction(extracted);
+  if (!resume) return { ok: false, error: "We couldn't find a resume in that text." };
+
+  const title = (resume.profile.name.trim() || "Imported resume").slice(0, TITLE_MAX);
+  const id = await queries.insertResume(
+    user.id,
+    { title, data: resume, isPrimary: quota.used === 0 },
+    slugify(title),
   );
   return done(id);
 }

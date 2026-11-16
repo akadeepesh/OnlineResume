@@ -1,6 +1,21 @@
 "use client";
 
-import { Copy, ExternalLink, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2, Upload } from "lucide-react";
+import {
+  ChevronDown,
+  ClipboardPaste,
+  Copy,
+  ExternalLink,
+  FileJson,
+  FileText,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  PencilLine,
+  Plus,
+  Star,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
@@ -8,6 +23,7 @@ import {
   createResume,
   deleteResume,
   duplicateResume,
+  importFromText,
   importResume,
   renameResume,
   setPrimaryResume,
@@ -31,7 +47,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { readResumeJson } from "@/lib/formats/files";
+import { Textarea } from "@/components/ui/textarea";
+import { AI_TEXT_MAX, AI_TEXT_MIN } from "@/lib/ai/extracted";
+import { IMPORT_ACCEPT, readImportFile } from "@/lib/formats/read-file";
 import { RESUME_TITLE_MAX } from "@/lib/resumes/slug";
 
 export interface ResumeCard {
@@ -51,13 +69,16 @@ interface ResumeListProps {
   /** "resume.example.com/jane" */
   baseLink: string;
   username: string;
+  /** AI import from pasted text is configured on this deployment. */
+  aiEnabled: boolean;
 }
 
 type DialogState =
   | { kind: "closed" }
   | { kind: "create" }
   | { kind: "rename"; resume: ResumeCard }
-  | { kind: "delete"; resume: ResumeCard };
+  | { kind: "delete"; resume: ResumeCard }
+  | { kind: "paste" };
 
 const UNEXPECTED = "Something went wrong. Please try again.";
 
@@ -70,7 +91,7 @@ async function run(action: () => Promise<ActionResult>): Promise<ActionResult> {
   }
 }
 
-export default function ResumeList({ resumes, quota, baseLink, username }: ResumeListProps) {
+export default function ResumeList({ resumes, quota, baseLink, username, aiEnabled }: ResumeListProps) {
   const router = useRouter();
   const [dialog, setDialog] = useState<DialogState>({ kind: "closed" });
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -85,10 +106,10 @@ export default function ResumeList({ resumes, quota, baseLink, username }: Resum
     event.target.value = "";
     if (!file) return;
     setError("");
-    const read = readResumeJson(await file.text());
+    const read = await readImportFile(file);
     if (!read.ok) return setError(read.error);
     setImporting(true);
-    const title = file.name.replace(/\.json$/i, "").slice(0, RESUME_TITLE_MAX);
+    const title = file.name.replace(/\.(json|zip)$/i, "").slice(0, RESUME_TITLE_MAX);
     const result = await run(() => importResume(read.resume, "classic", read.resume.profile.name.trim() || title));
     setImporting(false);
     if (!result.ok) setError(result.error);
@@ -115,20 +136,38 @@ export default function ResumeList({ resumes, quota, baseLink, username }: Resum
           </p>
         </div>
         <div className="flex gap-2">
-          <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={onImportFile} />
-          <Button
-            variant="outline"
-            onClick={() => fileInput.current?.click()}
-            disabled={full || importing}
-            title="Import an OnlineResume or JSON Resume file"
-          >
-            {importing ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
-            ) : (
-              <Upload className="mr-2 h-4 w-4" aria-hidden />
-            )}
-            Import
-          </Button>
+          <input ref={fileInput} type="file" accept={IMPORT_ACCEPT} className="hidden" onChange={onImportFile} />
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={full || importing}>
+                {importing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" aria-hidden />
+                )}
+                Import
+                <ChevronDown className="ml-1 h-3.5 w-3.5 text-neutral-500" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem onSelect={() => fileInput.current?.click()} className="gap-2">
+                <FileJson className="h-4 w-4 text-neutral-500" aria-hidden />
+                <span>
+                  <span className="block text-sm">From a file</span>
+                  <span className="block text-xs text-neutral-500">JSON, JSON Resume or LinkedIn export (.zip)</span>
+                </span>
+              </DropdownMenuItem>
+              {aiEnabled && (
+                <DropdownMenuItem onSelect={() => setDialog({ kind: "paste" })} className="gap-2">
+                  <ClipboardPaste className="h-4 w-4 text-neutral-500" aria-hidden />
+                  <span>
+                    <span className="block text-sm">Paste resume text</span>
+                    <span className="block text-xs text-neutral-500">AI sorts it into sections</span>
+                  </span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             onClick={() => setDialog({ kind: "create" })}
             disabled={full}
@@ -268,6 +307,16 @@ export default function ResumeList({ resumes, quota, baseLink, username }: Resum
           onSubmit={(title) => run(() => renameResume(dialog.resume.id, title))}
         />
       )}
+      {dialog.kind === "paste" && (
+        <PasteDialog
+          onClose={close}
+          onSubmit={async (text) => {
+            const result = await run(() => importFromText(text));
+            if (result.ok && result.id) router.push(`/editor/${result.id}`);
+            return result;
+          }}
+        />
+      )}
       {dialog.kind === "delete" && (
         <DeleteDialog
           resume={dialog.resume}
@@ -397,6 +446,72 @@ function DeleteDialog({
             Delete
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PasteDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (text: string) => Promise<ActionResult> }) {
+  const [text, setText] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const length = text.trim().length;
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError("");
+    const result = await onSubmit(text);
+    setPending(false);
+    if (result.ok) onClose();
+    else setError(result.error);
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
+      <DialogContent className="max-w-xl">
+        <form onSubmit={submit} className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>Paste your resume</DialogTitle>
+            <DialogDescription>
+              Copy the text from your current resume (PDF, Word, LinkedIn) and paste it here. AI sorts it into
+              sections for you to check in the editor. The text is sent to our AI provider only for this.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-1.5">
+            <Label htmlFor="resume-text" className="sr-only">
+              Resume text
+            </Label>
+            <Textarea
+              id="resume-text"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              rows={12}
+              maxLength={AI_TEXT_MAX}
+              placeholder="Jane Doe&#10;Product Designer · Berlin&#10;&#10;Experience&#10;…"
+              disabled={pending}
+              autoFocus
+              aria-describedby="resume-text-hint"
+            />
+            <p id="resume-text-hint" className="text-right text-xs text-neutral-400">
+              {length.toLocaleString("en")} / {AI_TEXT_MAX.toLocaleString("en")}
+            </p>
+          </div>
+          {error && (
+            <p role="alert" className="text-sm text-amber-700">
+              {error}
+            </p>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={pending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending || length < AI_TEXT_MIN}>
+              {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />}
+              {pending ? "Reading your resume…" : "Import"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
