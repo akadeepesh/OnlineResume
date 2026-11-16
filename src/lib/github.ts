@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EnvData, getEnvData } from "../../env";
+import { clientEnv } from "@/lib/env";
 
 export interface RepoData {
   stargazers_count: number;
@@ -13,15 +13,11 @@ export interface RepoData {
   size: number;
 }
 
-// this object contains all the environment variables
-const envData: EnvData = getEnvData();
-
 export const githubFetchEnabled =
-  envData.NEXT_PUBLIC_GITHUB_FETCH_ENABLED === "true" &&
-  Boolean(envData.NEXT_PUBLIC_GH_OWNER);
+  clientEnv.NEXT_PUBLIC_ENABLE_GITHUB_FETCH && Boolean(clientEnv.NEXT_PUBLIC_GH_OWNER);
 
 export const repoUrl = (name: string) =>
-  `https://github.com/${envData.NEXT_PUBLIC_GH_OWNER || "placeholder"}/${name}`;
+  `https://github.com/${clientEnv.NEXT_PUBLIC_GH_OWNER ?? "placeholder"}/${name}`;
 
 /**
  * Fetches live stats for a repository through the /api/github/[repo] route.

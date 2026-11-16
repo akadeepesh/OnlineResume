@@ -1,6 +1,7 @@
+import { clientEnv } from "@/lib/env";
 import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
 
-const envTemplate = process.env.NEXT_PUBLIC_TEMPLATE ?? "";
+const envTemplate = clientEnv.NEXT_PUBLIC_TEMPLATE ?? "";
 
 export const siteConfig: {
   /** Template rendered at "/" — one of: classic, editorial, spotlight, terminal, bento */
@@ -12,6 +13,5 @@ export const siteConfig: {
   showTemplateSwitcher: boolean;
 } = {
   template: isTemplateSlug(envTemplate) ? envTemplate : "classic",
-  showTemplateSwitcher:
-    process.env.NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER !== "false",
+  showTemplateSwitcher: clientEnv.NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER,
 };
