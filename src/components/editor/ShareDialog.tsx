@@ -2,7 +2,7 @@
 
 import { Check, Copy, Download, ExternalLink, Globe, Lock, Share2 } from "lucide-react";
 import { useState } from "react";
-import { updateSharing } from "@/app/editor/[id]/actions";
+import { updateOriginalDownload, updateSharing } from "@/app/editor/[id]/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +19,8 @@ export interface ShareSettings {
   url: string;
   isPublished: boolean;
   noindex: boolean;
+  /** The imported file, if there is one, and whether visitors may download it. */
+  original?: { fileName: string; allowDownload: boolean };
 }
 
 function Switch({
@@ -74,6 +76,25 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
       const result = await updateSharing(resumeId, patch);
       if (result.ok) setSettings((s) => ({ ...s, ...result.sharing }));
       else {
+        setSettings(before);
+        setError(result.error);
+      }
+    } catch {
+      setSettings(before);
+      setError("Couldn't save that change. Try again.");
+    }
+    setSaving(false);
+  }
+
+  async function changeOriginal(allowDownload: boolean) {
+    if (!settings.original) return;
+    const before = settings;
+    setSettings({ ...settings, original: { ...settings.original, allowDownload } });
+    setSaving(true);
+    setError("");
+    try {
+      const result = await updateOriginalDownload(resumeId, allowDownload);
+      if (!result.ok) {
         setSettings(before);
         setError(result.error);
       }
@@ -171,6 +192,26 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
             />
           </div>
         </div>
+
+        {settings.original && (
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p id="share-original" className="text-sm font-medium text-neutral-900">
+                Let visitors download the original
+              </p>
+              <p id="share-original-hint" className="text-xs text-neutral-500">
+                Adds a download button for {settings.original.fileName} to your published page.
+              </p>
+            </div>
+            <Switch
+              checked={settings.original.allowDownload}
+              onChange={changeOriginal}
+              disabled={saving}
+              labelledBy="share-original"
+              describedBy="share-original-hint"
+            />
+          </div>
+        )}
 
         <div className="flex items-center justify-between gap-4 border-t border-neutral-200 pt-4">
           <div>

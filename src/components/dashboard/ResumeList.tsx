@@ -61,6 +61,8 @@ export interface ResumeCard {
   isPublished: boolean;
   /** Already formatted on the server, e.g. "5 min ago". */
   edited: string;
+  /** File name of the document it was imported from, if any. */
+  originalName?: string;
 }
 
 interface ResumeListProps {
@@ -98,7 +100,33 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
   const [error, setError] = useState("");
   const full = quota.used >= quota.limit;
   const fileInput = useRef<HTMLInputElement>(null);
+  const docInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+
+  /** A Word document is uploaded: the server reads it and keeps the original. */
+  async function onDocumentFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setError("");
+    if (file.size > 4 * 1024 * 1024) return setError("That file is too large (4 MB max).");
+    setImporting(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/import/document", { method: "POST", body });
+      const data = (await response.json().catch(() => ({}))) as { id?: string; error?: string };
+      if (!response.ok || !data.id) {
+        setError(data.error ?? "That document couldn't be imported.");
+        setImporting(false);
+        return;
+      }
+      router.push(`/editor/${data.id}`);
+    } catch {
+      setError("Couldn't upload right now. Try again.");
+      setImporting(false);
+    }
+  }
 
   /** A JSON file (ours or JSON Resume) becomes a new resume, opened in the editor. */
   async function onImportFile(event: ChangeEvent<HTMLInputElement>) {
@@ -137,6 +165,13 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
         </div>
         <div className="flex gap-2">
           <input ref={fileInput} type="file" accept={IMPORT_ACCEPT} className="hidden" onChange={onImportFile} />
+          <input
+            ref={docInput}
+            type="file"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            className="hidden"
+            onChange={onDocumentFile}
+          />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" disabled={full || importing}>
@@ -150,6 +185,13 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem onSelect={() => docInput.current?.click()} className="gap-2">
+                <FileText className="h-4 w-4 text-neutral-500" aria-hidden />
+                <span>
+                  <span className="block text-sm">Word document</span>
+                  <span className="block text-xs text-neutral-500">.docx, kept so you can download it again</span>
+                </span>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => fileInput.current?.click()} className="gap-2">
                 <FileJson className="h-4 w-4 text-neutral-500" aria-hidden />
                 <span>
@@ -231,6 +273,18 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
                 <p className="mt-0.5 text-xs text-neutral-400">
                   {resume.templateName} · Edited {resume.edited}
                 </p>
+                {resume.originalName && (
+                  <p className="mt-0.5 text-xs text-neutral-400">
+                    Imported from{" "}
+                    <a
+                      href={`/api/resumes/${resume.id}/original`}
+                      className="underline underline-offset-2 hover:text-neutral-700"
+                      title="Download the file you imported"
+                    >
+                      {resume.originalName}
+                    </a>
+                  </p>
+                )}
               </div>
 
               {busyId === resume.id ? (

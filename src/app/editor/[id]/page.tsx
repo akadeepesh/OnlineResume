@@ -6,6 +6,7 @@ import CloudEditor from "@/components/editor/CloudEditor";
 import { requireOnboarded } from "@/lib/auth/session";
 import { clientEnv } from "@/lib/env";
 import { parseResumeDraft } from "@/lib/resume/draft";
+import { originalInfo } from "@/lib/resumes/originals";
 import { getOwnedResume } from "@/lib/resumes/queries";
 import { isTemplateSlug } from "@/templates/meta";
 
@@ -23,6 +24,7 @@ export default async function ResumeEditorPage({ params }: { params: Promise<{ i
   const row = await getOwnedResume(user.id, id);
   if (!row) notFound();
 
+  const original = await originalInfo(user.id, row.id);
   const parsed = parseResumeDraft(row.data);
   if (!parsed.success) {
     return (
@@ -50,6 +52,7 @@ export default async function ResumeEditorPage({ params }: { params: Promise<{ i
         url: new URL(row.isPrimary ? `/${username}` : `/${username}/${row.slug}`, clientEnv.NEXT_PUBLIC_SITE_URL).toString(),
         isPublished: row.isPublished,
         noindex: row.noindex,
+        original: original ?? undefined,
       }}
     />
   );

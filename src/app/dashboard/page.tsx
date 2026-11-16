@@ -5,6 +5,7 @@ import ResumeList, { type ResumeCard } from "@/components/dashboard/ResumeList";
 import { requireOnboarded } from "@/lib/auth/session";
 import { clientEnv, serverEnv } from "@/lib/env";
 import { editedLabel } from "@/lib/resumes/format";
+import { originalNames } from "@/lib/resumes/originals";
 import { listResumes, resumeQuota } from "@/lib/resumes/queries";
 import { templateMeta } from "@/templates/meta";
 
@@ -19,6 +20,10 @@ export default async function DashboardPage() {
   const { user, username } = await requireOnboarded("/dashboard");
   const [rows, quota] = await Promise.all([listResumes(user.id), resumeQuota(user.id)]);
   const baseLink = `${new URL(clientEnv.NEXT_PUBLIC_SITE_URL).host}/${username}`;
+  const originals = await originalNames(
+    user.id,
+    rows.map((row) => row.id),
+  );
 
   const now = new Date();
   const resumes: ResumeCard[] = rows.map((row) => ({
@@ -29,6 +34,7 @@ export default async function DashboardPage() {
     isPrimary: row.isPrimary,
     isPublished: row.isPublished,
     edited: editedLabel(row.updatedAt, now),
+    originalName: originals.get(row.id),
   }));
 
   return (

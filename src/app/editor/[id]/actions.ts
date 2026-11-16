@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
 import { parseResumeDraft } from "@/lib/resume/draft";
+import { setOriginalDownload } from "@/lib/resumes/originals";
 import { saveResumeContent, updateSharing as updateSharingQuery, type SharingSettings } from "@/lib/resumes/queries";
 import { allow, TOO_MANY } from "@/lib/rate-limit";
 import { isTemplateSlug } from "@/templates/meta";
@@ -69,4 +70,19 @@ export async function updateSharing(
   if (!sharing) return { ok: false, error: "This resume was deleted." };
   revalidatePath("/dashboard");
   return { ok: true, sharing };
+}
+
+/** Let visitors download the original file from the public page, or not. */
+export async function updateOriginalDownload(
+  rawId: unknown,
+  rawAllow: unknown,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: "You were signed out. Sign in again." };
+  if (!(await allow("sharing", session.user.id))) return { ok: false, error: TOO_MANY };
+  const id = idSchema.safeParse(rawId);
+  if (!id.success || typeof rawAllow !== "boolean") return { ok: false, error: "That change isn't valid." };
+  return (await setOriginalDownload(session.user.id, id.data, rawAllow))
+    ? { ok: true }
+    : { ok: false, error: "This resume has no original file." };
 }
