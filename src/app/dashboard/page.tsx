@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SignOutButton from "@/components/auth/SignOutButton";
-import { requireSession } from "@/lib/auth/session";
+import { requireOnboarded } from "@/lib/auth/session";
+import { clientEnv } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 
 // Placeholder until the resume dashboard lands: proves the session works end to end.
 export default async function DashboardPage() {
-  const { user } = await requireSession("/dashboard");
+  const { user, username } = await requireOnboarded("/dashboard");
+  const link = `${new URL(clientEnv.NEXT_PUBLIC_SITE_URL).host}/${username}`;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
@@ -18,6 +20,9 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Hi, {user.name}</h1>
           <p className="mt-1 text-sm text-neutral-500">Signed in as {user.email}</p>
+          <p className="mt-1 text-sm text-neutral-500">
+            Your link: <span className="font-medium text-neutral-900">{link}</span>
+          </p>
         </div>
         <SignOutButton />
       </div>
