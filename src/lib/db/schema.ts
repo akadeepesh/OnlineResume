@@ -20,9 +20,9 @@ import { bytea } from "./bytea";
 // ============================================================================
 // Database schema (Neon Postgres + Drizzle).
 //
-// - `users` has the shape Better Auth expects for its user model (PR 12 maps
-//   its adapter onto this table), plus our own `username` and `plan`.
-//   Better Auth's session/account/verification tables arrive with PR 12.
+// - `users`, `sessions`, `accounts` and `verifications` are Better Auth's
+//   tables (see lib/auth). Their JS keys must match Better Auth's field names;
+//   `users` adds our own `username` and `plan`.
 // - `resumes.data` is the zod `Resume` as jsonb. Rows are untrusted like any
 //   other input: read them through `parseResume` (which also migrates old
 //   schema versions) before use.
@@ -56,6 +56,64 @@ export const users = pgTable("users", {
   plan: text("plan").$type<Plan>().notNull().default("free"),
   ...timestamps,
 });
+
+/** Signed-in browsers. Better Auth reads and writes these. */
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    ...timestamps,
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)],
+);
+
+/**
+ * How a user signs in: one row per provider ("credential" for email +
+ * password, "google", "github"). `password` holds the hash for credential rows.
+ */
+export const accounts = pgTable(
+  "accounts",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+    scope: text("scope"),
+    password: text("password"),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("accounts_provider_account_idx").on(t.providerId, t.accountId),
+    index("accounts_user_idx").on(t.userId),
+  ],
+);
+
+/** Short-lived tokens (OAuth state, and later email verification / password reset). */
+export const verifications = pgTable(
+  "verifications",
+  {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index("verifications_identifier_idx").on(t.identifier)],
+);
 
 export const resumes = pgTable(
   "resumes",
@@ -127,6 +185,7 @@ export const aiUsage = pgTable(
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
 export type ResumeRow = typeof resumes.$inferSelect;
 export type NewResumeRow = typeof resumes.$inferInsert;
 export type ResumeFile = typeof resumeFiles.$inferSelect;
