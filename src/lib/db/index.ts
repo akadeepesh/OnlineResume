@@ -22,7 +22,7 @@ export function db(): Database {
   if (instance) return instance;
   const { DATABASE_URL } = serverEnv();
   if (!DATABASE_URL) {
-    throw new Error("DATABASE_URL is not set. See docs/SETUP.md (Database).");
+    throw new Error("DATABASE_URL is not set. See .env.example.");
   }
   instance = createDb(DATABASE_URL);
   return instance;

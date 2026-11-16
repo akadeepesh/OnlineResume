@@ -55,4 +55,11 @@ describe("server env", () => {
     expect(parseEnv(serverEnvSchema, {}).GITHUB_TOKEN).toBeUndefined();
     expect(parseEnv(serverEnvSchema, { GITHUB_TOKEN: "abc" }).GITHUB_TOKEN).toBe("abc");
   });
+
+  it("requires a long auth secret and a real auth URL", () => {
+    expect(parseEnv(serverEnvSchema, {}).BETTER_AUTH_SECRET).toBeUndefined();
+    expect(() => parseEnv(serverEnvSchema, { BETTER_AUTH_SECRET: "short" })).toThrow(/BETTER_AUTH_SECRET/);
+    expect(parseEnv(serverEnvSchema, { BETTER_AUTH_SECRET: "x".repeat(32) }).BETTER_AUTH_SECRET).toHaveLength(32);
+    expect(() => parseEnv(serverEnvSchema, { BETTER_AUTH_URL: "localhost" })).toThrow(/BETTER_AUTH_URL/);
+  });
 });
