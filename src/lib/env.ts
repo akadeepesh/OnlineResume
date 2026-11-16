@@ -43,6 +43,10 @@ export const serverEnvSchema = z.object({
   /** GitHub sign-in (and repo import later). Both id and secret are needed, or the button is hidden. */
   GITHUB_CLIENT_ID: text(),
   GITHUB_CLIENT_SECRET: text(),
+  /** Groq API key for AI-assisted import from pasted text. Off when unset. */
+  GROQ_API_KEY: text(),
+  /** Groq model for AI import. Defaults to a Llama 3.3 70B model. */
+  GROQ_MODEL: text(),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;
