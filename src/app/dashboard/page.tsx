@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SignOutButton from "@/components/auth/SignOutButton";
+import GuestDraftImport from "@/components/dashboard/GuestDraftImport";
 import ResumeList, { type ResumeCard } from "@/components/dashboard/ResumeList";
 import { requireOnboarded } from "@/lib/auth/session";
 import { clientEnv } from "@/lib/env";
@@ -51,7 +52,11 @@ export default async function DashboardPage() {
           Your primary resume will live at <span className="font-medium text-neutral-900">{baseLink}</span>.
         </p>
 
-        <div className="mt-10">
+        <div className="mt-8">
+          <GuestDraftImport />
+        </div>
+
+        <div className="mt-8">
           <ResumeList resumes={resumes} quota={quota} baseLink={baseLink} />
         </div>
       </main>

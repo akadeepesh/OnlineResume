@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
-import { blankResume } from "@/lib/resume/draft";
-import { parseResume } from "@/lib/resume/schema";
+import { blankResume, parseResumeDraft } from "@/lib/resume/draft";
 import * as queries from "@/lib/resumes/queries";
 import { RESUME_TITLE_MAX as TITLE_MAX, slugify } from "@/lib/resumes/slug";
+import { isTemplateSlug } from "@/templates/meta";
 
 // ============================================================================
 // Dashboard actions. Each one: signed in? → validate input with zod → run a
@@ -14,7 +14,8 @@ import { RESUME_TITLE_MAX as TITLE_MAX, slugify } from "@/lib/resumes/slug";
 // back as messages; nothing here trusts ids or titles from the client.
 // ============================================================================
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+/** `id` is set when a resume was created (create, duplicate, import). */
+export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
 const idSchema = z.uuid();
 const titleSchema = z
@@ -31,9 +32,9 @@ async function currentUser() {
   return session?.user ?? null;
 }
 
-function done(): ActionResult {
+function done(id?: string): ActionResult {
   revalidatePath("/dashboard");
-  return { ok: true };
+  return id ? { ok: true, id } : { ok: true };
 }
 
 /** How many resumes the user has, or an error when the plan's limit is reached. */
@@ -54,8 +55,12 @@ export async function createResume(rawTitle: unknown): Promise<ActionResult> {
 
   const data = blankResume();
   data.profile.name = user.name;
-  await queries.insertResume(user.id, { title: title.data, data, isPrimary: quota.used === 0 }, slugify(title.data));
-  return done();
+  const id = await queries.insertResume(
+    user.id,
+    { title: title.data, data, isPrimary: quota.used === 0 },
+    slugify(title.data),
+  );
+  return done(id);
 }
 
 export async function renameResume(rawId: unknown, rawTitle: unknown): Promise<ActionResult> {
@@ -81,16 +86,16 @@ export async function duplicateResume(rawId: unknown): Promise<ActionResult> {
   if (quota.error) return quota.error;
 
   // Rows are input like any other: parse (and migrate) before copying.
-  const parsed = parseResume(source.data);
+  const parsed = parseResumeDraft(source.data);
   if (!parsed.success) return { ok: false, error: "This resume couldn't be copied. Open it and save it first." };
 
   const title = `${source.title} (copy)`.slice(0, TITLE_MAX);
-  await queries.insertResume(
+  const copyId = await queries.insertResume(
     user.id,
     { title, data: parsed.data, template: source.template },
     source.slug,
   );
-  return done();
+  return done(copyId);
 }
 
 export async function setPrimaryResume(rawId: unknown): Promise<ActionResult> {
@@ -107,4 +112,33 @@ export async function deleteResume(rawId: unknown): Promise<ActionResult> {
   const id = idSchema.safeParse(rawId);
   if (!id.success) return NOT_FOUND;
   return (await queries.deleteResume(user.id, id.data)) ? done() : NOT_FOUND;
+}
+
+/**
+ * Save a whole resume as a new one: the guest draft from this browser, or a
+ * file import. Validated like any other input.
+ */
+export async function importResume(rawResume: unknown, rawTemplate: unknown, rawTitle?: unknown): Promise<ActionResult> {
+  const user = await currentUser();
+  if (!user) return SIGNED_OUT;
+  const parsed = parseResumeDraft(rawResume);
+  if (!parsed.success) return { ok: false, error: "That resume has data we can't read." };
+  if (JSON.stringify(parsed.data).length > 800_000) {
+    return { ok: false, error: "This resume is too large to save. Try a smaller photo." };
+  }
+  const template = typeof rawTemplate === "string" && isTemplateSlug(rawTemplate) ? rawTemplate : "classic";
+
+  const fallbackTitle = parsed.data.profile.name.trim() || "My resume";
+  const title = titleSchema.safeParse(rawTitle ?? fallbackTitle);
+  const finalTitle = title.success ? title.data : fallbackTitle.slice(0, TITLE_MAX);
+
+  const quota = await checkQuota(user.id);
+  if (quota.error) return quota.error;
+
+  const id = await queries.insertResume(
+    user.id,
+    { title: finalTitle, data: parsed.data, template, isPrimary: quota.used === 0 },
+    slugify(finalTitle),
+  );
+  return done(id);
 }

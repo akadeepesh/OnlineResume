@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, Check, Eye, Loader2, PencilLine } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
 import { useEditorHydration, useEditorStore } from "@/lib/store/editor";
 import type { SectionId } from "@/lib/editor/sections";
 import { savedLabel } from "@/lib/editor/saved-label";
+import { useCloudSave, useCloudSaveState, type CloudSave } from "./cloud-save";
 import { HistoryButtons, useHistoryShortcuts } from "./HistoryControls";
 import PreviewPane from "./PreviewPane";
 import SectionPanel from "./SectionPanel";
@@ -71,8 +73,8 @@ function SaveStatus() {
       className="flex items-center gap-1 text-xs text-neutral-500"
       title={
         savedAt !== null
-          ? `Last saved in this browser at ${new Date(savedAt).toLocaleTimeString()}. Sign-in to keep it everywhere is coming soon.`
-          : "Your resume is saved in this browser as you type. Sign-in to keep it everywhere is coming soon."
+          ? `Last saved in this browser at ${new Date(savedAt).toLocaleTimeString()}. Sign in to keep it in your account.`
+          : "Your resume is saved in this browser as you type. Sign in to keep it in your account."
       }
     >
       {pending ? (
@@ -86,22 +88,78 @@ function SaveStatus() {
   );
 }
 
-function TopBar({ onSelect, announce }: { onSelect: (id: SectionId) => void; announce: (m: string) => void }) {
+/** Save status for resumes kept in the account. */
+function CloudSaveStatus({ save }: { save: CloudSave }) {
+  const state = useCloudSaveState(save);
+  const now = useNow(state.kind === "saved" && state.at !== null);
+
+  if (state.kind === "conflict") {
+    return (
+      <span className="flex items-center gap-2 text-xs font-medium text-amber-700" role="alert">
+        <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+        <span className="hidden sm:inline">Changed in another tab</span>
+        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => window.location.reload()}>
+          Load theirs
+        </Button>
+        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={save.keepMine}>
+          Keep mine
+        </Button>
+      </span>
+    );
+  }
+  if (state.kind === "error") {
+    return (
+      <span className="flex items-center gap-1 text-xs font-medium text-amber-700" role="alert" title={state.message}>
+        <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+        <span className="hidden sm:inline">{state.message}</span>
+        <span className="sm:hidden">Not saved</span>
+      </span>
+    );
+  }
+  const busy = state.kind === "pending" || state.kind === "saving";
+  const label = busy ? "Saving…" : state.at !== null ? savedLabel(state.at, now) : "Saved to your account";
+  return (
+    <span className="flex items-center gap-1 text-xs text-neutral-500" role="status">
+      {busy ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
+      ) : (
+        <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+      )}
+      <span className="sr-only md:not-sr-only">{label}</span>
+    </span>
+  );
+}
+
+export interface CloudEditorProps {
+  save: CloudSave;
+  /** The resume's title from the dashboard. */
+  title: string;
+}
+
+function TopBar({
+  onSelect,
+  announce,
+  cloud,
+}: {
+  onSelect: (id: SectionId) => void;
+  announce: (m: string) => void;
+  cloud?: CloudEditorProps;
+}) {
   // Before hydration the store still holds the example, so don't flash its name.
   const name = useEditorStore((s) => (s.hasHydrated ? s.resume.profile.name.trim() : null));
   return (
     <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-3 sm:px-4">
       <Link
-        href="/"
+        href={cloud ? "/dashboard" : "/"}
         className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-        aria-label="Back to home"
+        aria-label={cloud ? "Back to dashboard" : "Back to home"}
       >
         <ArrowLeft className="h-4 w-4" />
       </Link>
       <p className="min-w-0 flex-1 truncate text-sm font-medium text-neutral-900">
-        {name === null ? "" : name || "Untitled resume"}
+        {cloud ? cloud.title : name === null ? "" : name || "Untitled resume"}
       </p>
-      <SaveStatus />
+      {cloud ? <CloudSaveStatus save={cloud.save} /> : <SaveStatus />}
       <HistoryButtons onSelect={onSelect} announce={announce} />
       <TemplatePicker />
       <StartFromMenu />
@@ -205,7 +263,16 @@ function MobileLayout({ section, onSelect }: { section: SectionId; onSelect: (id
   );
 }
 
-export default function EditorShell() {
+function CloudSaveRunner({ save }: { save: CloudSave }) {
+  useCloudSave(save);
+  return null;
+}
+
+/**
+ * The editor. Without `cloud` it edits the guest draft in this browser; with
+ * it, a resume from the account (inside an `EditorStoreProvider`).
+ */
+export default function EditorShell({ cloud }: { cloud?: CloudEditorProps } = {}) {
   const hydrated = useEditorHydration();
   const isDesktop = useIsDesktop();
   const [section, setSection] = useState<SectionId>("profile");
@@ -219,7 +286,8 @@ export default function EditorShell() {
       <p className="sr-only" aria-live="polite">
         {announcement}
       </p>
-      <TopBar onSelect={setSection} announce={announce} />
+      {cloud && <CloudSaveRunner save={cloud.save} />}
+      <TopBar onSelect={setSection} announce={announce} cloud={cloud} />
       {!hydrated || isDesktop === null ? (
         <Loading />
       ) : isDesktop ? (

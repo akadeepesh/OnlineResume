@@ -2,6 +2,8 @@ import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/db/errors";
 import { resumes, users, type NewResumeRow } from "@/lib/db/schema";
+import type { Resume } from "@/lib/resume/schema";
+import type { TemplateSlug } from "@/templates/meta";
 import { limitsFor } from "@/lib/limits";
 import { uniqueSlug } from "./slug";
 
@@ -126,4 +128,37 @@ export async function deleteResume(userId: string, id: string): Promise<boolean>
       .where(inArray(resumes.id, successor)),
   ]);
   return true;
+}
+
+export type SaveContentResult =
+  | { status: "saved"; updatedAt: Date }
+  | { status: "conflict" }
+  | { status: "missing" };
+
+/**
+ * Save editor content, but only if nobody saved since `expected` (the
+ * `updatedAt` the editor loaded or last saved). Another tab or device saving
+ * in between makes this a conflict instead of silently losing their work.
+ * `expected: null` overwrites regardless (the user chose to keep their copy).
+ *
+ * Compared at millisecond precision: Postgres keeps microseconds, JavaScript
+ * dates don't.
+ */
+export async function saveResumeContent(
+  userId: string,
+  id: string,
+  content: { data: Resume; template: TemplateSlug },
+  expected: Date | null,
+): Promise<SaveContentResult> {
+  const unchanged =
+    expected === null
+      ? undefined
+      : sql`date_trunc('milliseconds', ${resumes.updatedAt}) = ${expected.toISOString()}::timestamptz`;
+  const [row] = await db()
+    .update(resumes)
+    .set({ data: content.data, template: content.template, updatedAt: new Date() })
+    .where(and(owned(userId, id), unchanged))
+    .returning({ updatedAt: resumes.updatedAt });
+  if (row) return { status: "saved", updatedAt: row.updatedAt };
+  return (await getOwnedResume(userId, id)) ? { status: "conflict" } : { status: "missing" };
 }

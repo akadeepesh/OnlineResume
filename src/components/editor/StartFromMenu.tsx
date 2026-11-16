@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { editorStore } from "@/lib/store/editor";
+import { useEditorStoreApi, type EditorState } from "@/lib/store/editor";
 
 const choices = {
   example: {
@@ -26,14 +26,14 @@ const choices = {
     hint: "A filled-in sample you can edit",
     icon: Sparkles,
     confirm: "Replace your resume with the example?",
-    run: () => editorStore.getState().resetToExample(),
+    run: (state: EditorState) => state.resetToExample(),
   },
   blank: {
     label: "Start blank",
     hint: "An empty resume",
     icon: FilePlus2,
     confirm: "Clear your resume and start blank?",
-    run: () => editorStore.getState().startBlank(),
+    run: (state: EditorState) => state.startBlank(),
   },
 } as const;
 
@@ -41,6 +41,7 @@ type Choice = keyof typeof choices;
 
 /** "Start from" menu. Always asks first, because it replaces the whole draft. */
 export default function StartFromMenu() {
+  const store = useEditorStoreApi();
   const [pending, setPending] = useState<Choice | null>(null);
 
   return (
@@ -71,7 +72,7 @@ export default function StartFromMenu() {
           <DialogHeader>
             <DialogTitle>{pending && choices[pending].confirm}</DialogTitle>
             <DialogDescription>
-              Everything you&apos;ve written in this browser will be replaced. Changed your mind
+              Everything you&apos;ve written will be replaced. Changed your mind
               afterwards? Undo brings it back until you close this tab.
             </DialogDescription>
           </DialogHeader>
@@ -82,7 +83,7 @@ export default function StartFromMenu() {
             <Button
               variant="destructive"
               onClick={() => {
-                if (pending) choices[pending].run();
+                if (pending) choices[pending].run(store.getState());
                 setPending(null);
               }}
             >

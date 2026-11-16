@@ -1,11 +1,12 @@
 import { createStore, useStore } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
-import { useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { blankResume, parseResumeDraft } from "@/lib/resume/draft";
 import { sampleResume } from "@/lib/resume/sample";
 import type { Profile, Resume, SectionKey, Socials } from "@/lib/resume/schema";
 import type { SectionId } from "@/lib/editor/sections";
 import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
+import { EDITOR_STORAGE_KEY } from "./keys";
 
 // ============================================================================
 // Editor store: the resume being edited, plus the template it's previewed in.
@@ -24,7 +25,7 @@ import { isTemplateSlug, type TemplateSlug } from "@/templates/meta";
 // and history lives in memory: it isn't saved and starts empty on each load.
 // ============================================================================
 
-export const EDITOR_STORAGE_KEY = "onlineresume:editor-draft";
+export { EDITOR_STORAGE_KEY };
 export const EDITOR_BACKUP_KEY = `${EDITOR_STORAGE_KEY}:invalid`;
 /**
  * Version of what's saved in localStorage. v2: the resume gained a section
@@ -504,19 +505,45 @@ export function createEditorStore({
 export type EditorStore = ReturnType<typeof createEditorStore>;
 
 /**
- * The app-wide editor store. Hydration is manual so the server render and the
- * first client render match; call `useEditorHydration()` once in the editor.
+ * The guest editor's store, saved in localStorage. Hydration is manual so the
+ * server render and the first client render match; call
+ * `useEditorHydration()` once in the editor.
  */
 export const editorStore = createEditorStore({ skipHydration: true, saveDelayMs: 600 });
 
+/**
+ * A store for a resume saved in the account. It starts from the server's copy
+ * and keeps nothing in the browser: `useCloudSave` writes changes to the
+ * database instead, so the localStorage status fields are unused.
+ */
+export function createCloudEditorStore(initial: EditorData): EditorStore {
+  const envelope = JSON.stringify({ state: initial, version: STORE_VERSION });
+  return createEditorStore({
+    skipHydration: true,
+    storage: { getItem: () => envelope, setItem: () => {}, removeItem: () => {} },
+  });
+}
+
+/**
+ * Which store the editor components use. Without a provider it's the guest
+ * store; `/editor/[id]` provides a cloud store.
+ */
+const EditorStoreContext = createContext<EditorStore | null>(null);
+export const EditorStoreProvider = EditorStoreContext.Provider;
+
+export function useEditorStoreApi(): EditorStore {
+  return useContext(EditorStoreContext) ?? editorStore;
+}
+
 export function useEditorStore<T>(selector: (state: EditorState) => T): T {
-  return useStore(editorStore, selector);
+  return useStore(useEditorStoreApi(), selector);
 }
 
 /** Load the saved draft after mount. Returns true once it has been read. */
 export function useEditorHydration(): boolean {
+  const store = useEditorStoreApi();
   useEffect(() => {
-    if (!editorStore.persist.hasHydrated()) void editorStore.persist.rehydrate();
-  }, []);
+    if (!store.persist.hasHydrated()) void store.persist.rehydrate();
+  }, [store]);
   return useEditorStore((s) => s.hasHydrated);
 }
