@@ -34,10 +34,6 @@ export const clientEnvSchema = z.object({
   NEXT_PUBLIC_TEMPLATE: text(),
   /** Floating template picker on "/" and /templates/<slug>. */
   NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER: flag(true),
-  /** Live repo stats for skill links. Leftover from the portfolio; goes away with skill → project links. */
-  NEXT_PUBLIC_ENABLE_GITHUB_FETCH: flag(false),
-  /** GitHub account the repo stats are read from. Same leftover as above. */
-  NEXT_PUBLIC_GH_OWNER: text(),
 });
 
 export const serverEnvSchema = z.object({
@@ -50,8 +46,6 @@ export const serverEnvSchema = z.object({
       .regex(/^postgres(ql)?:\/\//, "must be a postgres:// or postgresql:// connection string")
       .optional(),
   ),
-  /** Raises GitHub's API rate limit for repo stats. Optional. */
-  GITHUB_TOKEN: text(),
   /** Signs session cookies and tokens. Required in production once DATABASE_URL is set. `openssl rand -base64 32` */
   BETTER_AUTH_SECRET: z.preprocess(blankAsUnset, z.string().trim().min(32, "must be at least 32 characters").optional()),
   /** Base URL Better Auth uses for OAuth callbacks. Defaults to NEXT_PUBLIC_SITE_URL. */
@@ -79,8 +73,6 @@ export const clientEnv: ClientEnv = parseEnv(clientEnvSchema, {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_TEMPLATE: process.env.NEXT_PUBLIC_TEMPLATE,
   NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER: process.env.NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER,
-  NEXT_PUBLIC_ENABLE_GITHUB_FETCH: process.env.NEXT_PUBLIC_ENABLE_GITHUB_FETCH,
-  NEXT_PUBLIC_GH_OWNER: process.env.NEXT_PUBLIC_GH_OWNER,
 });
 
 let cachedServerEnv: ServerEnv | undefined;
