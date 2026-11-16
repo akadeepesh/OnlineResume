@@ -1,6 +1,8 @@
 "use client";
 
-import { Copy, FileText, Loader2, MoreHorizontal, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { Copy, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import {
   createResume,
@@ -66,6 +68,7 @@ async function run(action: () => Promise<ActionResult>): Promise<ActionResult> {
 }
 
 export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps) {
+  const router = useRouter();
   const [dialog, setDialog] = useState<DialogState>({ kind: "closed" });
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -125,7 +128,12 @@ export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate font-medium text-neutral-900">{resume.title}</p>
+                  <Link
+                    href={`/editor/${resume.id}`}
+                    className="truncate font-medium text-neutral-900 underline-offset-4 hover:underline"
+                  >
+                    {resume.title}
+                  </Link>
                   {resume.isPrimary && (
                     <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                       Primary
@@ -156,6 +164,9 @@ export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => router.push(`/editor/${resume.id}`)}>
+                      <PencilLine className="mr-2 h-4 w-4" aria-hidden /> Edit
+                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => setDialog({ kind: "rename", resume })}>
                       <Pencil className="mr-2 h-4 w-4" aria-hidden /> Rename
                     </DropdownMenuItem>
@@ -192,7 +203,11 @@ export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps
           submitLabel="Create"
           initialTitle=""
           onClose={close}
-          onSubmit={(title) => run(() => createResume(title))}
+          onSubmit={async (title) => {
+            const result = await run(() => createResume(title));
+            if (result.ok && result.id) router.push(`/editor/${result.id}`);
+            return result;
+          }}
         />
       )}
       {dialog.kind === "rename" && (
