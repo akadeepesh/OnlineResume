@@ -20,12 +20,13 @@ export type ReadResult =
 /** Read a .json file's text as a resume, whichever of the two formats it's in. */
 export function readResumeJson(text: string): ReadResult {
   if (text.length > MAX_IMPORT_BYTES) return { ok: false, error: "That file is too large to be a resume (1 MB max)." };
-  let value: unknown;
+  let parsedJson: unknown;
   try {
-    value = JSON.parse(text);
+    parsedJson = JSON.parse(text);
   } catch {
     return { ok: false, error: "That file isn't valid JSON." };
   }
+  const value = parsedJson; // const, so the type guard below narrows it
   const external = isJsonResume(value);
   const parsed = parseResumeDraft(external ? fromJsonResume(value) : value);
   if (!parsed.success) {
