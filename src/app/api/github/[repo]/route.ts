@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { EnvData, getEnvData } from "../../../../../env";
+import { clientEnv, serverEnv } from "@/lib/env";
 
-const envData: EnvData = getEnvData();
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ repo: string }> }
 ) {
   const { repo } = await params;
-  const enableGithubFetch = envData.NEXT_PUBLIC_GITHUB_FETCH_ENABLED === "true";
-  const githubOwner = envData.NEXT_PUBLIC_GH_OWNER;
+  const enableGithubFetch = clientEnv.NEXT_PUBLIC_ENABLE_GITHUB_FETCH;
+  const githubOwner = clientEnv.NEXT_PUBLIC_GH_OWNER;
 
   if (!enableGithubFetch || !githubOwner) {
     return NextResponse.json(
@@ -22,8 +21,9 @@ export async function GET(
       Accept: "application/vnd.github.v3+json",
     };
 
-    if (envData.GITHUB_TOKEN) {
-      headers["Authorization"] = `token ${envData.GITHUB_TOKEN}`;
+    const { GITHUB_TOKEN } = serverEnv();
+    if (GITHUB_TOKEN) {
+      headers["Authorization"] = `token ${GITHUB_TOKEN}`;
     }
 
     const response = await fetch(

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
+import { clientEnv } from "@/lib/env";
 import { sampleResume } from "@/lib/resume/sample";
 
 const { profile } = sampleResume;
@@ -24,6 +25,8 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // Absolute URLs for Open Graph images and canonical links.
+  metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
   title: profile.name,
   description: `${profile.name} — ${profile.role}. ${profile.tagline}`,
 };
