@@ -1,13 +1,14 @@
 "use client";
 
-import { Copy, ExternalLink, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2 } from "lucide-react";
+import { Copy, ExternalLink, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   createResume,
   deleteResume,
   duplicateResume,
+  importResume,
   renameResume,
   setPrimaryResume,
   type ActionResult,
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { readResumeJson } from "@/lib/formats/files";
 import { RESUME_TITLE_MAX } from "@/lib/resumes/slug";
 
 export interface ResumeCard {
@@ -74,6 +76,24 @@ export default function ResumeList({ resumes, quota, baseLink, username }: Resum
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const full = quota.used >= quota.limit;
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+
+  /** A JSON file (ours or JSON Resume) becomes a new resume, opened in the editor. */
+  async function onImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setError("");
+    const read = readResumeJson(await file.text());
+    if (!read.ok) return setError(read.error);
+    setImporting(true);
+    const title = file.name.replace(/\.json$/i, "").slice(0, RESUME_TITLE_MAX);
+    const result = await run(() => importResume(read.resume, "classic", read.resume.profile.name.trim() || title));
+    setImporting(false);
+    if (!result.ok) setError(result.error);
+    else if (result.id) router.push(`/editor/${result.id}`);
+  }
 
   async function quickAction(id: string, action: () => Promise<ActionResult>) {
     setError("");
@@ -94,14 +114,30 @@ export default function ResumeList({ resumes, quota, baseLink, username }: Resum
             {quota.used} of {quota.limit} used
           </p>
         </div>
-        <Button
-          onClick={() => setDialog({ kind: "create" })}
-          disabled={full}
-          title={full ? `You can keep up to ${quota.limit} resumes.` : undefined}
-        >
-          <Plus className="mr-2 h-4 w-4" aria-hidden />
-          New resume
-        </Button>
+        <div className="flex gap-2">
+          <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={onImportFile} />
+          <Button
+            variant="outline"
+            onClick={() => fileInput.current?.click()}
+            disabled={full || importing}
+            title="Import an OnlineResume or JSON Resume file"
+          >
+            {importing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
+            ) : (
+              <Upload className="mr-2 h-4 w-4" aria-hidden />
+            )}
+            Import
+          </Button>
+          <Button
+            onClick={() => setDialog({ kind: "create" })}
+            disabled={full}
+            title={full ? `You can keep up to ${quota.limit} resumes.` : undefined}
+          >
+            <Plus className="mr-2 h-4 w-4" aria-hidden />
+            New resume
+          </Button>
+        </div>
       </div>
 
       {error && (
