@@ -142,7 +142,7 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
                 Published
               </p>
               <p id="share-published-hint" className="text-xs text-neutral-500">
-                Off: the link shows "not found" to everyone but you.
+                Off: the link shows &ldquo;not found&rdquo; to everyone but you.
               </p>
             </div>
             <Switch
