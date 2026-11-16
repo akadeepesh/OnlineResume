@@ -82,7 +82,8 @@ export async function PublicResume({ username, slug }: { username: string; slug:
 
   const { row, resume, isOwner } = visible;
   const Template = templates[isTemplateSlug(row.template) ? row.template : "classic"];
-  const printHref = `/print${new URL(visible.url).pathname}?auto=1`;
+  // Server-rendered PDF; falls back to the print page where that isn't available.
+  const printHref = `/api/pdf${new URL(visible.url).pathname}`;
   const original = row.isPublished ? await publicOriginal(row.id) : null;
 
   return (

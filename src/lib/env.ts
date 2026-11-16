@@ -47,6 +47,8 @@ export const serverEnvSchema = z.object({
   GROQ_API_KEY: text(),
   /** Groq model for AI import. Defaults to a Llama 3.3 70B model. */
   GROQ_MODEL: text(),
+  /** A local Chrome for one-click PDFs outside Vercel. Without it, "Download PDF" uses the print page. */
+  CHROME_EXECUTABLE_PATH: text(),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;

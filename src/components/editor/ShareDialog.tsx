@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import QrCode from "./QrCode";
 
 export interface ShareSettings {
   /** Full public URL of this resume. */
@@ -213,13 +214,17 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
           </div>
         )}
 
+        <div className="border-t border-neutral-200 pt-4">
+          <QrCode url={settings.url} fileName={`${new URL(settings.url).pathname.slice(1).replace(/\//g, "-")}-qr.png`} />
+        </div>
+
         <div className="flex items-center justify-between gap-4 border-t border-neutral-200 pt-4">
           <div>
             <p className="text-sm font-medium text-neutral-900">PDF</p>
             <p className="text-xs text-neutral-500">A clean, ATS-friendly version for applications.</p>
           </div>
           <Button size="sm" variant="outline" asChild>
-            <a href={`/print${new URL(settings.url).pathname}?auto=1`} target="_blank" rel="noopener">
+            <a href={`/api/pdf${new URL(settings.url).pathname}`} target="_blank" rel="noopener">
               <Download className="mr-2 h-4 w-4" aria-hidden />
               Download
             </a>
