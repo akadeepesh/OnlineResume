@@ -7,6 +7,7 @@ import { isAuthConfigured } from "@/lib/auth/server";
 import { withPlaceholderName } from "@/lib/editor/preview-channel";
 import { clientEnv } from "@/lib/env";
 import { parseResumeDraft } from "@/lib/resume/draft";
+import { publicOriginal } from "@/lib/resumes/originals";
 import { findResumeByAddress } from "@/lib/resumes/queries";
 import { templates } from "@/templates";
 import { isTemplateSlug } from "@/templates/meta";
@@ -82,6 +83,7 @@ export async function PublicResume({ username, slug }: { username: string; slug:
   const { row, resume, isOwner } = visible;
   const Template = templates[isTemplateSlug(row.template) ? row.template : "classic"];
   const printHref = `/print${new URL(visible.url).pathname}?auto=1`;
+  const original = row.isPublished ? await publicOriginal(row.id) : null;
 
   return (
     <>
@@ -108,12 +110,22 @@ export async function PublicResume({ username, slug }: { username: string; slug:
         </div>
       )}
       {!isOwner && (
-        <a
-          href={printHref}
-          className="fixed bottom-4 right-4 z-50 rounded-full border border-neutral-200 bg-white/95 px-4 py-2 text-sm font-medium text-neutral-800 shadow-lg backdrop-blur hover:bg-white print:hidden"
-        >
-          Download PDF
-        </a>
+        <div className="fixed bottom-4 right-4 z-50 flex gap-2 print:hidden">
+          {original && (
+            <a
+              href={`/api/resumes/${row.id}/original`}
+              className="rounded-full border border-neutral-200 bg-white/95 px-4 py-2 text-sm font-medium text-neutral-800 shadow-lg backdrop-blur hover:bg-white"
+            >
+              Original file
+            </a>
+          )}
+          <a
+            href={printHref}
+            className="rounded-full border border-neutral-200 bg-white/95 px-4 py-2 text-sm font-medium text-neutral-800 shadow-lg backdrop-blur hover:bg-white"
+          >
+            Download PDF
+          </a>
+        </div>
       )}
     </>
   );
