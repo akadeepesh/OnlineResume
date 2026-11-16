@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { editorStore } from "@/lib/store/editor";
+import { useEditorStoreApi } from "@/lib/store/editor";
 import {
   PREVIEW_PATH,
   isReadyMessage,
@@ -47,6 +47,7 @@ export default function PreviewPane({
   interactive?: boolean;
 }) {
   const [device, setDevice] = useState<Device>(defaultDevice);
+  const store = useEditorStoreApi();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [frameRef, frame] = useSize<HTMLDivElement>();
 
@@ -56,7 +57,7 @@ export default function PreviewPane({
     const post = () => {
       const target = iframeRef.current?.contentWindow;
       if (!target) return;
-      const { resume, template } = editorStore.getState();
+      const { resume, template } = store.getState();
       const message: PreviewUpdateMessage = { type: "preview:update", resume, template };
       target.postMessage(message, window.location.origin);
     };
@@ -66,7 +67,7 @@ export default function PreviewPane({
       if (isReadyMessage(event.data)) post();
     };
     window.addEventListener("message", onMessage);
-    const unsubscribe = editorStore.subscribe((state, prev) => {
+    const unsubscribe = store.subscribe((state, prev) => {
       if (state.resume !== prev.resume || state.template !== prev.template) post();
     });
     post();
@@ -74,7 +75,7 @@ export default function PreviewPane({
       window.removeEventListener("message", onMessage);
       unsubscribe();
     };
-  }, []);
+  }, [store]);
 
   const { width: deviceWidth } = DEVICES[device];
   const scale = frame.width > 0 ? Math.min(1, frame.width / deviceWidth) : 1;

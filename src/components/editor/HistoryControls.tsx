@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { historyShortcut } from "@/lib/editor/shortcuts";
 import { sectionMeta, type SectionId } from "@/lib/editor/sections";
-import { editorStore, useEditorStore } from "@/lib/store/editor";
+import { useEditorStore, useEditorStoreApi, type EditorStore } from "@/lib/store/editor";
 
 export type HistoryAction = "undo" | "redo";
 
@@ -15,8 +15,12 @@ export type HistoryAction = "undo" | "redo";
  * can't see would look like nothing happened. Returns a short message for
  * screen readers, or null when there was nothing to do.
  */
-export function runHistory(action: HistoryAction, onSelect: (id: SectionId) => void): string | null {
-  const state = editorStore.getState();
+export function runHistory(
+  store: EditorStore,
+  action: HistoryAction,
+  onSelect: (id: SectionId) => void,
+): string | null {
+  const state = store.getState();
   const section = action === "undo" ? state.undo() : state.redo();
   if (section === undefined) return null;
   if (section) onSelect(section);
@@ -32,6 +36,7 @@ export function runHistory(action: HistoryAction, onSelect: (id: SectionId) => v
  * "Delete this role?" holds the role's position).
  */
 export function useHistoryShortcuts(onSelect: (id: SectionId) => void, announce: (message: string) => void) {
+  const store = useEditorStoreApi();
   const latest = useRef({ onSelect, announce });
   useEffect(() => {
     latest.current = { onSelect, announce };
@@ -43,12 +48,12 @@ export function useHistoryShortcuts(onSelect: (id: SectionId) => void, announce:
       if (!action) return;
       if (document.querySelector('[role="dialog"], [role="alertdialog"], [role="menu"]')) return;
       e.preventDefault();
-      const message = runHistory(action, latest.current.onSelect);
+      const message = runHistory(store, action, latest.current.onSelect);
       if (message) latest.current.announce(message);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [store]);
 }
 
 const noopSubscribe = () => () => {};
@@ -67,6 +72,7 @@ export function HistoryButtons({
   onSelect: (id: SectionId) => void;
   announce: (message: string) => void;
 }) {
+  const store = useEditorStoreApi();
   const canUndo = useEditorStore((s) => s.past.length > 0);
   const canRedo = useEditorStore((s) => s.future.length > 0);
   const mac = useIsMac();
@@ -75,7 +81,7 @@ export function HistoryButtons({
     <button
       type="button"
       onClick={() => {
-        const message = runHistory(action, onSelect);
+        const message = runHistory(store, action, onSelect);
         if (message) announce(message);
       }}
       disabled={!enabled}
