@@ -16,24 +16,11 @@ import { z } from "zod";
 /** "" → undefined, so defaults and optional() treat blank values as unset. */
 const blankAsUnset = (value: unknown) => (typeof value === "string" && value.trim() === "" ? undefined : value);
 
-const flag = (fallback: boolean) =>
-  z.preprocess(
-    blankAsUnset,
-    z
-      .enum(["true", "false"])
-      .default(fallback ? "true" : "false")
-      .transform((value) => value === "true"),
-  );
-
 const text = () => z.preprocess(blankAsUnset, z.string().trim().optional());
 
 export const clientEnvSchema = z.object({
   /** Public base URL, e.g. https://resume.akadeepesh.com. Used for metadata and absolute links. */
   NEXT_PUBLIC_SITE_URL: z.preprocess(blankAsUnset, z.url().default("http://localhost:3000")),
-  /** Template shown at "/" (classic, editorial, spotlight, terminal, bento). Unknown values fall back to classic. */
-  NEXT_PUBLIC_TEMPLATE: text(),
-  /** Floating template picker on "/" and /templates/<slug>. */
-  NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER: flag(true),
 });
 
 export const serverEnvSchema = z.object({
@@ -71,8 +58,6 @@ export function parseEnv<S extends z.ZodType>(schema: S, source: Record<string, 
 
 export const clientEnv: ClientEnv = parseEnv(clientEnvSchema, {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-  NEXT_PUBLIC_TEMPLATE: process.env.NEXT_PUBLIC_TEMPLATE,
-  NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER: process.env.NEXT_PUBLIC_SHOW_TEMPLATE_SWITCHER,
 });
 
 let cachedServerEnv: ServerEnv | undefined;
