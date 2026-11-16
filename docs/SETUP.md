@@ -22,12 +22,29 @@ All variables are listed in [`.env.example`](../.env.example) and validated in [
 | `NEXT_PUBLIC_ENABLE_GITHUB_FETCH` | public | `false` | Live repo stats on skills (to be removed) |
 | `NEXT_PUBLIC_GH_OWNER` | public | none | GitHub account for those stats (to be removed) |
 | `GITHUB_TOKEN` | server | none | Higher GitHub API rate limit |
+| `DATABASE_URL` | server | none | Neon Postgres connection string. Accounts and saved resumes need it; the guest editor doesn't |
 
 Rules for adding one:
 - `NEXT_PUBLIC_*` values end up in the browser bundle. Never put a secret in one.
 - Read public ones with a literal `process.env.NEXT_PUBLIC_X` inside `env.ts` (Next.js only inlines names it can see), then import `clientEnv`.
 - Read secrets only through `serverEnv()`, which throws in the browser.
 - Add it to `.env.example`, this table and the schema in the same PR.
+
+## Database (Neon + Drizzle)
+
+1. Create a free project at [neon.tech](https://neon.tech) (pick a region close to your Vercel functions, e.g. Frankfurt / `fra1`).
+2. Copy the **pooled** connection string into `.env.local` as `DATABASE_URL`.
+3. Apply the migrations: `npm run db:migrate`.
+4. Optional: browse the data with `npm run db:studio`.
+
+Changing the schema (`src/lib/db/schema.ts`):
+1. Edit the schema.
+2. `npm run db:generate` writes a new SQL migration to `drizzle/`. Read it, then commit it with the schema change.
+3. `npm run db:migrate` applies it. Run it against production before (or right after) deploying code that needs it.
+
+Tables: `users` (Better Auth's user shape + `username`, `plan`), `resumes` (resume JSON as jsonb, slug unique per user, one primary per user), `resume_files` (original upload, max 5 MB), `ai_usage` (AI imports per user per day). Better Auth's session tables arrive with auth.
+
+On Vercel, add `DATABASE_URL` for Production (and Preview, ideally pointing at a Neon branch so previews never touch production data).
 
 ## Vercel
 
