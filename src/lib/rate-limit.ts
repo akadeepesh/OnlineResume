@@ -27,6 +27,8 @@ export const LIMITS = {
   createResume: { max: 30, windowSeconds: 3600 },
   sharing: { max: 60, windowSeconds: 60 },
   export: { max: 10, windowSeconds: 3600 },
+  /** Server-rendered PDFs (per user, or per IP for visitors). Each one starts a browser. */
+  pdf: { max: 20, windowSeconds: 3600 },
 } satisfies Record<string, Limit>;
 
 export type LimitName = keyof typeof LIMITS;

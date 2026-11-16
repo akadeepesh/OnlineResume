@@ -19,7 +19,11 @@ const nextConfig = {
   poweredByHeader: false,
   // Loaded by Node at runtime instead of being bundled (they load files and
   // workers of their own).
-  serverExternalPackages: ["pdfjs-dist"],
+  serverExternalPackages: ["pdfjs-dist", "@sparticuz/chromium", "puppeteer-core"],
+  // The serverless Chromium is read from disk at runtime; make sure it ships with the PDF route.
+  outputFileTracingIncludes: {
+    "/api/pdf/**": ["./node_modules/@sparticuz/chromium/bin/**"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
