@@ -1,6 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { resumeFiles, resumes } from "@/lib/db/schema";
+import type { SourceMap } from "@/lib/import/source-map";
 
 // ============================================================================
 // Original files a resume was imported from, kept for "Download original".
@@ -8,17 +9,18 @@ import { resumeFiles, resumes } from "@/lib/db/schema";
 // ============================================================================
 
 export const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const PDF_MIME = "application/pdf";
 
 /** File types we store and serve back. Anything else is never served. */
 export const ORIGINAL_TYPES: Record<string, { extension: string }> = {
   [DOCX_MIME]: { extension: "docx" },
-  "application/pdf": { extension: "pdf" },
+  [PDF_MIME]: { extension: "pdf" },
 };
 
 export async function saveOriginal(
   userId: string,
   resumeId: string,
-  file: { fileName: string; mimeType: string; content: Uint8Array },
+  file: { fileName: string; mimeType: string; content: Uint8Array; sourceMap?: SourceMap },
 ): Promise<void> {
   await db().insert(resumeFiles).values({
     userId,
@@ -27,6 +29,7 @@ export async function saveOriginal(
     mimeType: file.mimeType,
     sizeBytes: file.content.length,
     content: file.content,
+    sourceMap: file.sourceMap ?? null,
   });
 }
 

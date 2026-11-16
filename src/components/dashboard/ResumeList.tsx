@@ -103,7 +103,7 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
   const docInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
 
-  /** A Word document is uploaded: the server reads it and keeps the original. */
+  /** A PDF or Word document is uploaded: the server reads it and keeps the original. */
   async function onDocumentFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -168,7 +168,7 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
           <input
             ref={docInput}
             type="file"
-            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
             onChange={onDocumentFile}
           />
@@ -188,8 +188,8 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
               <DropdownMenuItem onSelect={() => docInput.current?.click()} className="gap-2">
                 <FileText className="h-4 w-4 text-neutral-500" aria-hidden />
                 <span>
-                  <span className="block text-sm">Word document</span>
-                  <span className="block text-xs text-neutral-500">.docx, kept so you can download it again</span>
+                  <span className="block text-sm">PDF or Word document</span>
+                  <span className="block text-xs text-neutral-500">Kept so you can download it again</span>
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => fileInput.current?.click()} className="gap-2">
