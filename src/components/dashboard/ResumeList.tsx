@@ -49,7 +49,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AI_TEXT_MAX, AI_TEXT_MIN } from "@/lib/ai/extracted";
-import { readResumeJson } from "@/lib/formats/files";
+import { IMPORT_ACCEPT, readImportFile } from "@/lib/formats/read-file";
 import { RESUME_TITLE_MAX } from "@/lib/resumes/slug";
 
 export interface ResumeCard {
@@ -106,10 +106,10 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
     event.target.value = "";
     if (!file) return;
     setError("");
-    const read = readResumeJson(await file.text());
+    const read = await readImportFile(file);
     if (!read.ok) return setError(read.error);
     setImporting(true);
-    const title = file.name.replace(/\.json$/i, "").slice(0, RESUME_TITLE_MAX);
+    const title = file.name.replace(/\.(json|zip)$/i, "").slice(0, RESUME_TITLE_MAX);
     const result = await run(() => importResume(read.resume, "classic", read.resume.profile.name.trim() || title));
     setImporting(false);
     if (!result.ok) setError(result.error);
@@ -136,7 +136,7 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
           </p>
         </div>
         <div className="flex gap-2">
-          <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={onImportFile} />
+          <input ref={fileInput} type="file" accept={IMPORT_ACCEPT} className="hidden" onChange={onImportFile} />
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" disabled={full || importing}>
@@ -153,8 +153,8 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
               <DropdownMenuItem onSelect={() => fileInput.current?.click()} className="gap-2">
                 <FileJson className="h-4 w-4 text-neutral-500" aria-hidden />
                 <span>
-                  <span className="block text-sm">JSON file</span>
-                  <span className="block text-xs text-neutral-500">OnlineResume or JSON Resume</span>
+                  <span className="block text-sm">From a file</span>
+                  <span className="block text-xs text-neutral-500">JSON, JSON Resume or LinkedIn export (.zip)</span>
                 </span>
               </DropdownMenuItem>
               {aiEnabled && (
