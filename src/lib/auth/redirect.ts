@@ -13,12 +13,17 @@ export function safeNext(value: string | string[] | null | undefined, fallback =
   if (next.startsWith("//") || next.startsWith("/\\")) return fallback;
   // Browsers strip tabs and newlines, turning "/\t/evil.com" into "//evil.com".
   if ([...next].some((char) => char.charCodeAt(0) < 0x20 || char.charCodeAt(0) === 0x7f)) return fallback;
-  // Never bounce back into the auth pages themselves.
-  if (/^\/(sign-in|sign-up)(\/|\?|#|$)/.test(next)) return fallback;
+  // Never bounce back into the auth or onboarding pages themselves.
+  if (/^\/(sign-in|sign-up|onboarding)(\/|\?|#|$)/.test(next)) return fallback;
   return next;
 }
 
 /** "/sign-in?next=/editor", leaving out the default destination. */
 export function authPageHref(page: "sign-in" | "sign-up", next: string): string {
   return next === DEFAULT_AFTER_SIGN_IN ? `/${page}` : `/${page}?next=${encodeURIComponent(next)}`;
+}
+
+/** "/onboarding?next=/editor", leaving out the default destination. */
+export function onboardingHref(next: string): string {
+  return next === DEFAULT_AFTER_SIGN_IN ? "/onboarding" : `/onboarding?next=${encodeURIComponent(next)}`;
 }
