@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as account from "@/lib/account";
 import { getAuth } from "@/lib/auth/server";
 import { getSession, getUsername } from "@/lib/auth/session";
+import { allow, TOO_MANY } from "@/lib/rate-limit";
 import { validateUsername } from "@/lib/username";
 
 export type SettingsResult = { ok: true } | { ok: false; error: string };
@@ -33,6 +34,7 @@ export async function updateUsername(rawUsername: unknown): Promise<SettingsResu
   const check = validateUsername(typeof rawUsername === "string" ? rawUsername : "");
   if (!check.ok) return { ok: false, error: check.reason };
   if (check.username === (await getUsername(session.user.id))) return { ok: true };
+  if (!(await allow("usernameChange", session.user.id))) return { ok: false, error: TOO_MANY };
 
   const result = await account.changeUsername(session.user.id, check.username);
   if (!result.ok) return { ok: false, error: result.reason === "taken" ? "That username is taken." : "Account not found." };

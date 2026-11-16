@@ -32,6 +32,7 @@ const MESSAGES: Record<Exclude<Extract<SaveResult, { ok: false }>["reason"], "co
   "signed-out": "You were signed out. Sign in again to keep saving.",
   invalid: "Something in this resume couldn't be saved.",
   "too-large": "This resume is too large to save. Try a smaller photo.",
+  "rate-limited": "Saving too often. Retrying in a moment…",
 };
 
 export interface CloudSave {
@@ -77,6 +78,10 @@ export function createCloudSave(store: EditorStore, resumeId: string, initialUpd
       setState({ kind: "saved", at: Date.now() });
     } else if (result.reason === "conflict") {
       setState({ kind: "conflict" });
+    } else if (result.reason === "rate-limited") {
+      dirty = true;
+      setState({ kind: "error", message: MESSAGES["rate-limited"] });
+      timer = setTimeout(save, RETRY_MS);
     } else {
       setState({ kind: "error", message: MESSAGES[result.reason] });
     }

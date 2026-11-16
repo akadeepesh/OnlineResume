@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
 import { parseResumeDraft } from "@/lib/resume/draft";
 import { saveResumeContent, updateSharing as updateSharingQuery, type SharingSettings } from "@/lib/resumes/queries";
+import { allow, TOO_MANY } from "@/lib/rate-limit";
 import { isTemplateSlug } from "@/templates/meta";
 
 /** Largest resume we accept, as JSON. Photos are resized in the browser to well under this. */
@@ -12,7 +13,7 @@ const MAX_CONTENT_CHARS = 800_000;
 
 export type SaveResult =
   | { ok: true; updatedAt: string }
-  | { ok: false; reason: "conflict" | "missing" | "signed-out" | "invalid" | "too-large" };
+  | { ok: false; reason: "conflict" | "missing" | "signed-out" | "invalid" | "too-large" | "rate-limited" };
 
 const idSchema = z.uuid();
 
@@ -27,6 +28,7 @@ export async function saveResume(
 ): Promise<SaveResult> {
   const session = await getSession();
   if (!session) return { ok: false, reason: "signed-out" };
+  if (!(await allow("save", session.user.id))) return { ok: false, reason: "rate-limited" };
 
   const id = idSchema.safeParse(rawId);
   if (!id.success) return { ok: false, reason: "missing" };
@@ -58,6 +60,7 @@ export async function updateSharing(
 ): Promise<{ ok: true; sharing: SharingSettings } | { ok: false; error: string }> {
   const session = await getSession();
   if (!session) return { ok: false, error: "You were signed out. Sign in again." };
+  if (!(await allow("sharing", session.user.id))) return { ok: false, error: TOO_MANY };
   const id = idSchema.safeParse(rawId);
   const patch = sharingSchema.safeParse(rawPatch);
   if (!id.success || !patch.success) return { ok: false, error: "That change isn't valid." };

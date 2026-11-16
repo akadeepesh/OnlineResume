@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/db/errors";
 import { users } from "@/lib/db/schema";
 import { isUsernameTaken } from "@/lib/db/usernames";
+import { allow } from "@/lib/rate-limit";
 import { validateUsername } from "@/lib/username";
 
 export type Availability =
@@ -18,7 +19,11 @@ const TAKEN = "That username is taken.";
 
 /** Live check while typing. Signed-in users only. */
 export async function checkUsername(raw: string): Promise<Availability> {
-  if (!(await getSession())) return { status: "invalid", message: "Sign in again to continue." };
+  const session = await getSession();
+  if (!session) return { status: "invalid", message: "Sign in again to continue." };
+  if (!(await allow("usernameCheck", session.user.id))) {
+    return { status: "invalid", message: "Too many checks. Wait a moment." };
+  }
   if (typeof raw !== "string") return { status: "invalid", message: "Enter a username." };
 
   const check = validateUsername(raw);

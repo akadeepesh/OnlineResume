@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
 import { blankResume, parseResumeDraft } from "@/lib/resume/draft";
 import * as queries from "@/lib/resumes/queries";
+import { allow, TOO_MANY } from "@/lib/rate-limit";
 import { RESUME_TITLE_MAX as TITLE_MAX, slugify } from "@/lib/resumes/slug";
 import { isTemplateSlug } from "@/templates/meta";
 
@@ -39,6 +40,8 @@ function done(id?: string): ActionResult {
 
 /** How many resumes the user has, or an error when the plan's limit is reached. */
 async function checkQuota(userId: string): Promise<{ used: number; error?: ActionResult }> {
+  // Every path that creates a resume comes through here.
+  if (!(await allow("createResume", userId))) return { used: 0, error: { ok: false, error: TOO_MANY } };
   const { used, limit } = await queries.resumeQuota(userId);
   if (used < limit) return { used };
   return { used, error: { ok: false, error: `You can keep up to ${limit} resumes. Delete one to make room.` } };
