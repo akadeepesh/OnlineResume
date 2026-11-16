@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import { clientEnv } from "@/lib/env";
-import { sampleResume } from "@/lib/resume/sample";
-
-const { profile } = sampleResume;
-
 import { cn } from "@/lib/utils";
 
 const fontSans = Inter({
@@ -27,8 +23,9 @@ const fontMono = JetBrains_Mono({
 export const metadata: Metadata = {
   // Absolute URLs for Open Graph images and canonical links.
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
-  title: profile.name,
-  description: `${profile.name} — ${profile.role}. ${profile.tagline}`,
+  title: { default: "OnlineResume", template: "%s · OnlineResume" },
+  description: "Your resume, as a link. Write it once, pick a design, share one link.",
+  applicationName: "OnlineResume",
 };
 
 export default function RootLayout({

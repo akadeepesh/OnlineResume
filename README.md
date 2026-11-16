@@ -8,22 +8,21 @@ Built for everyone who needs a resume, not just developers: sign in with email, 
 
 ## Features
 
-**Available now**
 - **Section-by-section editor** with a live preview, undo/redo, autosave, and sections you can reorder or hide.
-- **Five templates** rendered from one validated schema, so your content works in every design.
-- **Guest mode:** start writing without an account. Your draft is kept in the browser.
-- **Accounts** with email + password, Google or GitHub.
-- **Your own username**, which becomes your public link.
-
-**In progress**
-- Dashboard with several resumes per account, saved to the database.
-- Public pages at `/<username>`, with publish and search-engine visibility controls.
-- PDF and JSON export.
-- Import from PDF, DOCX, JSON Resume and LinkedIn, keeping the original file for download.
+- **Six templates** rendered from one validated schema, so your content works in every design.
+- **Guest mode:** start writing without an account. Your draft is kept in the browser and can be saved to an account later.
+- **Accounts** with email + password, Google or GitHub, and a username that becomes your link.
+- **Several resumes per account**, each with its own link: `/<username>` for the primary one, `/<username>/<slug>` for the rest.
+- **Private until published**, and hidden from search engines unless you turn that on.
+- **Link previews** with a generated image for every published resume.
+- **PDF** through a clean, ATS-friendly print layout.
+- **JSON and JSON Resume** import and export.
+- **Skills linked to projects:** click a skill to see the projects that use it.
+- **Account settings:** change your username, export all your data, delete your account.
 
 ## Templates
 
-Every template takes the same data ([`src/lib/resume/schema.ts`](src/lib/resume/schema.ts)). Previews use the fictional sample in [`src/lib/resume/sample.ts`](src/lib/resume/sample.ts).
+Every template renders the same data ([`src/lib/resume/schema.ts`](src/lib/resume/schema.ts)) and follows the section order and visibility chosen in the editor. Previews use the fictional sample in [`src/lib/resume/sample.ts`](src/lib/resume/sample.ts).
 
 | Template    | Style                                                                 |
 | ----------- | --------------------------------------------------------------------- |
@@ -32,8 +31,9 @@ Every template takes the same data ([`src/lib/resume/schema.ts`](src/lib/resume/
 | `spotlight` | Dark split-screen, sticky nav that tracks the section, cursor glow    |
 | `terminal`  | Interactive shell: visitors can type `help`, `skills python`, …       |
 | `bento`     | Modern tile grid with stats, accordion experience and skill drawer    |
+| `plain`     | Single column, ATS-friendly, prints cleanly (used for PDFs)           |
 
-Preview any of them at `/templates/<name>`, e.g. `/templates/bento`.
+Browse them at `/templates`, or preview one at `/templates/<name>`.
 
 To add a template, create `src/templates/<name>/` with a component that takes `{ data: Resume }`, then register it in [`src/templates/meta.ts`](src/templates/meta.ts) and [`src/templates/index.ts`](src/templates/index.ts).
 

@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/lib/db";
-import { accounts, sessions, users, verifications } from "@/lib/db/schema";
+import { accounts, authRateLimits, sessions, users, verifications } from "@/lib/db/schema";
 import { clientEnv, serverEnv } from "@/lib/env";
 import { socialProviders } from "./providers";
 
@@ -33,7 +33,13 @@ function createAuth() {
     secret: env.BETTER_AUTH_SECRET,
     database: drizzleAdapter(db(), {
       provider: "pg",
-      schema: { user: users, session: sessions, account: accounts, verification: verifications },
+      schema: {
+        user: users,
+        session: sessions,
+        account: accounts,
+        verification: verifications,
+        rateLimit: authRateLimits,
+      },
     }),
     user: {
       additionalFields: {
@@ -56,6 +62,18 @@ function createAuth() {
       // Signed copy of the session in a cookie for 5 minutes: most requests
       // skip the database round trip.
       cookieCache: { enabled: true, maxAge: 5 * 60 },
+    },
+    // Stored in the database so the limits hold across serverless instances.
+    // Better Auth turns rate limiting on in production only.
+    rateLimit: {
+      storage: "database",
+      window: 60,
+      max: 100,
+      customRules: {
+        "/sign-in/email": { window: 60, max: 10 },
+        "/sign-up/email": { window: 3600, max: 10 },
+        "/update-user": { window: 60, max: 20 },
+      },
     },
     telemetry: { enabled: false },
     // Lets server actions set cookies (must stay last).
