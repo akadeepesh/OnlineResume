@@ -162,3 +162,37 @@ export async function saveResumeContent(
   if (row) return { status: "saved", updatedAt: row.updatedAt };
   return (await getOwnedResume(userId, id)) ? { status: "conflict" } : { status: "missing" };
 }
+
+/**
+ * A resume by its public address: the primary one at /<username>, or
+ * /<username>/<slug>. Returns it whether or not it's published; the page
+ * decides who may see it.
+ */
+export async function findResumeByAddress(username: string, slug: string | null) {
+  const [row] = await db()
+    .select({ resume: resumes, username: users.username })
+    .from(resumes)
+    .innerJoin(users, eq(users.id, resumes.userId))
+    .where(and(eq(users.username, username), slug === null ? eq(resumes.isPrimary, true) : eq(resumes.slug, slug)))
+    .limit(1);
+  return row ?? null;
+}
+
+export interface SharingSettings {
+  isPublished: boolean;
+  noindex: boolean;
+}
+
+/** Publish/unpublish and search-engine visibility. Not an edit: `updated_at` stays. */
+export async function updateSharing(
+  userId: string,
+  id: string,
+  patch: Partial<SharingSettings>,
+): Promise<SharingSettings | null> {
+  const [row] = await db()
+    .update(resumes)
+    .set({ ...patch, ...keepUpdatedAt })
+    .where(owned(userId, id))
+    .returning({ isPublished: resumes.isPublished, noindex: resumes.noindex });
+  return row ?? null;
+}

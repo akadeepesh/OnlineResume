@@ -1,9 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
 import { parseResumeDraft } from "@/lib/resume/draft";
-import { saveResumeContent } from "@/lib/resumes/queries";
+import { saveResumeContent, updateSharing as updateSharingQuery, type SharingSettings } from "@/lib/resumes/queries";
 import { isTemplateSlug } from "@/templates/meta";
 
 /** Largest resume we accept, as JSON. Photos are resized in the browser to well under this. */
@@ -43,4 +44,26 @@ export async function saveResume(
   const result = await saveResumeContent(session.user.id, id.data, { data: resume.data, template }, expected);
   if (result.status === "saved") return { ok: true, updatedAt: result.updatedAt.toISOString() };
   return { ok: false, reason: result.status };
+}
+
+const sharingSchema = z
+  .object({ isPublished: z.boolean(), noindex: z.boolean() })
+  .partial()
+  .strict();
+
+/** Publish or hide a resume, and choose whether search engines may list it. */
+export async function updateSharing(
+  rawId: unknown,
+  rawPatch: unknown,
+): Promise<{ ok: true; sharing: SharingSettings } | { ok: false; error: string }> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: "You were signed out. Sign in again." };
+  const id = idSchema.safeParse(rawId);
+  const patch = sharingSchema.safeParse(rawPatch);
+  if (!id.success || !patch.success) return { ok: false, error: "That change isn't valid." };
+
+  const sharing = await updateSharingQuery(session.user.id, id.data, patch.data);
+  if (!sharing) return { ok: false, error: "This resume was deleted." };
+  revalidatePath("/dashboard");
+  return { ok: true, sharing };
 }
