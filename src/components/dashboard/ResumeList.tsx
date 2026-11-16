@@ -109,7 +109,7 @@ export default function ResumeList({ resumes, quota, baseLink, username, aiEnabl
     const read = await readImportFile(file);
     if (!read.ok) return setError(read.error);
     setImporting(true);
-    const title = file.name.replace(/\.json$/i, "").slice(0, RESUME_TITLE_MAX);
+    const title = file.name.replace(/\.(json|zip)$/i, "").slice(0, RESUME_TITLE_MAX);
     const result = await run(() => importResume(read.resume, "classic", read.resume.profile.name.trim() || title));
     setImporting(false);
     if (!result.ok) setError(result.error);
