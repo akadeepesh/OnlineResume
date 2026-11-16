@@ -21,6 +21,8 @@ const text = () => z.preprocess(blankAsUnset, z.string().trim().optional());
 export const clientEnvSchema = z.object({
   /** Public base URL, e.g. https://resume.akadeepesh.com. Used for metadata and absolute links. */
   NEXT_PUBLIC_SITE_URL: z.preprocess(blankAsUnset, z.url().default("http://localhost:3000")),
+  /** Sentry DSN for browser errors. Off when unset. A DSN is public by design. */
+  NEXT_PUBLIC_SENTRY_DSN: z.preprocess(blankAsUnset, z.url().optional()),
 });
 
 export const serverEnvSchema = z.object({
@@ -49,6 +51,8 @@ export const serverEnvSchema = z.object({
   GROQ_MODEL: text(),
   /** A local Chrome for one-click PDFs outside Vercel. Without it, "Download PDF" uses the print page. */
   CHROME_EXECUTABLE_PATH: text(),
+  /** Sentry DSN for server errors. Off when unset. */
+  SENTRY_DSN: z.preprocess(blankAsUnset, z.url().optional()),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;
@@ -64,6 +68,7 @@ export function parseEnv<S extends z.ZodType>(schema: S, source: Record<string, 
 
 export const clientEnv: ClientEnv = parseEnv(clientEnvSchema, {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
 
 let cachedServerEnv: ServerEnv | undefined;
