@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Globe, Lock, Share2 } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Globe, Lock, Share2 } from "lucide-react";
 import { useState } from "react";
 import { updateSharing } from "@/app/editor/[id]/actions";
 import { Button } from "@/components/ui/button";
@@ -170,6 +170,19 @@ export default function ShareDialog({ resumeId, initial }: { resumeId: string; i
               describedBy="share-search-hint"
             />
           </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 border-t border-neutral-200 pt-4">
+          <div>
+            <p className="text-sm font-medium text-neutral-900">PDF</p>
+            <p className="text-xs text-neutral-500">A clean, ATS-friendly version for applications.</p>
+          </div>
+          <Button size="sm" variant="outline" asChild>
+            <a href={`/print${new URL(settings.url).pathname}?auto=1`} target="_blank" rel="noopener">
+              <Download className="mr-2 h-4 w-4" aria-hidden />
+              Download
+            </a>
+          </Button>
         </div>
 
         {error && (

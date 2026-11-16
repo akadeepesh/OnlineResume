@@ -7,8 +7,9 @@ import EditorialTemplate from "./editorial/EditorialTemplate";
 import SpotlightTemplate from "./spotlight/SpotlightTemplate";
 import TerminalTemplate from "./terminal/TerminalTemplate";
 import BentoTemplate from "./bento/BentoTemplate";
+import PlainTemplate from "./plain/PlainTemplate";
 
-export { templateMeta, isTemplateSlug } from "./meta";
+export { templateMeta, isTemplateSlug, printTemplateFor } from "./meta";
 export type { TemplateSlug } from "./meta";
 
 type TemplateComponent = ComponentType<{ data: Resume }>;
@@ -29,4 +30,5 @@ export const templates: Record<TemplateSlug, TemplateComponent> = {
   spotlight: showingVisibleContent(SpotlightTemplate, "SpotlightTemplate"),
   terminal: showingVisibleContent(TerminalTemplate, "TerminalTemplate"),
   bento: showingVisibleContent(BentoTemplate, "BentoTemplate"),
+  plain: showingVisibleContent(PlainTemplate, "PlainTemplate"),
 };
