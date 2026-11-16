@@ -199,10 +199,10 @@ export type EditedOriginalReport =
 /** What "Download edited original" will change, and what it can't place. */
 export async function editedOriginalReport(rawId: unknown): Promise<EditedOriginalReport> {
   const user = await currentUser();
-  if (!user) return SIGNED_OUT;
+  if (!user) return { ok: false, error: "Your session ended. Sign in again." };
   if (!(await allow("sharing", user.id))) return { ok: false, error: TOO_MANY };
   const id = idSchema.safeParse(rawId);
-  if (!id.success) return NOT_FOUND;
+  if (!id.success) return { ok: false, error: "That resume doesn't exist anymore." };
   const result = await buildEditedOriginal(user.id, id.data);
   if (!result.ok) return { ok: false, error: result.error };
   return {
