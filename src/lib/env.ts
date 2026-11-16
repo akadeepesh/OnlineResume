@@ -52,6 +52,16 @@ export const serverEnvSchema = z.object({
   ),
   /** Raises GitHub's API rate limit for repo stats. Optional. */
   GITHUB_TOKEN: text(),
+  /** Signs session cookies and tokens. Required in production once DATABASE_URL is set. `openssl rand -base64 32` */
+  BETTER_AUTH_SECRET: z.preprocess(blankAsUnset, z.string().trim().min(32, "must be at least 32 characters").optional()),
+  /** Base URL Better Auth uses for OAuth callbacks. Defaults to NEXT_PUBLIC_SITE_URL. */
+  BETTER_AUTH_URL: z.preprocess(blankAsUnset, z.url().optional()),
+  /** Google sign-in. Both id and secret are needed, or the button is hidden. */
+  GOOGLE_CLIENT_ID: text(),
+  GOOGLE_CLIENT_SECRET: text(),
+  /** GitHub sign-in (and repo import later). Both id and secret are needed, or the button is hidden. */
+  GITHUB_CLIENT_ID: text(),
+  GITHUB_CLIENT_SECRET: text(),
 });
 
 export type ClientEnv = z.infer<typeof clientEnvSchema>;
