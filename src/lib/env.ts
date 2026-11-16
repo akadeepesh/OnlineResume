@@ -41,6 +41,15 @@ export const clientEnvSchema = z.object({
 });
 
 export const serverEnvSchema = z.object({
+  /** Neon Postgres connection string. Optional: only accounts and saved resumes need it. */
+  DATABASE_URL: z.preprocess(
+    blankAsUnset,
+    z
+      .string()
+      .trim()
+      .regex(/^postgres(ql)?:\/\//, "must be a postgres:// or postgresql:// connection string")
+      .optional(),
+  ),
   /** Raises GitHub's API rate limit for repo stats. Optional. */
   GITHUB_TOKEN: text(),
 });
