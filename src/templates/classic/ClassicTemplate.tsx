@@ -2,25 +2,18 @@
 
 import React from "react";
 import {
-  Activity,
-  AlertCircle,
-  ArrowUpRight,
   Award,
   Briefcase,
   Calendar,
-  Database,
   Download,
   ExternalLink,
   FolderGit2,
-  GitFork,
   Github,
   GraduationCap,
-  Info,
   Layers,
   Linkedin,
   Mail,
   MapPin,
-  Star,
   User,
   Wrench,
 } from "lucide-react";
@@ -35,14 +28,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/shared/Avatar";
 import { RichText } from "@/components/shared/RichText";
 import { SkillIcon } from "@/components/shared/SkillIcon";
-import {
-  formatRepoDate,
-  formatRepoSize,
-  repoUrl,
-  useRepoData,
-} from "@/lib/github";
-import type { Resume, Skill, Site } from "@/lib/resume/schema";
-import { has, joinParts, presentSections, socialLinks } from "@/lib/resume/view";
+import type { Resume, Skill } from "@/lib/resume/schema";
+import { has, joinParts, presentSections, socialLinks, workForSkill, type LinkedWork } from "@/lib/resume/view";
 import { renderBlocks } from "../blocks";
 
 // ---------------------------------------------------------------------------
@@ -171,116 +158,44 @@ const ProfileCard: React.FC<{ profile: Resume["profile"] }> = ({ profile }) => {
 };
 
 // ---------------------------------------------------------------------------
-// Skills → repositories (GitHub backed)
+// Skills → the projects that use them
 // ---------------------------------------------------------------------------
 
-const RepoCard: React.FC<{ name: string }> = ({ name }) => {
-  const { data, loading, error, enabled } = useRepoData(name);
-
-  return (
-    <a
-      href={repoUrl(name)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-300 hover:shadow-sm"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Github className="h-4 w-4 flex-shrink-0 text-slate-500" />
-          <h4 className="truncate text-sm font-semibold text-slate-900">
-            {name}
-          </h4>
-        </div>
-        {loading ? (
-          <div className="h-4 w-16 animate-pulse rounded bg-slate-100" />
-        ) : data ? (
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <span className="flex items-center gap-1">
-              <Star className="h-3.5 w-3.5" />
-              {data.stargazers_count}
-            </span>
-            <span className="flex items-center gap-1">
-              <GitFork className="h-3.5 w-3.5" />
-              {data.forks_count}
-            </span>
-            {data.open_issues_count > 0 && (
-              <span className="flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" />
-                {data.open_issues_count}
-              </span>
-            )}
+const WorkCard: React.FC<{ work: LinkedWork }> = ({ work }) => {
+  const body = (
+    <>
+      <div className="flex h-24 items-center justify-center bg-gradient-to-br from-slate-900 to-indigo-900 px-4">
+        <span className="text-center text-lg font-semibold text-white">{work.title}</span>
+      </div>
+      <div className="p-4">
+        {has(work.description) && <p className="text-sm text-slate-600">{work.description}</p>}
+        {work.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {work.tags.map((tag) => (
+              <Chip key={tag}>{tag}</Chip>
+            ))}
           </div>
-        ) : (
-          <ArrowUpRight className="h-4 w-4 text-slate-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        )}
+        {work.href && (
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600">
+            View project <ExternalLink className="h-3.5 w-3.5" />
+          </span>
         )}
       </div>
-      {data?.description && (
-        <p className="mt-2 line-clamp-2 text-sm text-slate-600">
-          {data.description}
-        </p>
-      )}
-      {data?.topics && data.topics.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {data.topics.slice(0, 5).map((topic) => (
-            <span
-              key={topic}
-              className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700"
-            >
-              {topic}
-            </span>
-          ))}
-        </div>
-      )}
-      {data && (
-        <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <Activity className="h-3.5 w-3.5" />
-            Updated {formatRepoDate(data.updated_at)}
-          </span>
-          <span className="flex items-center gap-1">
-            <Database className="h-3.5 w-3.5" />
-            {formatRepoSize(data.size)}
-          </span>
-        </div>
-      )}
-      {error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
-      {!enabled && (
-        <p className="mt-2 text-xs text-slate-400">Live GitHub stats disabled</p>
-      )}
+    </>
+  );
+  const className = "group block overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm";
+  return work.href ? (
+    <a href={work.href} target="_blank" rel="noopener noreferrer" className={className}>
+      {body}
     </a>
+  ) : (
+    <div className={className}>{body}</div>
   );
 };
 
-const SiteCard: React.FC<{ site: Site }> = ({ site }) => (
-  <a
-    href={site.url}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="group block overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm"
-  >
-    <div className="flex h-24 items-center justify-center bg-gradient-to-br from-slate-900 to-indigo-900 px-4">
-      <span className="text-center text-lg font-semibold text-white">
-        {site.title}
-      </span>
-    </div>
-    <div className="p-4">
-      {has(site.description) && <p className="text-sm text-slate-600">{site.description}</p>}
-      {site.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {site.tags.map((tag) => (
-            <Chip key={tag}>{tag}</Chip>
-          ))}
-        </div>
-      )}
-      <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600">
-        Visit site <ExternalLink className="h-3.5 w-3.5" />
-      </span>
-    </div>
-  </a>
-);
-
-const SkillDialog: React.FC<{ skill: Skill }> = ({ skill }) => {
-  const count = skill.repos.length + (skill.sites?.length ?? 0);
+const SkillDialog: React.FC<{ skill: Skill; work: LinkedWork[] }> = ({ skill, work }) => {
+  const count = work.length;
   // Nothing to open: a plain chip instead of a dialog with an empty list.
   if (count === 0) {
     return (
@@ -307,23 +222,10 @@ const SkillDialog: React.FC<{ skill: Skill }> = ({ skill }) => {
               {skill.name} Projects
             </DialogTitle>
           </DialogHeader>
-          {skill.repos.length > 0 && (
-            <div className="mb-4 flex items-start gap-2 rounded-lg border border-indigo-100 bg-indigo-50/70 p-3 text-sm text-indigo-800">
-              <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p>
-                Set{" "}
-                <code className="rounded bg-indigo-100 px-1 py-0.5 font-mono text-xs">
-                  NEXT_PUBLIC_GH_OWNER
-                </code>{" "}
-                to your GitHub username to show live stars, forks and topics.
-              </p>
-            </div>
-          )}
           <ScrollArea className="h-[60vh] pr-3">
             <div className="grid gap-3">
-              {skill.sites?.map((site, i) => <SiteCard key={i} site={site} />)}
-              {skill.repos.map((repo) => (
-                <RepoCard key={repo} name={repo} />
+              {work.map((item, i) => (
+                <WorkCard key={i} work={item} />
               ))}
             </div>
           </ScrollArea>
@@ -560,14 +462,14 @@ export default function ClassicTemplate({ data }: { data: Resume }) {
                 sections: ["skills"],
                 render: () => (
                   <Section title="Skills & Projects" icon={Layers}>
-                    {skills.some((s) => s.repos.length + (s.sites?.length ?? 0) > 0) && (
+                    {skills.some((s) => workForSkill(data, s).length > 0) && (
                       <p className="-mt-3 mb-4 text-sm text-slate-500">
                         Select a skill to explore related work.
                       </p>
                     )}
                     <div className="flex flex-wrap gap-2">
                       {skills.map((skill, i) => (
-                        <SkillDialog key={i} skill={skill} />
+                        <SkillDialog key={i} skill={skill} work={workForSkill(data, skill)} />
                       ))}
                     </div>
                   </Section>
