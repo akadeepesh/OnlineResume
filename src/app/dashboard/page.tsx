@@ -3,7 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import GuestDraftImport from "@/components/dashboard/GuestDraftImport";
 import ResumeList, { type ResumeCard } from "@/components/dashboard/ResumeList";
 import { requireOnboarded } from "@/lib/auth/session";
-import { clientEnv } from "@/lib/env";
+import { clientEnv, serverEnv } from "@/lib/env";
 import { editedLabel } from "@/lib/resumes/format";
 import { listResumes, resumeQuota } from "@/lib/resumes/queries";
 import { templateMeta } from "@/templates/meta";
@@ -46,7 +46,13 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-8">
-          <ResumeList resumes={resumes} quota={quota} baseLink={baseLink} username={username} />
+          <ResumeList
+            resumes={resumes}
+            quota={quota}
+            baseLink={baseLink}
+            username={username}
+            aiEnabled={Boolean(serverEnv().GROQ_API_KEY)}
+          />
         </div>
       </main>
     </div>
