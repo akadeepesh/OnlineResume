@@ -10,6 +10,7 @@ import { useEditorHydration, useEditorStore } from "@/lib/store/editor";
 import type { SectionId } from "@/lib/editor/sections";
 import { savedLabel } from "@/lib/editor/saved-label";
 import { useCloudSave, useCloudSaveState, type CloudSave } from "./cloud-save";
+import ShareDialog, { type ShareSettings } from "./ShareDialog";
 import { HistoryButtons, useHistoryShortcuts } from "./HistoryControls";
 import PreviewPane from "./PreviewPane";
 import SectionPanel from "./SectionPanel";
@@ -131,9 +132,11 @@ function CloudSaveStatus({ save }: { save: CloudSave }) {
 }
 
 export interface CloudEditorProps {
+  resumeId: string;
   save: CloudSave;
   /** The resume's title from the dashboard. */
   title: string;
+  share: ShareSettings;
 }
 
 function TopBar({
@@ -163,6 +166,7 @@ function TopBar({
       <HistoryButtons onSelect={onSelect} announce={announce} />
       <TemplatePicker />
       <StartFromMenu />
+      {cloud && <ShareDialog resumeId={cloud.resumeId} initial={cloud.share} />}
     </header>
   );
 }
