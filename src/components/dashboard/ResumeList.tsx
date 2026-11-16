@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2 } from "lucide-react";
+import { Copy, ExternalLink, FileText, Loader2, MoreHorizontal, Pencil, PencilLine, Plus, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -48,6 +48,7 @@ interface ResumeListProps {
   quota: { used: number; limit: number };
   /** "resume.example.com/jane" */
   baseLink: string;
+  username: string;
 }
 
 type DialogState =
@@ -67,7 +68,7 @@ async function run(action: () => Promise<ActionResult>): Promise<ActionResult> {
   }
 }
 
-export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps) {
+export default function ResumeList({ resumes, quota, baseLink, username }: ResumeListProps) {
   const router = useRouter();
   const [dialog, setDialog] = useState<DialogState>({ kind: "closed" });
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -139,7 +140,11 @@ export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps
                       Primary
                     </span>
                   )}
-                  {!resume.isPublished && (
+                  {resume.isPublished ? (
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      Published
+                    </span>
+                  ) : (
                     <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
                       Private
                     </span>
@@ -166,6 +171,13 @@ export default function ResumeList({ resumes, quota, baseLink }: ResumeListProps
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onSelect={() => router.push(`/editor/${resume.id}`)}>
                       <PencilLine className="mr-2 h-4 w-4" aria-hidden /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() =>
+                        window.open(resume.isPrimary ? `/${username}` : `/${username}/${resume.slug}`, "_blank", "noopener")
+                      }
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" aria-hidden /> {resume.isPublished ? "View page" : "Preview page"}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => setDialog({ kind: "rename", resume })}>
                       <Pencil className="mr-2 h-4 w-4" aria-hidden /> Rename

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import CloudEditor from "@/components/editor/CloudEditor";
 import { requireOnboarded } from "@/lib/auth/session";
+import { clientEnv } from "@/lib/env";
 import { parseResumeDraft } from "@/lib/resume/draft";
 import { getOwnedResume } from "@/lib/resumes/queries";
 import { isTemplateSlug } from "@/templates/meta";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function ResumeEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { user } = await requireOnboarded(`/editor/${id}`);
+  const { user, username } = await requireOnboarded(`/editor/${id}`);
   if (!z.uuid().safeParse(id).success) notFound();
 
   // Owner-scoped: someone else's id is simply not found.
@@ -45,6 +46,11 @@ export default async function ResumeEditorPage({ params }: { params: Promise<{ i
       resume={parsed.data}
       template={isTemplateSlug(row.template) ? row.template : "classic"}
       updatedAt={row.updatedAt.toISOString()}
+      share={{
+        url: new URL(row.isPrimary ? `/${username}` : `/${username}/${row.slug}`, clientEnv.NEXT_PUBLIC_SITE_URL).toString(),
+        isPublished: row.isPublished,
+        noindex: row.noindex,
+      }}
     />
   );
 }

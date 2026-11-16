@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       <main className="mx-auto max-w-3xl px-6 py-10">
         <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Hi, {user.name}</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Your primary resume will live at <span className="font-medium text-neutral-900">{baseLink}</span>.
+          Your primary resume is at <span className="font-medium text-neutral-900">{baseLink}</span>.
         </p>
 
         <div className="mt-8">
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-8">
-          <ResumeList resumes={resumes} quota={quota} baseLink={baseLink} />
+          <ResumeList resumes={resumes} quota={quota} baseLink={baseLink} username={username} />
         </div>
       </main>
     </div>
